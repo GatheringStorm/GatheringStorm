@@ -11,9 +11,9 @@ class Head extends React.Component {
   }
 
   headerChoice() {
-    if(this.props.stateMachine.currentState == State.GAME)
+    if(this.props.stateMachine.currentState.name == State.GAME)
     return (<div />);
-    else if(this.props.stateMachine.currentState == State.GAMESELECTION)
+    else if(this.props.stateMachine.currentState.name == State.GAMESELECTION)
     return (<div />);
     else
     return (<div />);
