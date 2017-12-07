@@ -5,12 +5,12 @@ using GatheringStorm.Api.Models.Dto;
 
 namespace GatheringStorm.Api.Services
 {
-    interface IGamesService
+    public interface IGamesService
     {
         Task<List<DtoGame>> GetGames();
     }
 
-    class GamesService : IGamesService
+    public class GamesService : IGamesService
     {
         public Task<List<DtoGame>> GetGames()
         {

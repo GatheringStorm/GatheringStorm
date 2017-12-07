@@ -2,7 +2,7 @@ using System;
 
 namespace GatheringStorm.Api.Models.Dto
 {
-    class DtoGame
+    public class DtoGame
     {
         public Guid Id { get; set; }
         public string CurrentPlayer { get; set; }
