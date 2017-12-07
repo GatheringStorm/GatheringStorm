@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace GatheringStorm.Api.Models.DB
 {
-    public class User
+    public class MoveTargetEntity
     {
-        [Key]
-        public string Mail { get; set; }
-        public List<Entity> Entities { get; set; }
-        public List<UserParticipation> Participations { get; set; }
+        public Guid MoveId { get; set; }
+        public Move Move { get; set; }
+        public Guid EntityId { get; set; }
+        public Entity Entity { get; set; }
     }
 }

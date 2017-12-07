@@ -9,5 +9,6 @@ namespace GatheringStorm.Api.Models.DB
     {
         public Guid Id { get; set; }
         public int Health { get; set; }
+        public List<MoveTargetEntity> TargetingMoves { get; set; }
     }
 }

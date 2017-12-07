@@ -5,10 +5,11 @@ using System.Threading.Tasks;
 
 namespace GatheringStorm.Api.Models.DB
 {
-    public class MoveType
+    public class CardEffect
     {
         public Guid Id { get; set; }
-        public string Name { get; set; }
-        public List<Move> Moves { get; set; }
+        public Effect Effect { get; set; }
+        public Card Card { get; set; }
+        public string EffectParameters { get; set; }
     }
 }

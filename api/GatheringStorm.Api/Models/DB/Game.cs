@@ -9,5 +9,7 @@ namespace GatheringStorm.Api.Models.DB
     {
         public Guid Id { get; set; }
         public DateTime BeginDate { get; set; }
+        public List<UserParticipation> UserParticipations { get; set; }
+        public List<Move> Moves { get; set; }
     }
 }
