@@ -28,7 +28,7 @@ namespace GatheringStorm.Api
         {
             services.AddMvc();
 
-            services.AddDbContext<AppDbContext>(o => o.UseSqlServer(Configuration.GetConnectionString("Default")));
+            services.AddDbContext<AppDbContext>(o => o.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddTransient<IGamesService, GamesService>();
         }
 
@@ -40,7 +40,7 @@ namespace GatheringStorm.Api
                 app.UseDeveloperExceptionPage();
             }
 
-            dbContext.Database.EnsureCreated();
+            // dbContext.Database.EnsureCreated();
 
             app.UseMvc();
         }

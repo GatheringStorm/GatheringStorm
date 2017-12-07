@@ -23,5 +23,11 @@ namespace GatheringStorm.Api.Controllers
         {
             return new OkObjectResult(await this.gamesService.GetGames().ConfigureAwait(false));
         }
+
+        [HttpGet("{id}/Board")]
+        public async Task<IActionResult> GetBoard([FromRoute] Guid id)
+        {
+            return new OkObjectResult(await this.gamesService.GetBoard(id).ConfigureAwait(false));
+        }
     }
 }
