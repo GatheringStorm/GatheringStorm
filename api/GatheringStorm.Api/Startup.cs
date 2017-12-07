@@ -28,7 +28,7 @@ namespace GatheringStorm.Api
         {
             services.AddMvc();
 
-            services.AddDbContext<AppDbContext>(o => o.UseSqlServer("Data Source=.;Initial Catalog=GatheringStorm;Integrated Security=True;"));
+            services.AddDbContext<AppDbContext>(o => o.UseSqlServer(Configuration.GetConnectionString("Default")));
             services.AddTransient<IGamesService, GamesService>();
         }
 
