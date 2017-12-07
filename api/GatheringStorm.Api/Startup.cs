@@ -40,7 +40,7 @@ namespace GatheringStorm.Api
                 app.UseDeveloperExceptionPage();
             }
 
-            // dbContext.Database.EnsureCreated();
+            dbContext.Database.EnsureCreated();
 
             app.UseMvc();
         }
