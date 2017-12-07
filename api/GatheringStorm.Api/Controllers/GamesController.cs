@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GatheringStorm.Api.Data;
+using GatheringStorm.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GatheringStorm.Api.Controllers
@@ -10,18 +11,23 @@ namespace GatheringStorm.Api.Controllers
     [Route("api/[controller]")]
     public class GamesController : Controller
     {
-        public readonly AppDbContext dbContext;
+        public readonly IGamesService gamesService;
 
-        public GamesController(AppDbContext dbContext)
+        public GamesController(IGamesService gamesService)
         {
-            // TODO: USE GAMES SERVICE
-            this.dbContext = dbContext;
+            this.gamesService = gamesService;
         }
 
         [HttpGet]
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
-            throw new NotImplementedException();
+            return new OkObjectResult(await this.gamesService.GetGames().ConfigureAwait(false));
+        }
+
+        [HttpGet("{id}/Board")]
+        public async Task<IActionResult> GetBoard([FromRoute] Guid id)
+        {
+            return new OkObjectResult(await this.gamesService.GetBoard(id).ConfigureAwait(false));
         }
     }
 }
