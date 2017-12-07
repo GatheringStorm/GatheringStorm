@@ -64,7 +64,7 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      title: "Camera Tester",
+      title: "Gathering Storm",
       template: "./src/Index.ejs"
     }),
     new ExtractTextPlugin({

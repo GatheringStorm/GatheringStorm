@@ -1,14 +1,14 @@
 import React from "react";
 
-import Header from "./Card/Header.jsx";
-import Effect from "./Card/Effect.jsx";
-import Stats from "./Card/Stats.jsx";
+import Header from "./Header.jsx";
+import Effect from "./Effect.jsx";
+import Stats from "./Stats.jsx";
 
 class Card extends React.Component {
   constructor(props) {
     super(props);
+    
   }
-
   render() {
     return (
       <table>

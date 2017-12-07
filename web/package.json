@@ -51,8 +51,7 @@
   },
   "scripts": {
     "dev": "webpack-dev-server",
-    "test":
-      "mocha-webpack --require babel-polyfill --webpack-config webpack.test.config.js \"Test/Index.js\"",
+    "test": "mocha-webpack --require babel-polyfill --webpack-config webpack.test.config.js \"Test/Index.js\"",
     "prod": "NODE_ENV=production webpack -p"
   },
   "author": "Fabian Amhof",
