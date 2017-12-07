@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using GatheringStorm.Api.Data;
 using Microsoft.EntityFrameworkCore;
+using GatheringStorm.Api.Services;
 
 namespace GatheringStorm.Api
 {
@@ -28,6 +29,7 @@ namespace GatheringStorm.Api
             services.AddMvc();
 
             services.AddDbContext<AppDbContext>(o => o.UseSqlServer("Data Source=.;Initial Catalog=GatheringStorm;Integrated Security=True;"));
+            services.AddTransient<IGamesService, GamesService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
