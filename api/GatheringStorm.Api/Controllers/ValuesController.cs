@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GatheringStorm.Api.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GatheringStorm.Api.Controllers
@@ -9,10 +10,18 @@ namespace GatheringStorm.Api.Controllers
     [Route("api/[controller]")]
     public class ValuesController : Controller
     {
+        public readonly AppDbContext dbContext;
+
+        public ValuesController(AppDbContext dbContext)
+        {
+            this.dbContext = dbContext;
+        }
+
         // GET api/values
         [HttpGet]
         public IEnumerable<string> Get()
         {
+            Console.WriteLine(this.dbContext.Entities);
             return new string[] { "value1", "value2" };
         }
 

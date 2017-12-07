@@ -8,6 +8,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using GatheringStorm.Api.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace GatheringStorm.Api
 {
@@ -24,15 +26,19 @@ namespace GatheringStorm.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
+
+            services.AddDbContext<AppDbContext>(o => o.UseSqlServer("Data Source=.;Initial Catalog=GatheringStorm;Integrated Security=True;"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, AppDbContext dbContext)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            dbContext.Database.EnsureCreated();
 
             app.UseMvc();
         }
