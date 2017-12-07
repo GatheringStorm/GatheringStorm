@@ -15,20 +15,20 @@ class Card extends React.Component {
         <tbody>
           <tr>
             <td>
-              <Header name={props.name} title={props.title} cost={props.cost} />
+              <Header name={this.props.name} title={this.props.title} cost={this.props.cost} />
             </td>
           </tr>
           <tr>
             <td>
               <Effect
-                description={props.description}
-                targetCount={props.targetCount}
+                description={this.props.description}
+                targetCount={this.props.targetCount}
               />
             </td>
           </tr>
           <tr>
             <td>
-              <Stats attack={props.attack} hp={props.hp} />
+              <Stats attack={this.props.attack} hp={this.props.hp} />
             </td>
           </tr>
         </tbody>

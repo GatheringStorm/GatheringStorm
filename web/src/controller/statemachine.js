@@ -1,37 +1,50 @@
-var stateMachine = new StateMachine();
+import StateMachine from "state-machine-js"
 
-let State = {
-   LOGIN: 'LOGIN',
-   OPENED: 'OPENED',
-   LOCKED: 'LOCKED'
+let stateMachine = new StateMachine();
+
+export let State = {
+    LOGIN: 'LOGIN',
+    GAMESELECTION: 'GAMESELECTION',
+    GAME: 'GAME'
 };
 
-let Action = {
-   LOGOUT: 'LOGOUT',
-   OPEN: 'OPEN',
-   LOCK: 'LOCK',
-   UNLOCK: 'UNLOCK'
+export let Action = {
+    LOGOUT: 'LOGOUT',
+    LOGIN: 'OPEN',
+    STARTGAME: 'STARTGAME',
+    BACK: 'BACK'
 };
 
-let config = [
-   {
-       initial: true,
-       name: State.LOGIN,
-       transitions: [
-           { action: Action.OPEN, target: State.OPENED },
-           { action: Action.LOCK, target: State.LOCKED }
-       ]
-   },
-   {
-       name: State.GAMESELECTION,
-       transitions: [
-           { action: Action.LOGOUT, target: State.LOGIN }
-       ]
-   },
-   {
-       name: State.LOCKED,
-       transitions: [
-           { action: Action.UNLOCK, target: State.LOGIN }
-       ]
-   }
+let config = [{
+        initial: true,
+        name: State.LOGIN,
+        transitions: [{
+            action: Action.LOGIN,
+            target: State.GAMESELECTION
+        }]
+    },
+    {
+        name: State.GAMESELECTION,
+        transitions: [{
+                action: Action.LOGOUT,
+                target: State.LOGIN
+            },
+            {
+                action: Action.STARTGAME,
+                target: State.GAME
+            }
+        ]
+    },
+    {
+        name: State.GAME,
+        transitions: [{
+            action: Action.BACK,
+            target: State.GAMESELECTION
+        }]
+    }
 ];
+
+stateMachine.create(config);
+stateMachine.start();
+
+export default stateMachine;

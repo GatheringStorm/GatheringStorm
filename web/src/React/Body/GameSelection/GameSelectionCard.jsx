@@ -15,19 +15,19 @@ class GameSelectionCard extends React.Component {
         <tbody>
           <tr>
             <td>
-              <Header name={props.name} />
+              <Header name={this.props.name} />
             </td>
           </tr>
           <tr>
             <td>
               <Body
-                date={props.date}
+                date={this.props.date}
               />
             </td>
           </tr>
           <tr>
             <td>
-              <FooterButton mode={props.mode} />
+              <FooterButton mode={this.props.mode} />
             </td>
           </tr>
         </tbody>

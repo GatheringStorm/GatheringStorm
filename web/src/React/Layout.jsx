@@ -14,12 +14,12 @@ class Layout extends React.Component {
         <tbody>
           <tr>
             <td>
-              <Head />
+              <Head stateMachine={this.props.stateMachine} />
             </td>
           </tr>
           <tr>
             <td>
-              <Body />
+            <Body stateMachine={this.props.stateMachine} />
             </td>
           </tr>
         </tbody>
