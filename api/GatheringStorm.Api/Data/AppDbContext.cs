@@ -9,6 +9,12 @@ namespace GatheringStorm.Api.Data
         {
         }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+        }
+
         public DbSet<Entity> Entities { get; set; }
+        public DbSet<User> Users { get; set; }
     }
 }
