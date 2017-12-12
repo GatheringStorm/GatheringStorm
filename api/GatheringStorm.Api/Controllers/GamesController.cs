@@ -19,7 +19,9 @@ namespace GatheringStorm.Api.Controllers
         [HttpPost("New")]
         public async Task<IActionResult> StartNewGame([FromBody] DtoNewGameInfo newGameInfo)
         {
-            return new OkObjectResult(await this.gamesService.StartNewGame(newGameInfo).ConfigureAwait(false));
+            var result = await this.gamesService.StartNewGame(newGameInfo).ConfigureAwait(false);
+            // TODO: Generic ObjectResult
+            return new OkObjectResult(result.SuccessReturnValue);
         }
 
         [HttpGet]
@@ -38,6 +40,7 @@ namespace GatheringStorm.Api.Controllers
         public async Task<IActionResult> EndTurn(Guid gameId)
         {
             await this.gamesService.EndTurn(gameId).ConfigureAwait(false);
+            // TODO: AppActionResult without ReturnValue
             return new OkResult();
         }
 
