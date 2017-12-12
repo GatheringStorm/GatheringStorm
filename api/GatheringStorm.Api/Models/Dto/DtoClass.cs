@@ -1,5 +1,3 @@
-using System;
-
 namespace GatheringStorm.Api.Models.Dto
 {
     public class DtoClass

@@ -27,7 +27,11 @@ namespace GatheringStorm.Api.Services
                 Player = new DtoPlayer
                 {
                     Mail = "you@gmail.com",
-                    Class = null
+                    Class = new DtoClass
+                    {
+                        Id = 1,
+                        Name = "Schnell"
+                    }
                 },
                 Opponent = new DtoPlayer
                 {

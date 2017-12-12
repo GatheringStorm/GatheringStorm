@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using GatheringStorm.Api.Data;
 using GatheringStorm.Api.Models.Dto;
 using GatheringStorm.Api.Services;
 using Microsoft.AspNetCore.Mvc;
