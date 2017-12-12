@@ -7,12 +7,36 @@ namespace GatheringStorm.Api.Services
 {
     public interface IGamesService
     {
+        Task<DtoGame> StartNewGame(DtoNewGameInfo newGameInfo);
         Task<List<DtoGame>> GetGames();
-        Task<DtoBoard> GetBoard(Guid id);
+        Task<DtoBoard> GetBoard(Guid gameId);
+        Task EndTurn(Guid gameId);
+        Task PlayCard(Guid gameId, DtoPlayCardMove move);
+        Task Attack(Guid gameId, DtoAttackMove move);
     }
 
     public class GamesService : IGamesService
     {
+        public Task<DtoGame> StartNewGame(DtoNewGameInfo newGameInfo)
+        {
+            return Task.FromResult(new DtoGame
+            {
+                Id = Guid.NewGuid(),
+                CurrentPlayer = "opponent@gmail.com",
+                BeginDate = DateTime.Now,
+                Player = new DtoPlayer
+                {
+                    Mail = "you@gmail.com",
+                    Class = null
+                },
+                Opponent = new DtoPlayer
+                {
+                    Mail = "opponent@gmail.com",
+                    Class = null
+                }
+            });
+        }
+
         public Task<List<DtoGame>> GetGames()
         {
             return Task.FromResult(new List<DtoGame>
@@ -44,7 +68,7 @@ namespace GatheringStorm.Api.Services
             });
         }
 
-        public Task<DtoBoard> GetBoard(Guid id)
+        public Task<DtoBoard> GetBoard(Guid gameId)
         {
             return Task.FromResult(new DtoBoard
             {
@@ -120,6 +144,21 @@ namespace GatheringStorm.Api.Services
                     }
                 }
             });
+        }
+
+        public Task EndTurn(Guid gameId)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task PlayCard(Guid gameId, DtoPlayCardMove move)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task Attack(Guid gameId, DtoAttackMove move)
+        {
+            return Task.CompletedTask;
         }
     }
 }
