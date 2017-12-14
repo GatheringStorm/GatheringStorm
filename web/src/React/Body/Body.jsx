@@ -2,6 +2,7 @@ import React from "react";
 
 import { State } from "../../controller/statemachine.js"
 import { Action } from "../../controller/statemachine.js"
+import { GoogleLogin } from "react-google-login";
 
 class Body extends React.Component {
   constructor(props) {
@@ -10,15 +11,24 @@ class Body extends React.Component {
     this.bodyChoice = this.bodyChoice.bind(this)
   }
 
+  responseGoogle(response) {
+    console.log(response);
+  }
+
   bodyChoice() {
     if(this.props.stateMachine.currentState.name == State.GAME)
-    return (<div />);
+      return (<div />);
     else if(this.props.stateMachine.currentState.name == State.GAMESELECTION)
-    return (<div />);
+      return (<div />);
     else if(this.props.stateMachine.currentState.name == State.LOGIN)
-    return (<div className="g-signin2" data-onsuccess="onSignIn" />);
+      return (<GoogleLogin
+        clientId="24931599658-o9q66rbqprq0lcgrtlbfhcs3kcfqs8rg.apps.googleusercontent.com"
+        buttonText="Login"
+        onSuccess={this.responseGoogle}
+        onFailure={this.responseGoogle}
+      />);
     else
-    return <div />
+      return <div />;
   }
 
   render() {
