@@ -8,6 +8,10 @@ using GatheringStorm.Api.Services;
 using GatheringStorm.Api.Models.DB;
 using Microsoft.AspNetCore.Identity;
 using System;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 
 namespace GatheringStorm.Api
 {
@@ -35,16 +39,24 @@ namespace GatheringStorm.Api
             services.AddTransient<IGamesService, GamesService>();
 
             services.AddIdentity<User, IdentityRole>()
-                .AddEntityFrameworkStores<AppDbContext>()
-                .AddDefaultTokenProviders();
+                .AddEntityFrameworkStores<AppDbContext>();
 
-            services.AddAuthentication()
+            services.AddAuthentication(o =>
+            {
+                o.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                o.DefaultAuthenticateScheme = GoogleDefaults.AuthenticationScheme;
+                o.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+                .AddCookie()
+                .AddJwtBearer(o =>
+                {
+                    o.RequireHttpsMetadata = false;
+                })
                 .AddGoogle(googleOptions =>
                 {
                     googleOptions.ClientId = Configuration["GatheringStormGoogleClientId"];
                     googleOptions.ClientSecret = Configuration["GatheringStormGoogleClientSecret"];
-                })
-                .AddJwtBearer();
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

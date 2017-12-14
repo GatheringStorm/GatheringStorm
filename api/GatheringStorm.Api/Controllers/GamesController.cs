@@ -1,26 +1,32 @@
 ﻿using System;
 using System.Threading.Tasks;
+using GatheringStorm.Api.Models.DB;
 using GatheringStorm.Api.Models.Dto;
 using GatheringStorm.Api.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GatheringStorm.Api.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     public class GamesController : Controller
     {
         public readonly IGamesService gamesService;
 
-        public GamesController(IGamesService gamesService)
+        public UserManager<User> UserManager { get; }
+
+        public GamesController(IGamesService gamesService, UserManager<User> userManager)
         {
             this.gamesService = gamesService;
+            UserManager = userManager;
         }
 
         [HttpPost("New")]
         public async Task<IActionResult> StartNewGame([FromBody] DtoNewGameInfo newGameInfo)
         {
+            // TODO: Read Users properly?
+            var user = await this.UserManager.GetUserAsync(User);
             var result = await this.gamesService.StartNewGame(newGameInfo).ConfigureAwait(false);
             // TODO: Generic ObjectResult
             return new OkObjectResult(result.SuccessReturnValue);
