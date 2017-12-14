@@ -8,6 +8,10 @@ class Layout extends React.Component {
     super(props);
   }
 
+  componentDidMount() {
+    this.setState({})
+  }
+
   render() {
     return (
       <table>
@@ -19,7 +23,7 @@ class Layout extends React.Component {
           </tr>
           <tr>
             <td className="maxWidth flex-container">
-            <Body stateMachine={this.props.stateMachine} />
+              <Body stateMachine={this.props.stateMachine} />
             </td>
           </tr>
         </tbody>

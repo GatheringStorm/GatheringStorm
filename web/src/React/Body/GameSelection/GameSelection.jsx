@@ -1,7 +1,7 @@
 import React from "react";
 
-import Header from "./Header.jsx";
-import Body from "./Body.jsx";
+import Header from "./Header/Header.jsx";
+import Body from "./Body/Body.jsx";
 
 class GameSelection extends React.Component {
   constructor(props) {
@@ -14,14 +14,12 @@ class GameSelection extends React.Component {
         <tbody>
           <tr>
             <td>
-              <Header/>
+              <Header stateMachine={this.props.stateMachine} />
             </td>
           </tr>
           <tr>
             <td>
-              <Body
-                cards={}
-              />
+              <Body />
             </td>
           </tr>
         </tbody>

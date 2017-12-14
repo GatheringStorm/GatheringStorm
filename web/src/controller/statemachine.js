@@ -44,6 +44,12 @@ let config = [{
     }
 ];
 
+stateMachine.onChange.add(function (state, data, action) {
+    console.log('State has changed to:', state.name);
+    console.log('Got data:', data);
+    console.log('Got triggering action:', action);
+});
+
 stateMachine.create(config);
 stateMachine.start();
 
