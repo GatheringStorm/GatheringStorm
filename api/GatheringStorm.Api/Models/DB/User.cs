@@ -1,12 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Identity;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace GatheringStorm.Api.Models.DB
 {
-    public class User
+    public class User : IdentityUser<string>
     {
-        [Key]
-        public string Mail { get; set; }
         public List<Entity> Entities { get; set; }
         public List<UserParticipation> Participations { get; set; }
     }

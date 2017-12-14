@@ -2,10 +2,12 @@
 using System.Threading.Tasks;
 using GatheringStorm.Api.Models.Dto;
 using GatheringStorm.Api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GatheringStorm.Api.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     public class GamesController : Controller
     {

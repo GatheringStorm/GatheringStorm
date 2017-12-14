@@ -5,6 +5,9 @@ using Microsoft.Extensions.DependencyInjection;
 using GatheringStorm.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using GatheringStorm.Api.Services;
+using GatheringStorm.Api.Models.DB;
+using Microsoft.AspNetCore.Identity;
+using System;
 
 namespace GatheringStorm.Api
 {
@@ -30,6 +33,18 @@ namespace GatheringStorm.Api
             var connString = Configuration["GatheringStormConnection"];
             services.AddDbContext<AppDbContext>(o => o.UseSqlServer(connString));
             services.AddTransient<IGamesService, GamesService>();
+
+            services.AddIdentity<User, IdentityRole>()
+                .AddEntityFrameworkStores<AppDbContext>()
+                .AddDefaultTokenProviders();
+
+            services.AddAuthentication()
+                .AddGoogle(googleOptions =>
+                {
+                    googleOptions.ClientId = Configuration["GatheringStormGoogleClientId"];
+                    googleOptions.ClientSecret = Configuration["GatheringStormGoogleClientSecret"];
+                })
+                .AddJwtBearer();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -39,6 +54,8 @@ namespace GatheringStorm.Api
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseAuthentication();
 
             dbContext.Database.EnsureCreated();
 
