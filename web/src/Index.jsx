@@ -4,4 +4,6 @@ import React from "react";
 import ReactDOM from "react-dom";
 import Layout from "./React/Layout.jsx";
 
-ReactDOM.render(<Layout />, document.getElementById("Body"));
+import stateMachine from "./controller/statemachine.js"
+
+ReactDOM.render(<Layout stateMachine={stateMachine}/>, document.getElementById("Body"));

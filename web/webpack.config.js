@@ -60,11 +60,11 @@ module.exports = {
   devServer: {
     contentBase: path.join(__dirname, "dist"),
     compress: true,
-    port: 5000
+    port: 5001
   },
   plugins: [
     new HtmlWebpackPlugin({
-      title: "Camera Tester",
+      title: "Gathering Storm",
       template: "./src/Index.ejs"
     }),
     new ExtractTextPlugin({

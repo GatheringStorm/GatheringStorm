@@ -1,9 +1,9 @@
 import React from "react";
 
-import Head from "./Head/Head.jsx"
-import Body from "./Body/Body.jsx"
+import Header from "./Header.jsx";
+import Body from "./Body.jsx";
 
-class Layout extends React.Component {
+class GameSelection extends React.Component {
   constructor(props) {
     super(props);
   }
@@ -14,12 +14,14 @@ class Layout extends React.Component {
         <tbody>
           <tr>
             <td>
-              <Head stateMachine={this.props.stateMachine} />
+              <Header/>
             </td>
           </tr>
           <tr>
-            <td className="maxWidth flex-container">
-            <Body stateMachine={this.props.stateMachine} />
+            <td>
+              <Body
+                cards={}
+              />
             </td>
           </tr>
         </tbody>
@@ -28,4 +30,4 @@ class Layout extends React.Component {
   }
 }
 
-export default Layout;
+export default GameSelection;
