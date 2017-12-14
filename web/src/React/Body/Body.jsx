@@ -3,6 +3,7 @@ import React from "react";
 import { State } from "../../controller/statemachine.js"
 import { Action } from "../../controller/statemachine.js"
 import { GoogleLogin } from "react-google-login";
+import { defaultWebAccess } from "../../controller/webAccess.js"
 
 class Body extends React.Component {
   constructor(props) {
@@ -13,14 +14,15 @@ class Body extends React.Component {
 
   responseGoogle(response) {
     console.log(response);
+    defaultWebAccess.sample(response);
   }
 
   bodyChoice() {
-    if(this.props.stateMachine.currentState.name == State.GAME)
+    if (this.props.stateMachine.currentState.name == State.GAME)
       return (<div />);
-    else if(this.props.stateMachine.currentState.name == State.GAMESELECTION)
+    else if (this.props.stateMachine.currentState.name == State.GAMESELECTION)
       return (<div />);
-    else if(this.props.stateMachine.currentState.name == State.LOGIN)
+    else if (this.props.stateMachine.currentState.name == State.LOGIN)
       return (<GoogleLogin
         clientId="24931599658-o9q66rbqprq0lcgrtlbfhcs3kcfqs8rg.apps.googleusercontent.com"
         buttonText="Login"
