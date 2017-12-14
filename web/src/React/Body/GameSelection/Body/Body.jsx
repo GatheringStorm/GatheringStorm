@@ -21,7 +21,6 @@ class Body extends React.Component {
     async componentDidMount() {
         let testGames = [{ mode: "new", opponent: { email: "" }, beginDate: "" }];
         testGames.push(...await this.getOpenGames());
-        console.log(testGames)
         let obj = (
             <div>{
                 testGames.map((item, index) => {
@@ -30,8 +29,6 @@ class Body extends React.Component {
             }</div>
         )
         console.log(testGames.map((item, index) => { console.log(item.mode); console.log(item.opponent.email); console.log(item.beginDate); }))
-
-        console.log(obj)
 
         this.setState({
             data: obj
