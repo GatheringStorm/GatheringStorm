@@ -16,7 +16,6 @@ class Body extends React.Component {
 
   responseGoogle(response) {
     this.props.stateMachine.action(Action.LOGIN);
-    console.log(response);
     localStorage.setItem("userToken", JSON.stringify(response));
     defaultWebAccess.sample(response.Zi, "");
     this.setState({});

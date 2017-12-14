@@ -13,27 +13,29 @@ class Body extends React.Component {
     async getOpenGames() {
         let response = await defaultWebAccess.getOpenGames();
         return response.map(_ => {
-            _.mode = "exising";
+            _.mode = "existing";
             return _;
         });
     }
 
-    async componentWillMount() {
+    async componentDidMount() {
         let testGames = [{ mode: "new", opponent: { email: "" }, beginDate: "" }];
         testGames.push(...await this.getOpenGames());
+        console.log(testGames)
         let obj = (
             <div>{
                 testGames.map((item, index) => {
-                    <GameSelectionCard mode={item.mode} email={item.opponent.mail} date={item.beginDate} />
+                    <GameSelectionCard key={index} mode={item.mode} email={item.opponent.email} date={item.beginDate} />
                 })
             }</div>
         )
+        console.log(testGames.map((item, index) => { console.log(item.mode); console.log(item.opponent.email); console.log(item.beginDate); }))
+
+        console.log(obj)
 
         this.setState({
             data: obj
         })
-
-        console.log(obj)
     }
 
     render() {

@@ -32,12 +32,43 @@ class webAccess {
 
     }
 
-    async getGame(email) {}
+    async getGame(email) {
+        return {
+            "id": "GUID",
+            "currentPlayer": "you@gmail.com",
+            "opponent": {
+                "mail": "test@gmail.com",
+                "class": {
+                    "id": 1,
+                    "name": "Schnell"
+                }
+            },
+            "player": {
+                "mail": "you@gmail.com",
+                "class": {
+                    "id": 3,
+                    "name": "Langsam"
+                }
+            },
+            "beginDate": "2017-11-29T10:00.123+01:00",
+            "isFinished": false
+        }
+    }
 
     async startNewGame(email) {}
 
     async getOpenGames() {
-        return [];
+        return [{
+            opponent: {
+                email: "enemy@now.com"
+            },
+            beginDate: "20.11.2010"
+        }, {
+            opponent: {
+                email: "test@gmail.com"
+            },
+            beginDate: "14.12.2014"
+        }]
     }
 
 }
