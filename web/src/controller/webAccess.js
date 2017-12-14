@@ -34,6 +34,6 @@ class webAccess {
 
 }
 
-defaultWebAccess = new webAccess();
+const defaultWebAccess = new webAccess();
 
 export default defaultWebAccess;

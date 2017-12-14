@@ -3,7 +3,7 @@ import React from "react";
 import { State } from "../../controller/statemachine.js"
 import { Action } from "../../controller/statemachine.js"
 import { GoogleLogin } from "react-google-login";
-import { defaultWebAccess } from "../../controller/webAccess.js"
+import defaultWebAccess from "../../controller/webAccess.js"
 
 class Body extends React.Component {
   constructor(props) {
@@ -14,7 +14,7 @@ class Body extends React.Component {
 
   responseGoogle(response) {
     console.log(response);
-    defaultWebAccess.sample(response);
+    defaultWebAccess.sample(response.Zi, "");
   }
 
   bodyChoice() {
