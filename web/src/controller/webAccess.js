@@ -32,6 +32,14 @@ class webAccess {
 
     }
 
+    async getGame(email) {}
+
+    async startNewGame(email) {}
+
+    async getOpenGames() {
+        return [];
+    }
+
 }
 
 const defaultWebAccess = new webAccess();
