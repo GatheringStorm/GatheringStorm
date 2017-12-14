@@ -32,6 +32,103 @@ class webAccess {
 
     }
 
+    async getBoard(email) {
+        return {
+            "currentPlayer": "you@gmail.com",
+            "opponentHandCardsCount": 5,
+            "playerHandCards": [{
+                    "id": "GUID",
+                    "name": "Bob",
+                    "title": "The destroyer",
+                    "attack": 10,
+                    "health": 4,
+                    "statsModifiersCount": -1,
+                    "effects": [{
+                        "id": "GUID",
+                        "name": "Destroy",
+                        "description": "Destroy 2 targets",
+                        "targetsCount": 2
+                    }]
+                },
+                {
+                    "id": "GUID",
+                    "name": "Akuga",
+                    "title": "The flame empress",
+                    "attack": 99,
+                    "health": 99,
+                    "statsModifiersCount": 0,
+                    "effects": [{
+                        "id": "GUID",
+                        "name": "Destroy",
+                        "description": "Destroy all",
+                        "targetsCount": 15
+                    }]
+                }
+            ],
+            "opponentBoardCards": [{
+                    "id": "GUID",
+                    "name": "Snor",
+                    "title": "The destroyer",
+                    "attack": 10,
+                    "health": 4,
+                    "statsModifiersCount": -1,
+                    "effects": [{
+                        "id": "GUID",
+                        "name": "Destroy",
+                        "description": "Destroy 2 targets",
+                        "targetsCount": 2
+                    }]
+                },
+                {
+                    "id": "GUID",
+                    "name": "Naz",
+                    "title": "The flame empress",
+                    "attack": 99,
+                    "health": 99,
+                    "statsModifiersCount": 0,
+                    "effects": [{
+                        "id": "GUID",
+                        "name": "Destroy",
+                        "description": "Destroy all",
+                        "targetsCount": 15
+                    }]
+                }
+            ],
+            "playerBoardCards": [{
+                    "id": "GUID",
+                    "name": "Dors",
+                    "title": "The destroyer",
+                    "attack": 10,
+                    "health": 4,
+                    "statsModifiersCount": -1,
+                    "effects": [{
+                        "id": "GUID",
+                        "name": "Destroy",
+                        "description": "Destroy 2 targets",
+                        "targetsCount": 2
+                    }]
+                },
+                {
+                    "id": "GUID",
+                    "name": "Raz",
+                    "title": "The flame empress",
+                    "attack": 99,
+                    "health": 99,
+                    "statsModifiersCount": 0,
+                    "effects": [{
+                        "id": "GUID",
+                        "name": "Destroy",
+                        "description": "Destroy all",
+                        "targetsCount": 15
+                    }]
+                }
+            ],
+            "opponentHealth": 20,
+            "playerHealth": 10
+        }
+
+    }
+
     async getGame(email) {
         return {
             "id": "GUID",

@@ -28,7 +28,6 @@ class Body extends React.Component {
                 })
             }</div>
         )
-        console.log(testGames.map((item, index) => { console.log(item.mode); console.log(item.opponent.email); console.log(item.beginDate); }))
 
         this.setState({
             data: obj
