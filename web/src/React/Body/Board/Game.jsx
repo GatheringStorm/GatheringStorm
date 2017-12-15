@@ -3,6 +3,7 @@ import React from "react";
 
 import Board from "./Board.jsx"
 import defaultWebAccess from "../../../controller/webAccess.js"
+import { Action } from "../../../controller/statemachine.js"
 
 class Game extends React.Component {
     constructor(props) {
@@ -10,6 +11,7 @@ class Game extends React.Component {
 
         this.state = { board: null }
 
+        this.returnToGameSelection = this.returnToGameSelection.bind(this);
     }
 
     async componentDidMount() {
@@ -18,15 +20,20 @@ class Game extends React.Component {
         })
     }
 
+    returnToGameSelection() {
+        this.props.stateMachine.action(Action.BACK)
+    }
+
     render() {
         if (this.state.board == null)
             return <p>Loading ... </p>
         return (
-            <table>
+            <table className="maxWidth">
                 <tbody>
                     <tr>
                         <td>
-                            <p>{JSON.parse(localStorage.getItem("userToken")).profileObj.email} vs {this.state.board.opponentPlayer}</p>
+                            <input type="button" value="<" onClick={this.returnToGameSelection} />
+                            <p className="GameHeader">{JSON.parse(localStorage.getItem("userToken")).profileObj.email} vs {this.state.board.opponentPlayer}</p>
                         </td>
                     </tr>
                     <tr>

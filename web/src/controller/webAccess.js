@@ -169,6 +169,9 @@ class webAccess {
         }]
     }
 
+    async useCard(GUID) {
+        return true;
+    }
 }
 
 const defaultWebAccess = new webAccess();

@@ -10,7 +10,7 @@ class GameSelection extends React.Component {
 
   render() {
     return (
-      <table>
+      <table className="maxWidth">
         <tbody>
           <tr>
             <td>
