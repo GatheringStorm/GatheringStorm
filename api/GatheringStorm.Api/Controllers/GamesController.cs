@@ -14,7 +14,7 @@ namespace GatheringStorm.Api.Controllers
     [ValidateGoogleLogin]
     public class GamesController : Controller
     {
-        public readonly IGamesService gamesService;
+        private readonly IGamesService gamesService;
         private readonly IControllerUtility utility;
 
         public GamesController(IGamesService gamesService, IControllerUtility utility)
