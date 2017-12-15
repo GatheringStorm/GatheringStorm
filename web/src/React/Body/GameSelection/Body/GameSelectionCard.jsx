@@ -21,7 +21,7 @@ class GameSelectionCard extends React.Component {
 
   render() {
     return (
-      <table className={"GameSelcetionCard " + this.props.mode == "new" ? "newGame" : ""}>
+      <table className={this.props.mode == "new" ? "card newGame" : "card"}>
         <tbody>
           <tr>
             <td>
@@ -30,12 +30,12 @@ class GameSelectionCard extends React.Component {
           </tr>
           <tr>
             <td>
-              {this.props.mode == "new" ? <input type="email" id="newEnemy" /> : <p>Start: {this.props.date}</p>}
+              {this.props.mode == "new" ? <input type="email" className="maxWidth" id="newEnemy" /> : <p>Start: {this.props.date}</p>}
             </td>
           </tr>
           <tr>
             <td>
-              <button onClick={this.play}>{this.props.mode == "new" ? "Start Game" : "Play"}</button>
+              <button className="maxWidth" onClick={this.play}>{this.props.mode == "new" ? "Start Game" : "Play"}</button>
             </td>
           </tr>
         </tbody>
