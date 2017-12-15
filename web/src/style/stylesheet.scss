@@ -6,6 +6,10 @@
     width: 100%
 }
 
+.card tr {
+    height: 30px;
+}
+
 .card {
     margin: 5px;
     min-width: 150px;
@@ -17,7 +21,7 @@
 }
 
 .enemyTurn {
-    background: lightcoral;
+    background: orange;
 }
 
 .yourTurn {

@@ -35,7 +35,7 @@ class GameSelectionCard extends React.Component {
 
   render() {
     return (
-      <table className={this.createStyle()}>
+      <table onClick={this.props.mode == "new" ? "" : this.play} className={this.createStyle()}>
         <tbody>
           <tr>
             <td>
@@ -49,7 +49,9 @@ class GameSelectionCard extends React.Component {
           </tr>
           <tr>
             <td>
-              <button className="maxWidth" onClick={this.play}>{this.props.mode == "new" ? "Start Game" : "Play"}</button>
+              {this.props.mode == "new" ?
+                <button className="maxWidth" onClick={this.play}>{this.props.mode == "new" ? "Start Game" : "Play"}</button> : null
+              }
             </td>
           </tr>
         </tbody>

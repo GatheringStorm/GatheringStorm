@@ -32,7 +32,7 @@ class Game extends React.Component {
                 <tbody>
                     <tr>
                         <td>
-                            <input type="button" value="<" onClick={this.returnToGameSelection} />
+                            <input type="button" value="< Game Selection" onClick={this.returnToGameSelection} />
                             <p className="GameHeader">{JSON.parse(localStorage.getItem("userToken")).profileObj.email} vs {this.state.board.opponentPlayer}</p>
                         </td>
                     </tr>

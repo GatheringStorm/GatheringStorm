@@ -28,7 +28,7 @@ class Layout extends React.Component {
             </td>
           </tr>
           <tr>
-            <td className="maxWidth flex-container">
+            <td className="maxWidth">
               <Body stateMachine={this.props.stateMachine} />
             </td>
           </tr>
