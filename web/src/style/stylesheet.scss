@@ -7,11 +7,21 @@
 }
 
 .card {
+    margin: 5px;
+    min-width: 150px;
     background: white;
     width: 10%;
     border: 2px solid black;
     border-radius: 5%;
     float: left;
+}
+
+.spacer {
+    margin: 5px;
+}
+
+.boardseperator {
+    background: black;
 }
 
 .GameSelcetionCard {}
