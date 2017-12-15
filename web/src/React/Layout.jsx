@@ -1,6 +1,5 @@
 import React from "react";
 
-import Head from "./Head/Head.jsx"
 import Body from "./Body/Body.jsx"
 
 class Layout extends React.Component {
@@ -20,20 +19,9 @@ class Layout extends React.Component {
 
   render() {
     return (
-      <table className="maxWidth">
-        <tbody>
-          <tr>
-            <td>
-              <Head stateMachine={this.props.stateMachine} />
-            </td>
-          </tr>
-          <tr>
-            <td className="maxWidth">
-              <Body stateMachine={this.props.stateMachine} />
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="Layout">
+        <Body stateMachine={this.props.stateMachine} />
+      </div>
     );
   }
 }

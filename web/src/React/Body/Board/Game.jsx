@@ -28,21 +28,11 @@ class Game extends React.Component {
         if (this.state.board == null)
             return <p>Loading ... </p>
         return (
-            <table className="maxWidth">
-                <tbody>
-                    <tr>
-                        <td>
-                            <input type="button" value="< Game Selection" onClick={this.returnToGameSelection} />
-                            <p className="GameHeader">{JSON.parse(localStorage.getItem("userToken")).profileObj.email} vs {this.state.board.opponentPlayer}</p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <Board board={this.state.board} />
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <div className="Layout">
+                <input type="button" value="< Game Selection" onClick={this.returnToGameSelection} />
+                <p className="GameHeader">{JSON.parse(localStorage.getItem("userToken")).profileObj.email} vs {this.state.board.opponentPlayer}</p>
+                <Board board={this.state.board} />
+            </div>
         )
     }
 }

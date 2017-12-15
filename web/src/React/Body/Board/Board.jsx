@@ -20,21 +20,21 @@ class Board extends React.Component {
             <div>{this.props.board.opponentHandCardsCount}</div>
         )
         let oB = (
-            <div>{
+            <div className="flex-container-horizontal">{
                 oBoard.map((item, index) => {
                     return <Card key={index} card={item} />
                 })
             }</div>
         )
         let pB = (
-            <div>{
+            <div className="flex-container-horizontal">{
                 pBoard.map((item, index) => {
                     return <Card key={index} card={item} />
                 })
             }</div>
         )
         let pH = (
-            <div>{
+            <div className="flex-container-horizontal">{
                 pHand.map((item, index) => {
                     return <Card key={index} card={item} />
                 })
@@ -51,46 +51,27 @@ class Board extends React.Component {
 
     render() {
         return (
-            <table className="maxWidth">
-                <tbody>
-                    <tr>
-                        <td className="OpponentHand">
-                            {this.state.OpponentHand}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div className="spacer"></div>
-                        </td>
-                    </tr>
-                    <tr className="board">
-                        <td className="OpponentBoard">
-                            {this.state.OpponentBoard}
-                        </td>
-                    </tr>
-                    <tr className="board">
-                        <td className="boardseperator">
-                            <div className="spacer"></div>
-                        </td>
-                    </tr>
-                    <tr className="board">
-                        <td className="PlayerBoard">
-                            {this.state.PlayerBoard}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div className="spacer"></div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td className="PlayerHand">
-                            {this.state.PlayerHand}
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-
+            <div className="Layout flex-container">
+                <div className="OpponentHand flex-container-horizontal">
+                    {this.state.OpponentHand}
+                </div>
+                <div className="spacer"></div>
+                <div className="board">
+                    <div className="OpponentBoard flex-container-horizontal">
+                        {this.state.OpponentBoard}
+                    </div>
+                    <div className="boardseperator flex-container-horizontal">
+                        <div className="spacer"></div>
+                    </div>
+                    <div className="PlayerBoard flex-container-horizontal">
+                        {this.state.PlayerBoard}
+                    </div>
+                </div>
+                <div className="spacer"></div>
+                <div className="PlayerHand flex-container-horizontal">
+                    {this.state.PlayerHand}
+                </div>
+            </div>
         )
     }
 }

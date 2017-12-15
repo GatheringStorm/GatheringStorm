@@ -10,20 +10,10 @@ class GameSelection extends React.Component {
 
   render() {
     return (
-      <table className="maxWidth">
-        <tbody>
-          <tr>
-            <td>
-              <Header stateMachine={this.props.stateMachine} />
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <Body stateMachine={this.props.stateMachine} />
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="Layout">
+        <Header stateMachine={this.props.stateMachine} />
+        <Body stateMachine={this.props.stateMachine} />
+      </div>
     );
   }
 }
