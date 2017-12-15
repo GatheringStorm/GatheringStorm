@@ -24,7 +24,7 @@ class Body extends React.Component {
         let obj = (
             <div>{
                 testGames.map((item, index) => {
-                    return <GameSelectionCard key={index} stateMachine={this.props.stateMachine} mode={item.mode} email={item.opponent.email} date={item.beginDate} />
+                    return <GameSelectionCard key={index} stateMachine={this.props.stateMachine} mode={item.mode} email={item.opponent.email} date={item.beginDate} currentTurnPlayer={item.currentTurnPlayer} />
                 })
             }</div>
         )

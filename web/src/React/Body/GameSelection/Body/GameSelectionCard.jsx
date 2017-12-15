@@ -8,6 +8,8 @@ class GameSelectionCard extends React.Component {
     super(props);
 
     this.play = this.play.bind(this);
+
+    this.createStyle = this.createStyle.bind(this)
   }
 
   play() {
@@ -19,9 +21,21 @@ class GameSelectionCard extends React.Component {
     this.props.stateMachine.action(Action.STARTGAME);
   }
 
+  createStyle() {
+    let style = "card ";
+    if (this.props.mode == "new")
+      style += "new ";
+    if (this.props.currentTurnPlayer == JSON.parse(localStorage.getItem("userToken")).profileObj.email)
+      style += "yourTurn ";
+    else
+      style += "enemyTurn";
+
+    return style;
+  }
+
   render() {
     return (
-      <table className={this.props.mode == "new" ? "card newGame" : "card"}>
+      <table className={this.createStyle()}>
         <tbody>
           <tr>
             <td>

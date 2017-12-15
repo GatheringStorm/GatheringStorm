@@ -35,7 +35,7 @@ class webAccess {
     async getBoard(email) {
         return {
             "opponentPlayer": "enemy@gmail.com",
-            "currentPlayer": "you@gmail.com",
+            "currentTurnPlayer": "you@gmail.com",
             "opponentHandCardsCount": 5,
             "playerHandCards": [{
                     "id": "GUID",
@@ -133,7 +133,7 @@ class webAccess {
     async getGame(email) {
         return {
             "id": "GUID",
-            "currentPlayer": "you@gmail.com",
+            "currentTurnPlayer": "you@gmail.com",
             "opponent": {
                 "mail": "test@gmail.com",
                 "class": {
