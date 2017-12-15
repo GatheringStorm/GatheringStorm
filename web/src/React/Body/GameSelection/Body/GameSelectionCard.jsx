@@ -21,7 +21,7 @@ class GameSelectionCard extends React.Component {
 
   render() {
     return (
-      <table>
+      <table className={"GameSelcetionCard " + this.props.mode == "new" ? "newGame" : ""}>
         <tbody>
           <tr>
             <td>

@@ -1,12 +1,15 @@
 import React from "react";
 
 import Stats from "./Stats.jsx";
+import defaultWebAccess from "../../../../controller/webAccess.js"
 
 class Card extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = { effects: null }
+
+    this.use = this.use.bind(this);
   }
 
   componentDidMount() {
@@ -25,9 +28,13 @@ class Card extends React.Component {
     })
   }
 
+  async use() {
+    await defaultWebAccess.useCard(this.props.card.id);
+  }
+
   render() {
     return (
-      <table>
+      <table onClick={this.use} className="card">
         <tbody>
           <tr>
             <td>

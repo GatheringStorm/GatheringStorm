@@ -51,7 +51,7 @@ class Board extends React.Component {
 
     render() {
         return (
-            <table>
+            <table className="board maxWidth">
                 <tbody>
                     <tr>
                         <td className="OpponentHand">
@@ -64,12 +64,12 @@ class Board extends React.Component {
                         </td>
                     </tr>
                     <tr>
-                        <td className="PlayerBoard">
+                        <td className="PlayerHand">
                             {this.state.PlayerHand}
                         </td>
                     </tr>
                     <tr>
-                        <td className="PlayerHand">
+                        <td className="PlayerBoard">
                             {this.state.PlayerBoard}
                         </td>
                     </tr>
