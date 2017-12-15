@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using GatheringStorm.Api.Models;
 using GatheringStorm.Api.Models.Dto;
@@ -8,17 +9,17 @@ namespace GatheringStorm.Api.Services
 {
     public interface IGamesService
     {
-        Task<AppActionResult<DtoGame>> StartNewGame(DtoNewGameInfo newGameInfo);
-        Task<List<DtoGame>> GetGames();
-        Task<DtoBoard> GetBoard(Guid gameId);
-        Task EndTurn(Guid gameId);
-        Task PlayCard(Guid gameId, DtoPlayCardMove move);
-        Task Attack(Guid gameId, DtoAttackMove move);
+        Task<AppActionResult<DtoGame>> StartNewGame(DtoNewGameInfo newGameInfo, CancellationToken cancellationToken = default(CancellationToken));
+        Task<List<DtoGame>> GetGames(CancellationToken cancellationToken = default(CancellationToken));
+        Task<DtoBoard> GetBoard(Guid gameId, CancellationToken cancellationToken = default(CancellationToken));
+        Task EndTurn(Guid gameId, CancellationToken cancellationToken = default(CancellationToken));
+        Task PlayCard(Guid gameId, DtoPlayCardMove move, CancellationToken cancellationToken = default(CancellationToken));
+        Task Attack(Guid gameId, DtoAttackMove move, CancellationToken cancellationToken = default(CancellationToken));
     }
 
     public class GamesService : IGamesService
     {
-        public Task<AppActionResult<DtoGame>> StartNewGame(DtoNewGameInfo newGameInfo)
+        public Task<AppActionResult<DtoGame>> StartNewGame(DtoNewGameInfo newGameInfo, CancellationToken cancellationToken = default(CancellationToken))
         {
             return Task.FromResult(new AppActionResult<DtoGame>(new DtoGame
             {
@@ -42,7 +43,7 @@ namespace GatheringStorm.Api.Services
             }));
         }
 
-        public Task<List<DtoGame>> GetGames()
+        public Task<List<DtoGame>> GetGames(CancellationToken cancellationToken = default(CancellationToken))
         {
             return Task.FromResult(new List<DtoGame>
             {
@@ -73,7 +74,7 @@ namespace GatheringStorm.Api.Services
             });
         }
 
-        public Task<DtoBoard> GetBoard(Guid gameId)
+        public Task<DtoBoard> GetBoard(Guid gameId, CancellationToken cancellationToken = default(CancellationToken))
         {
             return Task.FromResult(new DtoBoard
             {
@@ -151,17 +152,17 @@ namespace GatheringStorm.Api.Services
             });
         }
 
-        public Task EndTurn(Guid gameId)
+        public Task EndTurn(Guid gameId, CancellationToken cancellationToken = default(CancellationToken))
         {
             return Task.CompletedTask;
         }
 
-        public Task PlayCard(Guid gameId, DtoPlayCardMove move)
+        public Task PlayCard(Guid gameId, DtoPlayCardMove move, CancellationToken cancellationToken = default(CancellationToken))
         {
             return Task.CompletedTask;
         }
 
-        public Task Attack(Guid gameId, DtoAttackMove move)
+        public Task Attack(Guid gameId, DtoAttackMove move, CancellationToken cancellationToken = default(CancellationToken))
         {
             return Task.CompletedTask;
         }

@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using System;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Threading.Tasks;
+using GatheringStorm.Api.Auth;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 
@@ -37,26 +38,28 @@ namespace GatheringStorm.Api
             var connString = Configuration["GatheringStormConnection"];
             services.AddDbContext<AppDbContext>(o => o.UseSqlServer(connString));
             services.AddTransient<IGamesService, GamesService>();
+            services.AddScoped<ILoginManager, LoginManager>();
 
-            services.AddIdentity<User, IdentityRole>()
-                .AddEntityFrameworkStores<AppDbContext>();
+            //services.AddAuthentication(o =>
+            //    {
+            //        o.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            //        o.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            //        o.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            //    })
+            //    .AddCookie()
+            //    .AddJwtBearer(o =>
+            //    {
+            //        o.RequireHttpsMetadata = false;
 
-            services.AddAuthentication(o =>
-            {
-                o.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-                o.DefaultAuthenticateScheme = GoogleDefaults.AuthenticationScheme;
-                o.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-                .AddCookie()
-                .AddJwtBearer(o =>
-                {
-                    o.RequireHttpsMetadata = false;
-                })
-                .AddGoogle(googleOptions =>
-                {
-                    googleOptions.ClientId = Configuration["GatheringStormGoogleClientId"];
-                    googleOptions.ClientSecret = Configuration["GatheringStormGoogleClientSecret"];
-                });
+            //        o.Audience = "24931599658-o9q66rbqprq0lcgrtlbfhcs3kcfqs8rg.apps.googleusercontent.com";
+            //        o.Authority = "accounts.google.com";
+            //        o.MetadataAddress = "https://accounts.google.com/.well-known/openid-configuration";
+            //    })
+            //    .AddGoogle(googleOptions =>
+            //    {
+            //        googleOptions.ClientId = Configuration["GatheringStormGoogleClientId"];
+            //        googleOptions.ClientSecret = Configuration["GatheringStormGoogleClientSecret"];
+            //    });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -67,7 +70,7 @@ namespace GatheringStorm.Api
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseAuthentication();
+            //app.UseAuthentication();
 
             dbContext.Database.EnsureCreated();
 

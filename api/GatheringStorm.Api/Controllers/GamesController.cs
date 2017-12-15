@@ -1,33 +1,34 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
+using GatheringStorm.Api.Auth;
 using GatheringStorm.Api.Models.DB;
 using GatheringStorm.Api.Models.Dto;
 using GatheringStorm.Api.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GatheringStorm.Api.Controllers
 {
     [Route("api/[controller]")]
+    [ValidateGoogleLogin]
     public class GamesController : Controller
     {
         public readonly IGamesService gamesService;
+        public readonly ILoginManager loginManager;
 
-        public UserManager<User> UserManager { get; }
-
-        public GamesController(IGamesService gamesService, UserManager<User> userManager)
+        public GamesController(IGamesService gamesService, ILoginManager loginManager)
         {
             this.gamesService = gamesService;
-            UserManager = userManager;
+            this.loginManager = loginManager;
         }
 
         [HttpPost("New")]
-        public async Task<IActionResult> StartNewGame([FromBody] DtoNewGameInfo newGameInfo)
+        public async Task<IActionResult> StartNewGame([FromBody] DtoNewGameInfo newGameInfo,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
-            // TODO: Read Users properly?
-            var user = await this.UserManager.GetUserAsync(User);
-            var result = await this.gamesService.StartNewGame(newGameInfo).ConfigureAwait(false);
+            var user = this.loginManager.LoggedInUser;
+            var result = await this.gamesService.StartNewGame(newGameInfo, cancellationToken).ConfigureAwait(false);
             // TODO: Generic ObjectResult
             return new OkObjectResult(result.SuccessReturnValue);
         }
