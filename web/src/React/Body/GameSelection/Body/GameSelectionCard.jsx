@@ -1,6 +1,7 @@
 import React from "react";
 
 import defaultWebAccess from "../../../../controller/webAccess.js";
+import { Action } from "../../../../controller/statemachine.js"
 
 class GameSelectionCard extends React.Component {
   constructor(props) {
@@ -15,6 +16,7 @@ class GameSelectionCard extends React.Component {
       return
     }
     defaultWebAccess.getGame(this.props.email)
+    this.props.stateMachine.action(Action.STARTGAME);
   }
 
   render() {
@@ -37,8 +39,7 @@ class GameSelectionCard extends React.Component {
             </td>
           </tr>
         </tbody>
-      </table>
-    );
+      </table>)
   }
 }
 
