@@ -8,7 +8,10 @@
 
 .card {
     background: white;
-    width: 20%;
+    width: 10%;
+    border: 2px solid black;
+    border-radius: 5%;
+    float: left;
 }
 
 .GameSelcetionCard {}
@@ -17,6 +20,12 @@
 
 .board {
     background: #FFDFC2;
+}
+
+.stats {
+    background: lightyellow;
+    border-radius: 100%;
+    text-align: left;
 }
 
 .OpponentHand {}
