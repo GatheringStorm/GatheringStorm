@@ -28,41 +28,42 @@ namespace GatheringStorm.Api.Controllers
             CancellationToken cancellationToken = default(CancellationToken))
         {
             var result = await this.gamesService.StartNewGame(newGameInfo, cancellationToken).ConfigureAwait(false);
-            return utility.GetResult(result);
+            return utility.GetActionResult(result);
         }
 
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            return new OkObjectResult(await this.gamesService.GetGames().ConfigureAwait(false));
+            var result = await this.gamesService.GetGames().ConfigureAwait(false);
+            return this.utility.GetActionResult(result);
         }
 
         [HttpGet("{gameId}/Board")]
         public async Task<IActionResult> GetBoard(Guid gameId)
         {
-            return new OkObjectResult(await this.gamesService.GetBoard(gameId).ConfigureAwait(false));
+            var result = await this.gamesService.GetBoard(gameId).ConfigureAwait(false);
+            return this.utility.GetActionResult(result);
         }
 
         [HttpPost("{gameId}/EndTurn")]
         public async Task<IActionResult> EndTurn(Guid gameId)
         {
-            await this.gamesService.EndTurn(gameId).ConfigureAwait(false);
-            // TODO: AppActionResult without ReturnValue
-            return new OkResult();
+            var result = await this.gamesService.EndTurn(gameId).ConfigureAwait(false);
+            return this.utility.GetActionResult(result);
         }
 
         [HttpPost("{gameId}/PlayCard")]
         public async Task<IActionResult> PlayCard(Guid gameId, [FromBody] DtoPlayCardMove move)
         {
-            await this.gamesService.PlayCard(gameId, move).ConfigureAwait(false);
-            return new OkResult();
+            var result = await this.gamesService.PlayCard(gameId, move).ConfigureAwait(false);
+            return this.utility.GetActionResult(result);
         }
 
         [HttpPost("{gameId}/Attack")]
         public async Task<IActionResult> PlayCard(Guid gameId, [FromBody] DtoAttackMove move)
         {
-            await this.gamesService.Attack(gameId, move).ConfigureAwait(false);
-            return new OkResult();
+            var result = await this.gamesService.Attack(gameId, move).ConfigureAwait(false);
+            return this.utility.GetActionResult(result);
         }
     }
 }

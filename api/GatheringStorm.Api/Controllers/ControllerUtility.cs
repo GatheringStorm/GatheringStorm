@@ -8,33 +8,29 @@ namespace GatheringStorm.Api.Controllers
 {
     public interface IControllerUtility
     {
-        IActionResult GetResult(AppActionResult appActionResult);
-        IActionResult GetResult<T>(AppActionResult<T> appActionResult);
+        IActionResult GetActionResult(AppResult appResult);
+        IActionResult GetActionResult<T>(AppResult<T> appResult);
     }
 
     public class ControllerUtility : IControllerUtility
     {
-        public IActionResult GetResult(AppActionResult appActionResult)
+        public IActionResult GetActionResult(AppResult appResult)
         {
-            if (appActionResult.Result == AppActionResultType.Success)
-            {
-                return new OkResult();
-            }
-
-            return new ObjectResult(null)
-            {
-                StatusCode = 418
-            };
+            return appResult.Result == AppActionResultType.Success
+                ? new OkResult()
+                : GetErrorResult(appResult);
         }
 
-        public IActionResult GetResult<T>(AppActionResult<T> appActionResult)
+        public IActionResult GetActionResult<T>(AppResult<T> appResult)
         {
-            if (appActionResult.Result == AppActionResultType.Success)
-            {
-                return new OkObjectResult(appActionResult.SuccessReturnValue);
-            }
+            return appResult.Result == AppActionResultType.Success
+                ? new OkObjectResult(appResult.SuccessReturnValue)
+                : GetErrorResult(appResult);
+        }
 
-            return new ObjectResult(appActionResult.ErrorMessage)
+        private static IActionResult GetErrorResult(AppResult appResult)
+        {
+            return new ObjectResult(new ErrorActionResultContent(appResult))
             {
                 StatusCode = 418
             };
