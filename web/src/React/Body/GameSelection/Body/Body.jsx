@@ -13,18 +13,18 @@ class Body extends React.Component {
     async getOpenGames() {
         let response = await defaultWebAccess.getOpenGames();
         return response.map(_ => {
-            _.mode = "exising";
+            _.mode = "existing";
             return _;
         });
     }
 
-    async componentWillMount() {
+    async componentDidMount() {
         let testGames = [{ mode: "new", opponent: { email: "" }, beginDate: "" }];
         testGames.push(...await this.getOpenGames());
         let obj = (
             <div>{
                 testGames.map((item, index) => {
-                    <GameSelectionCard mode={item.mode} email={item.opponent.mail} date={item.beginDate} />
+                    return <GameSelectionCard key={index} mode={item.mode} email={item.opponent.email} date={item.beginDate} />
                 })
             }</div>
         )
@@ -32,8 +32,6 @@ class Body extends React.Component {
         this.setState({
             data: obj
         })
-
-        console.log(obj)
     }
 
     render() {
