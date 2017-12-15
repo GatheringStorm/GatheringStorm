@@ -22,7 +22,7 @@ class Body extends React.Component {
         let testGames = [{ mode: "new", opponent: { email: "" }, beginDate: "" }];
         testGames.push(...await this.getOpenGames());
         let obj = (
-            <div className="flex-container-horizontal">{
+            <div className="flex-container-horizontal-wrap">{
                 testGames.map((item, index) => {
                     return <GameSelectionCard key={index} stateMachine={this.props.stateMachine} mode={item.mode} email={item.opponent.email} date={item.beginDate} currentTurnPlayer={item.currentTurnPlayer} />
                 })

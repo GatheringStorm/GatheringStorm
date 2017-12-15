@@ -32,15 +32,20 @@
 .flex-container-horizontal {
     display: flex;
     flex-direction: row;
+}
+
+.flex-container-horizontal-wrap {
+    display: flex;
+    flex-direction: row;
     flex-wrap: wrap;
 }
 
 .enemyTurn {
-    background: orange;
+    background: lightgreen;
 }
 
 .yourTurn {
-    background: lightgreen;
+    background: orange;
 }
 
 .spacer {
