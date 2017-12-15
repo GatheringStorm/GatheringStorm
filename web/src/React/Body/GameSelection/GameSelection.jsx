@@ -19,7 +19,7 @@ class GameSelection extends React.Component {
           </tr>
           <tr>
             <td>
-              <Body />
+              <Body stateMachine={this.props.stateMachine} />
             </td>
           </tr>
         </tbody>

@@ -1,6 +1,7 @@
 import React from "react";
 
 import GameSelection from "./GameSelection/GameSelection.jsx"
+import Game from "./Board/Game.jsx"
 import { State } from "../../controller/statemachine.js"
 import { Action } from "../../controller/statemachine.js"
 import { GoogleLogin } from "react-google-login";
@@ -18,12 +19,11 @@ class Body extends React.Component {
     this.props.stateMachine.action(Action.LOGIN);
     localStorage.setItem("userToken", JSON.stringify(response));
     defaultWebAccess.sample(response.Zi, "");
-    this.setState({});
   }
 
   bodyChoice() {
     if (this.props.stateMachine.currentState.name == State.GAME)
-      return (<div />);
+      return (<Game stateMachine={this.props.stateMachine} />);
     else if (this.props.stateMachine.currentState.name == State.GAMESELECTION)
       return (<GameSelection stateMachine={this.props.stateMachine} />);
     else if (this.props.stateMachine.currentState.name == State.LOGIN)
