@@ -24,8 +24,8 @@ class GameSelectionCard extends React.Component {
   createStyle() {
     let style = "card ";
     if (this.props.mode == "new")
-      style += "new ";
-    if (this.props.currentTurnPlayer == JSON.parse(localStorage.getItem("userToken")).profileObj.email)
+      style += "newGame ";
+    else if (this.props.currentTurnPlayer == JSON.parse(localStorage.getItem("userToken")).profileObj.email)
       style += "yourTurn ";
     else
       style += "enemyTurn";
