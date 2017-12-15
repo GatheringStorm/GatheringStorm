@@ -26,7 +26,6 @@ class Card extends React.Component {
   }
 
   render() {
-    console.log(this.props.card)
     return (
       <table>
         <tbody>

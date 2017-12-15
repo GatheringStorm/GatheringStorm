@@ -34,6 +34,7 @@ class webAccess {
 
     async getBoard(email) {
         return {
+            "opponentPlayer": "enemy@gmail.com",
             "currentPlayer": "you@gmail.com",
             "opponentHandCardsCount": 5,
             "playerHandCards": [{
