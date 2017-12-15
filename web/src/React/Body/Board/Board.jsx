@@ -16,37 +16,21 @@ class Board extends React.Component {
         oBoard.push(...this.props.board.opponentBoardCards);
         pBoard.push(...this.props.board.playerBoardCards);
         pHand.push(...this.props.board.playerHandCards);
-        let oH = (
-            <div>{this.props.board.opponentHandCardsCount}</div>
-        )
-        let oB = (
-            <div className="flex-container-horizontal">{
-                oBoard.map((item, index) => {
-                    return <Card key={index} card={item} />
-                })
-            }</div>
-        )
-        let pB = (
-            <div className="flex-container-horizontal">{
-                pBoard.map((item, index) => {
-                    return <Card key={index} card={item} />
-                })
-            }</div>
-        )
-        let pH = (
-            <div className="flex-container-horizontal">{
-                pHand.map((item, index) => {
-                    return <Card key={index} card={item} />
-                })
-            }</div>
-        )
 
         this.setState({
-            OpponentHand: oH,
-            OpponentBoard: oB,
-            PlayerBoard: pB,
-            PlayerHand: pH
+            OpponentHand: <div>{this.props.board.opponentHandCardsCount}</div>,
+            OpponentBoard: this.createCard(oBoard),
+            PlayerBoard: this.createCard(pBoard),
+            PlayerHand: this.createCard(pHand)
         })
+    }
+
+    createCard(cardMap) {
+        return (<div className="flex-container-horizontal">{
+            cardMap.map((item, index) => {
+                return <Card key={index} card={item} />
+            })
+        }</div>)
     }
 
     render() {
