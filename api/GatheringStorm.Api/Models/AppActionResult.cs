@@ -1,26 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace GatheringStorm.Api.Models
 {
+    public class AppActionResult
+    {
+        public AppActionResult(AppActionResultType result)
+        {
+            Result = result;
+        }
+
+        public AppActionResultType Result { get; }
+    }
+
     public class AppActionResult<T>
     {
-        public AppActionResult(AppActionResultType type, string errorMessage)
+        public AppActionResult(AppActionResultType result, string errorMessage)
         {
-            this.Type = type;
+            if (result == AppActionResultType.Success)
+            {
+                throw new InvalidEnumArgumentException(nameof(result), (int)result, typeof(AppActionResultType));
+            }
+
+            this.Result = result;
             this.ErrorMessage = errorMessage;
         }
 
         public AppActionResult(T suceSuccessReturnValue)
         {
-            this.Type = AppActionResultType.Success;
+            this.Result = AppActionResultType.Success;
             this.SuccessReturnValue = suceSuccessReturnValue;
         }
 
-        public AppActionResultType Type { get; set; }
-        public string ErrorMessage { get; set; }
-        public T SuccessReturnValue { get; set; }
+        public AppActionResultType Result { get; }
+        public string ErrorMessage { get; }
+        public T SuccessReturnValue { get; }
     }
 
     public enum AppActionResultType

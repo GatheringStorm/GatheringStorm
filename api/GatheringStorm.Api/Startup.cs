@@ -11,6 +11,7 @@ using System;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Threading.Tasks;
 using GatheringStorm.Api.Auth;
+using GatheringStorm.Api.Controllers;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 
@@ -38,6 +39,7 @@ namespace GatheringStorm.Api
             var connString = Configuration["GatheringStormConnection"];
             services.AddDbContext<AppDbContext>(o => o.UseSqlServer(connString));
             services.AddTransient<IGamesService, GamesService>();
+            services.AddTransient<IControllerUtility, ControllerUtility>();
             services.AddScoped<ILoginManager, LoginManager>();
 
             //services.AddAuthentication(o =>

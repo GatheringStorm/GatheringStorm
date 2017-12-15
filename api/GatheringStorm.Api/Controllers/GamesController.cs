@@ -15,22 +15,20 @@ namespace GatheringStorm.Api.Controllers
     public class GamesController : Controller
     {
         public readonly IGamesService gamesService;
-        public readonly ILoginManager loginManager;
+        private readonly IControllerUtility utility;
 
-        public GamesController(IGamesService gamesService, ILoginManager loginManager)
+        public GamesController(IGamesService gamesService, IControllerUtility utility)
         {
             this.gamesService = gamesService;
-            this.loginManager = loginManager;
+            this.utility = utility;
         }
 
         [HttpPost("New")]
         public async Task<IActionResult> StartNewGame([FromBody] DtoNewGameInfo newGameInfo,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            var user = this.loginManager.LoggedInUser;
             var result = await this.gamesService.StartNewGame(newGameInfo, cancellationToken).ConfigureAwait(false);
-            // TODO: Generic ObjectResult
-            return new OkObjectResult(result.SuccessReturnValue);
+            return utility.GetResult(result);
         }
 
         [HttpGet]

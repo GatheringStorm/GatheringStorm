@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using GatheringStorm.Api.Auth;
 using GatheringStorm.Api.Models;
 using GatheringStorm.Api.Models.Dto;
 
@@ -19,8 +20,17 @@ namespace GatheringStorm.Api.Services
 
     public class GamesService : IGamesService
     {
+        private readonly ILoginManager loginManager;
+
+        public GamesService(ILoginManager loginManager)
+        {
+            this.loginManager = loginManager;
+        }
+
         public Task<AppActionResult<DtoGame>> StartNewGame(DtoNewGameInfo newGameInfo, CancellationToken cancellationToken = default(CancellationToken))
         {
+            Console.WriteLine(this.loginManager.LoggedInUser.Mail);
+
             return Task.FromResult(new AppActionResult<DtoGame>(new DtoGame
             {
                 Id = Guid.NewGuid(),
