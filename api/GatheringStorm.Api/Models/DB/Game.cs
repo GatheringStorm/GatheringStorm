@@ -5,9 +5,26 @@ namespace GatheringStorm.Api.Models.DB
 {
     public class Game
     {
+        private string status;
+
         public Guid Id { get; set; }
         public DateTime BeginDate { get; set; }
-        public bool IsFinished { get; set; }
+        public DateTime EndDate { get; set; }
+        public string Status
+        {
+            get
+            {
+                return this.status;
+            }
+            set
+            {
+                if (!value.IsValidGameStatusId(true))
+                {
+                    throw new ArgumentException("Value is not a valid gameStatusId", nameof(Status));
+                }
+                this.status = value;
+            }
+        }
         public List<UserParticipation> UserParticipations { get; set; }
         public List<Move> Moves { get; set; }
     }

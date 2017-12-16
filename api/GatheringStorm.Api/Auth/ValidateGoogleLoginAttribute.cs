@@ -19,6 +19,8 @@ namespace GatheringStorm.Api.Auth
             private readonly IConfiguration configuration;
             private readonly ILoginManager loginManager;
 
+            private const string BearerPrefix = "Bearer ";
+
             public Implementation(IConfiguration configuration, ILoginManager loginManager)
             {
                 this.configuration = configuration;
@@ -27,7 +29,14 @@ namespace GatheringStorm.Api.Auth
 
             public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
             {
-                var idToken = context.HttpContext.Request.Headers["Authorization"].ToString().Remove(0, "Bearer ".Length);
+                var authHeader = context.HttpContext.Request.Headers["Authorization"];
+                if (authHeader.Count == 0 || authHeader.ToString().Length < BearerPrefix.Length)
+                {
+                    context.Result = new UnauthorizedResult();
+                    return;
+                }
+
+                var idToken = authHeader.ToString().Remove(0, BearerPrefix.Length);
 
                 using (var client = new HttpClient())
                 {

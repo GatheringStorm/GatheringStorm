@@ -16,7 +16,7 @@ namespace GatheringStorm.Api.Data
             modelBuilder.Entity<MoveTargetEntity>()
                 .HasKey(_ => new { _.EntityId, _.MoveId });
             modelBuilder.Entity<UserParticipation>()
-                .HasKey(_ => new { _.UserId, _.GameId});
+                .HasKey(_ => new { _.Mail, _.GameId });
         }
 
         public DbSet<Card> Cards { get; set; }

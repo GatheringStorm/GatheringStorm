@@ -45,7 +45,7 @@ namespace GatheringStorm.Api.Services
                     Mail = "you@gmail.com",
                     Class = new DtoClass
                     {
-                        Id = ClassTypeConstants.Swift,
+                        Id = ClassTypes.Swift,
                         Name = "Schnell"
                     }
                 },
@@ -71,7 +71,7 @@ namespace GatheringStorm.Api.Services
                         Mail = "you@gmail.com",
                         Class = new DtoClass
                         {
-                            Id = ClassTypeConstants.Swift,
+                            Id = ClassTypes.Swift,
                             Name = "Schnell"
                         }
                     },
@@ -80,7 +80,7 @@ namespace GatheringStorm.Api.Services
                         Mail = "opponent@gmail.com",
                         Class = new DtoClass
                         {
-                            Id = ClassTypeConstants.Tank,
+                            Id = ClassTypes.Tank,
                             Name = "Langsam"
                         }
                     }
