@@ -4,6 +4,8 @@ namespace GatheringStorm.Api.Models
 {
     public static class GameStatusIds
     {
+        public static string OpponentInvited { get; } = "opponentInvited";
+
         private static List<string> dbStatusIds = new List<string>
         {
             DB.InProgress,
@@ -19,8 +21,6 @@ namespace GatheringStorm.Api.Models
             Dto.Lost,
             OpponentInvited
         };
-
-        public static string OpponentInvited { get; } = "opponentInvited";
 
         public class DB
         {

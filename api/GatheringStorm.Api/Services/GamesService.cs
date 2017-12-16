@@ -42,6 +42,11 @@ namespace GatheringStorm.Api.Services
                 return new AppResult(AppActionResultType.GeneralError, $"User with email '{newGameInfo.OpponentMail}' not found.");
             }
 
+            var choices = newGameInfo.ClassIds.Select((classId, index) => new ClassChoice
+            {
+                ClassId = classId,
+                Priority = index + 1
+            }).ToList();
             var newGame = new Game
             {
                 BeginDate = DateTime.Now,
@@ -51,11 +56,7 @@ namespace GatheringStorm.Api.Services
                     new UserParticipation
                     {
                         User = this.loginManager.LoggedInUser,
-                        ClassChoices = newGameInfo.ClassIds.Select((classId, index) => new ClassChoice
-                        {
-                            ClassId = classId,
-                            Priority = index + 1
-                        }).ToList()
+                        ClassChoices = choices
                     },
                     new UserParticipation
                     {
