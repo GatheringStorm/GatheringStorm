@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GatheringStorm.Api.Auth;
@@ -12,7 +13,7 @@ namespace GatheringStorm.Api.Services
 {
     public interface IGamesService
     {
-        Task<AppResult<DtoGame>> StartNewGame(DtoNewGameInfo newGameInfo, CancellationToken cancellationToken = default(CancellationToken));
+        Task<AppResult> StartNewGame(DtoNewGameInfo newGameInfo, CancellationToken cancellationToken = default(CancellationToken));
         Task<AppResult<List<DtoGame>>> GetGames(CancellationToken cancellationToken = default(CancellationToken));
         Task<AppResult<DtoBoard>> GetBoard(Guid gameId, CancellationToken cancellationToken = default(CancellationToken));
         Task<AppResult> EndTurn(Guid gameId, CancellationToken cancellationToken = default(CancellationToken));
@@ -31,30 +32,42 @@ namespace GatheringStorm.Api.Services
             this.loginManager = loginManager;
         }
 
-        public Task<AppResult<DtoGame>> StartNewGame(DtoNewGameInfo newGameInfo, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<AppResult> StartNewGame(DtoNewGameInfo newGameInfo, CancellationToken cancellationToken = default(CancellationToken))
         {
             Console.WriteLine(this.loginManager.LoggedInUser.Mail);
 
-            return Task.FromResult(new AppResult<DtoGame>(new DtoGame
+            var opponent = await this.dbContext.Users.FindAsync(new [] {newGameInfo.OpponentMail}, cancellationToken);
+            if (opponent == null)
             {
-                Id = Guid.NewGuid(),
-                CurrentPlayer = "opponent@gmail.com",
+                return new AppResult(AppActionResultType.GeneralError, $"User with email '{newGameInfo.OpponentMail}' not found.");
+            }
+
+            var newGame = new Game
+            {
                 BeginDate = DateTime.Now,
-                Player = new DtoPlayer
+                Status = GameStatusIds.OpponentInvited,
+                UserParticipations = new List<UserParticipation>
                 {
-                    Mail = "you@gmail.com",
-                    Class = new DtoClass
+                    new UserParticipation
                     {
-                        Id = ClassTypes.Swift,
-                        Name = "Schnell"
+                        User = this.loginManager.LoggedInUser,
+                        ClassChoices = newGameInfo.ClassIds.Select((classId, index) => new ClassChoice
+                        {
+                            ClassId = classId,
+                            Priority = index + 1
+                        }).ToList()
+                    },
+                    new UserParticipation
+                    {
+                        User = opponent
                     }
-                },
-                Opponent = new DtoPlayer
-                {
-                    Mail = "opponent@gmail.com",
-                    Class = null
                 }
-            }));
+            };
+
+            await this.dbContext.Games.AddAsync(newGame, cancellationToken);
+            await this.dbContext.SaveChangesAsync();
+            
+            return new AppResult(AppActionResultType.Success);
         }
 
         public Task<AppResult<List<DtoGame>>> GetGames(CancellationToken cancellationToken = default(CancellationToken))

@@ -17,7 +17,7 @@ namespace GatheringStorm.Api.Models
 
         public static bool IsValidClass(this string classId)
         {
-            return classIds.Contains(classId);
+            return classId == null ||  classIds.Contains(classId);
         }
     }
 }

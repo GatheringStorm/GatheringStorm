@@ -40,6 +40,7 @@ namespace GatheringStorm.Api.Models
     {
         Success = 0,
         ServerError = 1,
-        RuleError = 2
+        RuleError = 2,
+        GeneralError = 3
     }
 }

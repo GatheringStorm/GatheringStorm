@@ -17,6 +17,8 @@ namespace GatheringStorm.Api.Data
                 .HasKey(_ => new { _.EntityId, _.MoveId });
             modelBuilder.Entity<UserParticipation>()
                 .HasKey(_ => new { _.Mail, _.GameId });
+            modelBuilder.Entity<ClassChoice>()
+                .HasKey(_ => _.ClassId);
         }
 
         public DbSet<Card> Cards { get; set; }
@@ -33,5 +35,6 @@ namespace GatheringStorm.Api.Data
         public DbSet<Title> Titles { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<UserParticipation> UserParitcipations { get; set; }
+        public DbSet<ClassChoice> ClassChoices { get; set; }
     }
 }

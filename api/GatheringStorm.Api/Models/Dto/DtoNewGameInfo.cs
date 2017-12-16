@@ -1,8 +1,10 @@
-﻿namespace GatheringStorm.Api.Models.Dto
+﻿using System.Collections.Generic;
+
+namespace GatheringStorm.Api.Models.Dto
 {
     public class DtoNewGameInfo
     {
         public string OpponentMail { get; set; }
-        public int ClassId { get; set; }
+        public List<string> ClassIds { get; set; }
     }
 }

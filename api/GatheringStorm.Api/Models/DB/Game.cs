@@ -9,7 +9,7 @@ namespace GatheringStorm.Api.Models.DB
 
         public Guid Id { get; set; }
         public DateTime BeginDate { get; set; }
-        public DateTime EndDate { get; set; }
+        public DateTime? EndDate { get; set; }
         public string Status
         {
             get

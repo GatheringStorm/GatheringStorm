@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
+using System;
 
 namespace GatheringStorm.Api.Models.DB
 {
-    public class UserParticipation
+    public class ClassChoice
     {
         private string classId;
 
-        [ForeignKey(nameof(DB.User.Mail))]
-        public string Mail { get; set; }
-        public User User { get; set; }
         public string ClassId
         {
             get
@@ -26,8 +21,6 @@ namespace GatheringStorm.Api.Models.DB
                 this.classId = value;
             }
         }
-        public List<ClassChoice> ClassChoices { get; set; }
-        public Guid GameId { get; set; }
-        public Game Game { get; set; }
+        public int Priority { get; set; }
     }
 }
