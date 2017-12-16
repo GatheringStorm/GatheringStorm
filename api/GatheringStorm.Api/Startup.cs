@@ -41,27 +41,6 @@ namespace GatheringStorm.Api
             services.AddTransient<IGamesService, GamesService>();
             services.AddTransient<IControllerUtility, ControllerUtility>();
             services.AddScoped<ILoginManager, LoginManager>();
-
-            //services.AddAuthentication(o =>
-            //    {
-            //        o.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-            //        o.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            //        o.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            //    })
-            //    .AddCookie()
-            //    .AddJwtBearer(o =>
-            //    {
-            //        o.RequireHttpsMetadata = false;
-
-            //        o.Audience = "24931599658-o9q66rbqprq0lcgrtlbfhcs3kcfqs8rg.apps.googleusercontent.com";
-            //        o.Authority = "accounts.google.com";
-            //        o.MetadataAddress = "https://accounts.google.com/.well-known/openid-configuration";
-            //    })
-            //    .AddGoogle(googleOptions =>
-            //    {
-            //        googleOptions.ClientId = Configuration["GatheringStormGoogleClientId"];
-            //        googleOptions.ClientSecret = Configuration["GatheringStormGoogleClientSecret"];
-            //    });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -71,8 +50,6 @@ namespace GatheringStorm.Api
             {
                 app.UseDeveloperExceptionPage();
             }
-
-            //app.UseAuthentication();
 
             dbContext.Database.EnsureCreated();
 

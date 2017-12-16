@@ -30,10 +30,7 @@ namespace GatheringStorm.Api.Controllers
 
         private static IActionResult GetErrorResult(AppResult appResult)
         {
-            return new ObjectResult(new ErrorActionResultContent(appResult))
-            {
-                StatusCode = 418
-            };
+            return new BadRequestObjectResult(new ErrorActionResultContent(appResult));
         }
     }
 }

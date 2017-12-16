@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using GatheringStorm.Api.Auth;
+using GatheringStorm.Api.Data;
 using GatheringStorm.Api.Models;
+using GatheringStorm.Api.Models.DB;
 using GatheringStorm.Api.Models.Dto;
 
 namespace GatheringStorm.Api.Services
@@ -21,9 +23,11 @@ namespace GatheringStorm.Api.Services
     public class GamesService : IGamesService
     {
         private readonly ILoginManager loginManager;
+        public readonly AppDbContext dbContext;
 
-        public GamesService(ILoginManager loginManager)
+        public GamesService(ILoginManager loginManager, AppDbContext dbContext)
         {
+            this.dbContext = dbContext;
             this.loginManager = loginManager;
         }
 
@@ -41,7 +45,7 @@ namespace GatheringStorm.Api.Services
                     Mail = "you@gmail.com",
                     Class = new DtoClass
                     {
-                        Id = 1,
+                        Id = ClassTypeConstants.Swift,
                         Name = "Schnell"
                     }
                 },
@@ -67,7 +71,7 @@ namespace GatheringStorm.Api.Services
                         Mail = "you@gmail.com",
                         Class = new DtoClass
                         {
-                            Id = 1,
+                            Id = ClassTypeConstants.Swift,
                             Name = "Schnell"
                         }
                     },
@@ -76,7 +80,7 @@ namespace GatheringStorm.Api.Services
                         Mail = "opponent@gmail.com",
                         Class = new DtoClass
                         {
-                            Id = 3,
+                            Id = ClassTypeConstants.Tank,
                             Name = "Langsam"
                         }
                     }
