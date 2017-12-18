@@ -8,20 +8,16 @@ namespace GatheringStorm.Api.Models.DB
     {
         private string classId;
 
-        [ForeignKey(nameof(DB.User.Mail))]
         public string Mail { get; set; }
         public User User { get; set; }
         public string ClassId
         {
-            get
-            {
-                return this.classId;
-            }
+            get => this.classId;
             set
             {
                 if (!value.IsValidClass())
                 {
-                    throw new ArgumentException("Value is not a valid classId", nameof(ClassId));
+                    throw new ArgumentException("Value is not a valid classId: " + value, nameof(ClassId));
                 }
                 this.classId = value;
             }

@@ -8,7 +8,7 @@ namespace GatheringStorm.Api.Models
         public static string Medium { get; } = "medium";
         public static string Tank { get; } = "tank";
 
-        private static List<string> classIds = new List<string>
+        private static readonly List<string> classIds = new List<string>
         {
             Swift,
             Medium,

@@ -5,42 +5,103 @@ using System.Text;
 
 namespace GatheringStorm.Api.Models
 {
-    public class AppResult
+    public abstract class AppResult
     {
-        public AppResult(AppActionResultType result)
-        {
-            Result = result;
-        }
-
-        public AppResult(AppActionResultType result, string errorMessage)
-        {
-            Result = result;
-            ErrorMessage = errorMessage;
-        }
+        private string result;
 
         public string ErrorMessage { get; protected set; }
-        public AppActionResultType Result { get; protected set; }
+
+        public string Result
+        {
+            get => this.result;
+            protected set
+            {
+                if (!value.IsValidAppActionResultType())
+                {
+                    throw new ArgumentException("Value is not a valid appActionResultType: " + value, nameof(Result));
+                }
+
+                this.result = value;
+            }
+        }
+    }
+
+    public class VoidAppResult : AppResult
+    {
+        protected VoidAppResult()
+        {
+        }
+
+        public static VoidAppResult Success()
+        {
+            return new VoidAppResult
+            {
+                Result = AppActionResultType.Success
+            };
+        }
+
+        public static VoidAppResult Error(string result, string errorMessage)
+        {
+            return new VoidAppResult
+            {
+                Result = result,
+                ErrorMessage = errorMessage
+            };
+        }
     }
 
     public class AppResult<T> : AppResult
     {
-        public AppResult(AppActionResultType result, string errorMessage) : base(result, errorMessage)
+        protected AppResult()
         {
         }
 
-        public AppResult(T suceSuccessReturnValue) : base(AppActionResultType.Success)
+        public static AppResult<T> Success(T value)
         {
-            this.SuccessReturnValue = suceSuccessReturnValue;
+            return new AppResult<T>
+            {
+                Result = AppActionResultType.Success,
+                SuccessReturnValue = value
+            };
+        }
+
+        public static AppResult<T> Error(string result, string errorMessage)
+        {
+            return new AppResult<T>
+            {
+                Result = result,
+                ErrorMessage = errorMessage
+            };
+        }
+
+        public VoidAppResult GetVoidAppResult()
+        {
+            return this.Result == AppActionResultType.Success
+                ? VoidAppResult.Success()
+                : VoidAppResult.Error(this.Result, this.ErrorMessage);
         }
 
         public T SuccessReturnValue { get; protected set; }
     }
 
-    public enum AppActionResultType
+    public static class AppActionResultType
     {
-        Success = 0,
-        ServerError = 1,
-        RuleError = 2,
-        GeneralError = 3
+        public static string Success { get; } = "success";
+        public static string UserError { get; } = "userError";
+        public static string ServerError { get; } = "serverError";
+        public static string RuleError { get; } = "ruleError";
+
+        private static readonly List<string> resultTypes = new List<string>
+        {
+            Success,
+            UserError,
+            ServerError,
+            RuleError
+        };
+
+        public static bool IsValidAppActionResultType(this string resultType)
+        {
+            return resultType == null || resultTypes.Contains(resultType);
+        }
     }
 }

@@ -6,14 +6,14 @@ namespace GatheringStorm.Api.Models
     {
         public static string OpponentInvited { get; } = "opponentInvited";
 
-        private static List<string> dbStatusIds = new List<string>
+        private static readonly List<string> dbStatusIds = new List<string>
         {
             DB.InProgress,
             DB.Finished,
             OpponentInvited
         };
 
-        private static List<string> dtoStatusIds = new List<string>
+        private static readonly List<string> dtoStatusIds = new List<string>
         {
             Dto.YourTurn,
             Dto.OpponentTurn,

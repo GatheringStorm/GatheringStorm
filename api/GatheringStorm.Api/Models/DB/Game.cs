@@ -12,15 +12,12 @@ namespace GatheringStorm.Api.Models.DB
         public DateTime? EndDate { get; set; }
         public string Status
         {
-            get
-            {
-                return this.status;
-            }
+            get => this.status;
             set
             {
                 if (!value.IsValidGameStatusId(true))
                 {
-                    throw new ArgumentException("Value is not a valid gameStatusId", nameof(Status));
+                    throw new ArgumentException("Value is not a valid gameStatusId: " + value, nameof(Status));
                 }
                 this.status = value;
             }

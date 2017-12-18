@@ -15,10 +15,22 @@ namespace GatheringStorm.Api.Data
 
             modelBuilder.Entity<MoveTargetEntity>()
                 .HasKey(_ => new { _.EntityId, _.MoveId });
+
+            modelBuilder.Entity<User>()
+                .HasMany(_ => _.Participations)
+                .WithOne(_ => _.User)
+                .HasForeignKey(_ => _.Mail);
+
             modelBuilder.Entity<UserParticipation>()
                 .HasKey(_ => new { _.Mail, _.GameId });
+
             modelBuilder.Entity<ClassChoice>()
-                .HasKey(_ => _.ClassId);
+                .HasKey(_ => new { _.ClassId, _.GameId, _.Mail });
+
+            modelBuilder.Entity<UserParticipation>()
+                .HasMany(_ => _.ClassChoices)
+                .WithOne(_ => _.UserParticipation)
+                .HasForeignKey(_ => new { _.Mail, _.GameId });
         }
 
         public DbSet<Card> Cards { get; set; }

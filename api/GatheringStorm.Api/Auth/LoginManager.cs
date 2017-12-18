@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using GatheringStorm.Api.Data;
+using GatheringStorm.Api.Models;
 using GatheringStorm.Api.Models.DB;
 
 namespace GatheringStorm.Api.Auth
@@ -13,6 +14,7 @@ namespace GatheringStorm.Api.Auth
         User LoggedInUser { get; }
 
         Task SetLoggedInUser(string mail, CancellationToken cancellationToken = default(CancellationToken));
+        Task<AppResult<User>> FindUser(string mail, CancellationToken cancellationToken = default(CancellationToken));
     }
 
     public class LoginManager : ILoginManager
@@ -33,12 +35,20 @@ namespace GatheringStorm.Api.Auth
             {
                 user = new User
                 {
-                    Mail = mail
+                    Mail = mail.ToLower()
                 };
                 await this.dbContext.Users.AddAsync(user, cancellationToken);
                 await this.dbContext.SaveChangesAsync(cancellationToken);
             }
             this.LoggedInUser = user;
+        }
+
+        public async Task<AppResult<User>> FindUser(string mail, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var opponent = await this.dbContext.Users.FindAsync(new object[] { mail.ToLower() }, cancellationToken);
+            return opponent != null
+                ? AppResult<User>.Success(opponent)
+                : AppResult<User>.Error(AppActionResultType.UserError, $"User with email '{mail}' not found.");
         }
     }
 }
