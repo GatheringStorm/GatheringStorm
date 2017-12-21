@@ -73,41 +73,52 @@ namespace GatheringStorm.Api.Services
 
         public Task<AppResult<List<DtoGame>>> GetGames(CancellationToken cancellationToken = default(CancellationToken))
         {
-            return Task.FromResult(AppResult<List<DtoGame>>.Success(new List<DtoGame>
+            var currentPlayerMail = this.loginManager.LoggedInUser.Mail;
+            List<Game> games = this.dbContext.Games.Where(_ => _.UserParticipations.Any(x => x.Mail == currentPlayerMail)).ToList();
+            List<DtoGame> dtoGames = new List<DtoGame>();
+
+            foreach (Game game in games)
             {
-                new DtoGame
+                var opponentMail = game.UserParticipations.Where(_ => _.Mail != currentPlayerMail).Select(_ => _.Mail).ToString();
+
+                var newDtoGame = new DtoGame
                 {
                     Id = Guid.NewGuid(),
-                    CurrentPlayer = "opponent@gmail.com",
-                    BeginDate = DateTime.Now,
+                    CurrentPlayer = "x",    // How do I get the current player? Get move -> the one that didn't do the last move?
+                    BeginDate = game.BeginDate,
                     Player = new DtoPlayer
                     {
-                        Mail = "you@gmail.com",
+                        Mail = currentPlayerMail,
                         Class = new DtoClass
                         {
-                            Id = ClassTypes.Swift,
-                            Name = "Schnell"
+                            Id = "1", // obsolete?
+                            Name = game.UserParticipations.Where(_ => _.Mail == currentPlayerMail).Select(_ => _.ClassId).ToString()
                         }
                     },
                     Opponent = new DtoPlayer
                     {
-                        Mail = "opponent@gmail.com",
+                        Mail = opponentMail,
                         Class = new DtoClass
                         {
-                            Id = ClassTypes.Tank,
-                            Name = "Langsam"
+                            Id = "2",   // obsolete?
+                            Name = game.UserParticipations.Where(_ => _.Mail == opponentMail).Select(_ => _.ClassId).ToString()
                         }
                     }
-                }
-            }));
+                };
+                dtoGames.Add(newDtoGame);
+            }
+
+            return Task.FromResult(AppResult<List<DtoGame>>.Success(dtoGames));
         }
 
         public Task<AppResult<DtoBoard>> GetBoard(Guid gameId, CancellationToken cancellationToken = default(CancellationToken))
         {
+            Game game = this.dbContext.Games.Find(gameId);
+
             return Task.FromResult(AppResult<DtoBoard>.Success(new DtoBoard
             {
                 Id = Guid.NewGuid(),
-                CurrentPlayer = "you@gmail.com",
+                CurrentPlayer = "x",    // How do I get the current player? Get move -> the one that didn't do the last move?
                 PlayerHealth = 20,
                 OpponentHealth = 19,
                 PlayerHandCards = new List<DtoCard>
