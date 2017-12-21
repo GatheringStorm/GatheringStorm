@@ -4,5 +4,6 @@
     {
         public int StatModifiersCount { get; set; }
         public CardLocation CardLocation { get; set; }
+        public Card Card { get; set; }
     }
 }

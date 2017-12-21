@@ -24,5 +24,6 @@ namespace GatheringStorm.Api.Models.DB
         }
         public List<UserParticipation> UserParticipations { get; set; }
         public List<Move> Moves { get; set; }
+        public List<Entity> Entities { get; set; }
     }
 }

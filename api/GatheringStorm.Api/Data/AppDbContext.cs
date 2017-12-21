@@ -1,3 +1,6 @@
+using System.Threading;
+using System.Threading.Tasks;
+using GatheringStorm.Api.Models;
 using GatheringStorm.Api.Models.DB;
 using Microsoft.EntityFrameworkCore;
 
@@ -42,11 +45,20 @@ namespace GatheringStorm.Api.Data
         public DbSet<GameCard> GameCards { get; set; }
         public DbSet<Move> Moves { get; set; }
         public DbSet<MoveTargetEntity> MoveTargetEntities { get; set; }
-        public DbSet<MoveType> MoveTypes { get; set; }
+        // public DbSet<MoveType> MoveTypes { get; set; }
         public DbSet<Player> Players { get; set; }
         public DbSet<Title> Titles { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<UserParticipation> UserParitcipations { get; set; }
         public DbSet<ClassChoice> ClassChoices { get; set; }
+    }
+
+    public static class DbContextExtensions
+    {
+        public static async Task<AppResult<T>> FindEntity<T>(this DbSet<T> dbSet, object id, CancellationToken cancellationToken = default(CancellationToken))
+            where T : class
+        {
+            return AppResult<T>.Success(await dbSet.FindAsync(new object[] { id }, cancellationToken));
+        }
     }
 }

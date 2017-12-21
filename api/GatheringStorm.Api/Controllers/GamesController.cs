@@ -34,35 +34,35 @@ namespace GatheringStorm.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var result = await this.gamesService.GetGames().ConfigureAwait(false);
+            var result = await this.gamesService.GetGamesAsync().ConfigureAwait(false);
             return this.utility.GetActionResult(result);
         }
 
         [HttpGet("{gameId}/Board")]
         public async Task<IActionResult> GetBoard(Guid gameId)
         {
-            var result = await this.gamesService.GetBoard(gameId).ConfigureAwait(false);
+            var result = await this.gamesService.GetBoardAsync(gameId).ConfigureAwait(false);
             return this.utility.GetActionResult(result);
         }
 
         [HttpPost("{gameId}/EndTurn")]
         public async Task<IActionResult> EndTurn(Guid gameId)
         {
-            var result = await this.gamesService.EndTurn(gameId).ConfigureAwait(false);
+            var result = await this.gamesService.EndTurnAsync(gameId).ConfigureAwait(false);
             return this.utility.GetActionResult(result);
         }
 
         [HttpPost("{gameId}/PlayCard")]
         public async Task<IActionResult> PlayCard(Guid gameId, [FromBody] DtoPlayCardMove move)
         {
-            var result = await this.gamesService.PlayCard(gameId, move).ConfigureAwait(false);
+            var result = await this.gamesService.PlayCardAsync(gameId, move).ConfigureAwait(false);
             return this.utility.GetActionResult(result);
         }
 
         [HttpPost("{gameId}/Attack")]
         public async Task<IActionResult> PlayCard(Guid gameId, [FromBody] DtoAttackMove move)
         {
-            var result = await this.gamesService.Attack(gameId, move).ConfigureAwait(false);
+            var result = await this.gamesService.AttackAsync(gameId, move).ConfigureAwait(false);
             return this.utility.GetActionResult(result);
         }
     }

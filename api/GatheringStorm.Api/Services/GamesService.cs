@@ -8,17 +8,18 @@ using GatheringStorm.Api.Data;
 using GatheringStorm.Api.Models;
 using GatheringStorm.Api.Models.DB;
 using GatheringStorm.Api.Models.Dto;
+using Microsoft.EntityFrameworkCore;
 
 namespace GatheringStorm.Api.Services
 {
     public interface IGamesService
     {
         Task<VoidAppResult> StartNewGame(DtoNewGameInfo newGameInfo, CancellationToken cancellationToken = default(CancellationToken));
-        Task<AppResult<List<DtoGame>>> GetGames(CancellationToken cancellationToken = default(CancellationToken));
-        Task<AppResult<DtoBoard>> GetBoard(Guid gameId, CancellationToken cancellationToken = default(CancellationToken));
-        Task<VoidAppResult> EndTurn(Guid gameId, CancellationToken cancellationToken = default(CancellationToken));
-        Task<VoidAppResult> PlayCard(Guid gameId, DtoPlayCardMove move, CancellationToken cancellationToken = default(CancellationToken));
-        Task<VoidAppResult> Attack(Guid gameId, DtoAttackMove move, CancellationToken cancellationToken = default(CancellationToken));
+        Task<AppResult<List<DtoGame>>> GetGamesAsync(CancellationToken cancellationToken = default(CancellationToken));
+        Task<AppResult<DtoBoard>> GetBoardAsync(Guid gameId, CancellationToken cancellationToken = default(CancellationToken));
+        Task<VoidAppResult> EndTurnAsync(Guid gameId, CancellationToken cancellationToken = default(CancellationToken));
+        Task<VoidAppResult> PlayCardAsync(Guid gameId, DtoPlayCardMove move, CancellationToken cancellationToken = default(CancellationToken));
+        Task<VoidAppResult> AttackAsync(Guid gameId, DtoAttackMove move, CancellationToken cancellationToken = default(CancellationToken));
     }
 
     public class GamesService : IGamesService
@@ -36,7 +37,7 @@ namespace GatheringStorm.Api.Services
         {
             Console.WriteLine(this.loginManager.LoggedInUser.Mail);
 
-            var findOpponentResult = await this.loginManager.FindUser(newGameInfo.OpponentMail, cancellationToken);
+            var findOpponentResult = await this.dbContext.Users.FindEntity(newGameInfo.OpponentMail, cancellationToken);
             if (findOpponentResult.Result != AppActionResultType.Success)
             {
                 return findOpponentResult.GetVoidAppResult();
@@ -71,28 +72,30 @@ namespace GatheringStorm.Api.Services
             return VoidAppResult.Success();
         }
 
-        public Task<AppResult<List<DtoGame>>> GetGames(CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<AppResult<List<DtoGame>>> GetGamesAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
-            var currentPlayerMail = this.loginManager.LoggedInUser.Mail;
-            List<Game> games = this.dbContext.Games.Where(_ => _.UserParticipations.Any(x => x.Mail == currentPlayerMail)).ToList();
+            var loggedInUserMail = this.loginManager.LoggedInUser.Mail;
+            List<Game> games = await this.dbContext.Games.Where(_ => _.UserParticipations.Any(x => x.Mail == loggedInUserMail)).ToListAsync();
             List<DtoGame> dtoGames = new List<DtoGame>();
 
             foreach (Game game in games)
             {
-                var opponentMail = game.UserParticipations.Where(_ => _.Mail != currentPlayerMail).Select(_ => _.Mail).ToString();
+                var opponentMail = game.UserParticipations.Where(_ => _.Mail != loggedInUserMail).Select(_ => _.Mail).ToString();
+                var loggedInUserParticipation = game.UserParticipations.Single(_ => _.Mail == loggedInUserMail && _.GameId == game.Id);
+                var opponentParticipation = game.UserParticipations.Single(_ => _.Mail == opponentMail && _.GameId == game.Id);
 
                 var newDtoGame = new DtoGame
                 {
-                    Id = Guid.NewGuid(),
-                    CurrentPlayer = "x",    // How do I get the current player? Get move -> the one that didn't do the last move?
+                    Id = game.Id,
+                    CurrentPlayer = (await this.GetCurrentPlayer(game.Id, cancellationToken)).SuccessReturnValue.Mail,
                     BeginDate = game.BeginDate,
                     Player = new DtoPlayer
                     {
-                        Mail = currentPlayerMail,
+                        Mail = loggedInUserMail,
                         Class = new DtoClass
                         {
-                            Id = "1", // obsolete?
-                            Name = game.UserParticipations.Where(_ => _.Mail == currentPlayerMail).Select(_ => _.ClassId).ToString()
+                            Id = loggedInUserParticipation.ClassId,
+                            Name = "TODO"
                         }
                     },
                     Opponent = new DtoPlayer
@@ -100,22 +103,22 @@ namespace GatheringStorm.Api.Services
                         Mail = opponentMail,
                         Class = new DtoClass
                         {
-                            Id = "2",   // obsolete?
-                            Name = game.UserParticipations.Where(_ => _.Mail == opponentMail).Select(_ => _.ClassId).ToString()
+                            Id = opponentParticipation.ClassId,
+                            Name = "TODO"
                         }
                     }
                 };
                 dtoGames.Add(newDtoGame);
             }
 
-            return Task.FromResult(AppResult<List<DtoGame>>.Success(dtoGames));
+            return AppResult<List<DtoGame>>.Success(dtoGames);
         }
 
-        public Task<AppResult<DtoBoard>> GetBoard(Guid gameId, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<AppResult<DtoBoard>> GetBoardAsync(Guid gameId, CancellationToken cancellationToken = default(CancellationToken))
         {
-            Game game = this.dbContext.Games.Find(gameId);
+            var game = (await this.dbContext.Games.FindEntity(gameId, cancellationToken)).SuccessReturnValue;
 
-            return Task.FromResult(AppResult<DtoBoard>.Success(new DtoBoard
+            return AppResult<DtoBoard>.Success(new DtoBoard
             {
                 Id = Guid.NewGuid(),
                 CurrentPlayer = "x",    // How do I get the current player? Get move -> the one that didn't do the last move?
@@ -188,22 +191,88 @@ namespace GatheringStorm.Api.Services
                         }
                     }
                 }
-            }));
+            });
         }
 
-        public Task<VoidAppResult> EndTurn(Guid gameId, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<VoidAppResult> EndTurnAsync(Guid gameId, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return Task.FromResult(VoidAppResult.Success());
+            var game = (await this.dbContext.Games.FindEntity(gameId, cancellationToken)).SuccessReturnValue;
+            var move = new Move
+            {
+                Date = DateTime.Now,
+                Type = MoveTypes.EndTurn,
+                Game = game,
+                SourceEntity = game.Entities.Single(_ => _.User.Mail == this.loginManager.LoggedInUser.Mail 
+                    && _ is Player)
+            };
+
+            await this.dbContext.Moves.AddAsync(move, cancellationToken);
+            await this.dbContext.SaveChangesAsync(cancellationToken);
+
+            return VoidAppResult.Success();
         }
 
-        public Task<VoidAppResult> PlayCard(Guid gameId, DtoPlayCardMove move, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<VoidAppResult> PlayCardAsync(Guid gameId, DtoPlayCardMove move, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return Task.FromResult(VoidAppResult.Success());
+            var game = (await this.dbContext.Games.FindEntity(gameId, cancellationToken)).SuccessReturnValue;
+
+            // TODO
+
+            return VoidAppResult.Success();
         }
 
-        public Task<VoidAppResult> Attack(Guid gameId, DtoAttackMove move, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<VoidAppResult> AttackAsync(Guid gameId, DtoAttackMove move, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return Task.FromResult(VoidAppResult.Success());
+            var game = (await this.dbContext.Games.FindEntity(gameId, cancellationToken)).SuccessReturnValue;
+
+            var attacker = (await this.dbContext.GameCards.FindEntity(move.AttackerId, cancellationToken)).SuccessReturnValue;
+            var target = (await this.dbContext.GameCards.FindEntity(move.TargetId, cancellationToken)).SuccessReturnValue;
+
+            var dbMove = new Move
+            {
+                Date = DateTime.Now,
+                Game = game,
+                Type = MoveTypes.Attack,
+                SourceEntity = attacker,
+                TargetEntities = new List<MoveTargetEntity>
+                {
+                    new MoveTargetEntity
+                    {
+                        Entity = target
+                    }
+                }
+            };
+
+            target.Health -= attacker.Card.Attack + attacker.StatModifiersCount;
+            attacker.Health -= target.Card.Attack + target.StatModifiersCount;
+
+            if (attacker.Health <= 0)
+            {
+                attacker.CardLocation = null; // TODO: CardLocations string enum
+            }
+
+            if (target.Health <= 0)
+            {
+                target.CardLocation = null; // TODO: CardLocations string enum
+            }
+
+            await this.dbContext.Moves.AddAsync(dbMove, cancellationToken);
+            await this.dbContext.SaveChangesAsync(cancellationToken);
+
+            return VoidAppResult.Success();
+        }
+
+        private async Task<AppResult<User>> GetCurrentPlayer(Guid gameId, CancellationToken cancellationToken)
+        {
+            var lastEndTurn = (await this.dbContext.Moves.Where(_ => _.Type == MoveTypes.EndTurn && _.Game.Id == gameId)
+                .OrderByDescending(_ => _.Date)
+                .ToListAsync())
+                .Single();
+
+            var game = (await this.dbContext.Games.FindEntity(gameId, cancellationToken)).SuccessReturnValue;
+            var currentUser = game.UserParticipations.Single(_ => _.Mail != lastEndTurn.SourceEntity.User.Mail).User;
+
+            return AppResult<User>.Success(currentUser);
         }
     }
 }
