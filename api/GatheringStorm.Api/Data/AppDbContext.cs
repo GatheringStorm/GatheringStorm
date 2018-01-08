@@ -28,7 +28,7 @@ namespace GatheringStorm.Api.Data
                 .HasKey(_ => new { _.Mail, _.GameId });
 
             modelBuilder.Entity<ClassChoice>()
-                .HasKey(_ => new { _.ClassId, _.GameId, _.Mail });
+                .HasKey(_ => new { _.ClassType, _.GameId, _.Mail });
 
             modelBuilder.Entity<UserParticipation>()
                 .HasMany(_ => _.ClassChoices)

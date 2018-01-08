@@ -43,9 +43,9 @@ namespace GatheringStorm.Api.Services
                 return findOpponentResult.GetVoidAppResult();
             }
 
-            var choices = newGameInfo.ClassIds.Select((classId, index) => new ClassChoice
+            var choices = newGameInfo.ClassTypes.Select((classType, index) => new ClassChoice
             {
-                ClassId = classId,
+                ClassType = classType,
                 Priority = index + 1
             }).ToList();
             var newGame = new Game
@@ -92,20 +92,12 @@ namespace GatheringStorm.Api.Services
                     Player = new DtoPlayer
                     {
                         Mail = loggedInUserMail,
-                        Class = new DtoClass
-                        {
-                            Id = loggedInUserParticipation.ClassId,
-                            Name = "TODO"
-                        }
+                        ClassType = loggedInUserParticipation.ClassType
                     },
                     Opponent = new DtoPlayer
                     {
                         Mail = opponentMail,
-                        Class = new DtoClass
-                        {
-                            Id = opponentParticipation.ClassId,
-                            Name = "TODO"
-                        }
+                        ClassType = opponentParticipation.ClassType
                     }
                 };
                 dtoGames.Add(newDtoGame);
@@ -174,10 +166,7 @@ namespace GatheringStorm.Api.Services
                             }
                         }
                     },
-                    Class = new DtoClass
-                    {
-                        Id = ClassTypes.Medium
-                    }
+                    ClassType = ClassType.Medium
                 },
                 Opponent = new DtoBoardPlayer
                 {
@@ -207,10 +196,7 @@ namespace GatheringStorm.Api.Services
                             }
                         }
                     },
-                    Class = new DtoClass
-                    {
-                        Id = ClassTypes.Swift
-                    }
+                    ClassType = ClassType.Quick
                 }
             });
         }

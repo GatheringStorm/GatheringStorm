@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,6 +30,8 @@ namespace GatheringStorm.Api.Auth
 
         public async Task SetLoggedInUser(string mail, CancellationToken cancellationToken = default(CancellationToken))
         {
+            var users = dbContext.Users.ToList();
+            users.ForEach(_ => System.Console.WriteLine(_.Mail));
             var user = await dbContext.Users.FindAsync(mail.ToLower());
             if (user == null)
             {

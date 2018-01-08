@@ -5,8 +5,6 @@ namespace GatheringStorm.Api.Models.DB
 {
     public class Move
     {
-        private string moveType;
-
         public Guid Id { get; set; }
         public DateTime Date { get; set; }
         public MoveType Type { get; set; }

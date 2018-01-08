@@ -9,6 +9,6 @@ namespace GatheringStorm.Api.Models.DB
         public int Health { get; set; }
         public User User { get; set; }
         public List<MoveTargetEntity> TargetingMoves { get; set; }
-        public List<Game> Games { get; set; }
+        public Game Game { get; set; }
     }
 }
