@@ -221,7 +221,7 @@ namespace GatheringStorm.Api.Services
             var move = new Move
             {
                 Date = DateTime.Now,
-                Type = MoveTypes.EndTurn,
+                Type = MoveType.EndTurn,
                 Game = game,
                 SourceEntity = game.Entities.Single(_ => _.User.Mail == this.loginManager.LoggedInUser.Mail 
                     && _ is Player)
@@ -253,7 +253,7 @@ namespace GatheringStorm.Api.Services
             {
                 Date = DateTime.Now,
                 Game = game,
-                Type = MoveTypes.Attack,
+                Type = MoveType.Attack,
                 SourceEntity = attacker,
                 TargetEntities = new List<MoveTargetEntity>
                 {
@@ -286,7 +286,7 @@ namespace GatheringStorm.Api.Services
         private async Task<AppResult<User>> GetCurrentTurnPlayer(Guid gameId, CancellationToken cancellationToken)
         {
             var lastEndTurn = await this.dbContext.Moves
-                .Where(_ => _.Type == MoveTypes.EndTurn && _.Game.Id == gameId)
+                .Where(_ => _.Type == MoveType.EndTurn && _.Game.Id == gameId)
                 .OrderByDescending(_ => _.Date)
                 .SingleAsync();
 
