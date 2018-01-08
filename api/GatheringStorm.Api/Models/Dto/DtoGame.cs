@@ -7,7 +7,7 @@ namespace GatheringStorm.Api.Models.Dto
         private string status;
 
         public Guid Id { get; set; }
-        public string CurrentPlayer { get; set; }
+        public string CurrentTurnPlayer { get; set; }
         public DateTime BeginDate { get; set; }
         public DateTime EndDate { get; set; }
         public string Status

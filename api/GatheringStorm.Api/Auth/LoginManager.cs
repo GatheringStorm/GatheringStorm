@@ -29,7 +29,7 @@ namespace GatheringStorm.Api.Auth
 
         public async Task SetLoggedInUser(string mail, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var user = await dbContext.Users.FindAsync(mail);
+            var user = await dbContext.Users.FindAsync(mail.ToLower());
             if (user == null)
             {
                 user = new User

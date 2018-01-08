@@ -87,7 +87,7 @@ namespace GatheringStorm.Api.Services
                 var newDtoGame = new DtoGame
                 {
                     Id = game.Id,
-                    CurrentPlayer = (await this.GetCurrentPlayer(game.Id, cancellationToken)).SuccessReturnValue.Mail,
+                    CurrentTurnPlayer = (await this.GetCurrentTurnPlayer(game.Id, cancellationToken)).SuccessReturnValue.Mail,
                     BeginDate = game.BeginDate,
                     Player = new DtoPlayer
                     {
@@ -121,7 +121,7 @@ namespace GatheringStorm.Api.Services
             return AppResult<DtoBoard>.Success(new DtoBoard
             {
                 Id = Guid.NewGuid(),
-                CurrentPlayer = "x",    // How do I get the current player? Get move -> the one that didn't do the last move?
+                CurrentTurnPlayer = "x",    // How do I get the current player? Get move -> the one that didn't do the last move?
                 PlayerHealth = 20,
                 OpponentHealth = 19,
                 PlayerHandCards = new List<DtoCard>
@@ -262,12 +262,12 @@ namespace GatheringStorm.Api.Services
             return VoidAppResult.Success();
         }
 
-        private async Task<AppResult<User>> GetCurrentPlayer(Guid gameId, CancellationToken cancellationToken)
+        private async Task<AppResult<User>> GetCurrentTurnPlayer(Guid gameId, CancellationToken cancellationToken)
         {
-            var lastEndTurn = (await this.dbContext.Moves.Where(_ => _.Type == MoveTypes.EndTurn && _.Game.Id == gameId)
+            var lastEndTurn = await this.dbContext.Moves
+                .Where(_ => _.Type == MoveTypes.EndTurn && _.Game.Id == gameId)
                 .OrderByDescending(_ => _.Date)
-                .ToListAsync())
-                .Single();
+                .SingleAsync();
 
             var game = (await this.dbContext.Games.FindEntity(gameId, cancellationToken)).SuccessReturnValue;
             var currentUser = game.UserParticipations.Single(_ => _.Mail != lastEndTurn.SourceEntity.User.Mail).User;
