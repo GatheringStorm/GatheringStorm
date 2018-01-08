@@ -51,7 +51,7 @@ namespace GatheringStorm.Api.Services
             var newGame = new Game
             {
                 BeginDate = DateTime.Now,
-                Status = GameStatusIds.OpponentInvited,
+                Status = GameStatus.InvitePending,
                 UserParticipations = new List<UserParticipation>
                 {
                     new UserParticipation
@@ -80,6 +80,7 @@ namespace GatheringStorm.Api.Services
 
             foreach (Game game in games)
             {
+                var currentPlayerMail = (await this.GetCurrentTurnPlayer(game.Id, cancellationToken)).SuccessReturnValue.Mail;
                 var opponentMail = game.UserParticipations.Where(_ => _.Mail != loggedInUserMail).Select(_ => _.Mail).ToString();
                 var loggedInUserParticipation = game.UserParticipations.Single(_ => _.Mail == loggedInUserMail && _.GameId == game.Id);
                 var opponentParticipation = game.UserParticipations.Single(_ => _.Mail == opponentMail && _.GameId == game.Id);
@@ -87,8 +88,9 @@ namespace GatheringStorm.Api.Services
                 var newDtoGame = new DtoGame
                 {
                     Id = game.Id,
-                    CurrentTurnPlayer = (await this.GetCurrentTurnPlayer(game.Id, cancellationToken)).SuccessReturnValue.Mail,
+                    CurrentTurnPlayer = currentPlayerMail,
                     BeginDate = game.BeginDate,
+                    Status = DtoGameStatus.Lost, // TODO: Mapping in separate function
                     Player = new DtoPlayer
                     {
                         Mail = loggedInUserMail,
@@ -100,6 +102,7 @@ namespace GatheringStorm.Api.Services
                         ClassType = opponentParticipation.ClassType
                     }
                 };
+                
                 dtoGames.Add(newDtoGame);
             }
 
