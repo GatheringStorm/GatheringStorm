@@ -9,6 +9,7 @@ namespace GatheringStorm.Api.Models.Dto
         public string Name { get; set; }
         public string Title { get; set; }
         public int Cost { get; set; }
+        public bool CanAttack { get; set; }
         public int Attack { get; set; }
         public int Health { get; set; }
         public int StatsModifiersCount { get; set; }

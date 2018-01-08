@@ -122,8 +122,6 @@ namespace GatheringStorm.Api.Services
             {
                 Id = Guid.NewGuid(),
                 CurrentTurnPlayer = "x",    // How do I get the current player? Get move -> the one that didn't do the last move?
-                PlayerHealth = 20,
-                OpponentHealth = 19,
                 PlayerHandCards = new List<DtoCard>
                 {
                     new DtoCard
@@ -148,50 +146,70 @@ namespace GatheringStorm.Api.Services
                     }
                 },
                 OpponentHandCardsCount = 4,
-                PlayerBoardCards = new List<DtoCard>
+                Player = new DtoBoardPlayer
                 {
-                    new DtoCard
+                    Health = 20,
+                    Mail = "you@gmail.com",
+                    BoardCards = new List<DtoCard>
                     {
-                        Id = Guid.NewGuid(),
-                        Name = "Drahlget",
-                        Title = "The monk",
-                        Cost = 5,
-                        Attack = 3,
-                        Health = 1,
-                        StatsModifiersCount = 1,
-                        Effects = new List<DtoEffect>
+                        new DtoCard
                         {
-                            new DtoEffect
+                            Id = Guid.NewGuid(),
+                            Name = "Drahlget",
+                            Title = "The monk",
+                            Cost = 5,
+                            CanAttack = false,
+                            Attack = 3,
+                            Health = 1,
+                            StatsModifiersCount = 1,
+                            Effects = new List<DtoEffect>
                             {
-                                Id = Guid.NewGuid(),
-                                Name = "Buff cards",
-                                Description = "Give all cards with name 'Uni' +1/+1",
-                                TargetsCount = 0
+                                new DtoEffect
+                                {
+                                    Id = Guid.NewGuid(),
+                                    Name = "Buff cards",
+                                    Description = "Give all cards with name 'Uni' +1/+1",
+                                    TargetsCount = 0
+                                }
                             }
                         }
+                    },
+                    Class = new DtoClass
+                    {
+                        Id = ClassTypes.Medium
                     }
                 },
-                OpponentBoardCards = new List<DtoCard>
+                Opponent = new DtoBoardPlayer
                 {
-                    new DtoCard
+                    Health = 1,
+                    Mail = "xXTHE_EVILXx@gmail.com",
+                    BoardCards = new List<DtoCard>
                     {
-                        Id = Guid.NewGuid(),
-                        Name = "Drahlget",
-                        Title = "The monk",
-                        Cost = 2,
-                        Attack = 3,
-                        Health = 4,
-                        StatsModifiersCount = 1,
-                        Effects = new List<DtoEffect>
+                        new DtoCard
                         {
-                            new DtoEffect
+                            Id = Guid.NewGuid(),
+                            Name = "Drahlget",
+                            Title = "The monk",
+                            Cost = 5,
+                            CanAttack = true,
+                            Attack = 3,
+                            Health = 1,
+                            StatsModifiersCount = 1,
+                            Effects = new List<DtoEffect>
                             {
-                                Id = Guid.NewGuid(),
-                                Name = "Buff cards",
-                                Description = "Give all cards with name 'Uni' +1/+1",
-                                TargetsCount = 0
+                                new DtoEffect
+                                {
+                                    Id = Guid.NewGuid(),
+                                    Name = "Buff cards",
+                                    Description = "Give all cards with name 'Uni' +1/+1",
+                                    TargetsCount = 0
+                                }
                             }
                         }
+                    },
+                    Class = new DtoClass
+                    {
+                        Id = ClassTypes.Swift
                     }
                 }
             });

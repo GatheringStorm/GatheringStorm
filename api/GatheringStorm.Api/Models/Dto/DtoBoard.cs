@@ -7,11 +7,9 @@ namespace GatheringStorm.Api.Models.Dto
     {
         public Guid Id { get; set; }
         public string CurrentTurnPlayer { get; set; }
-        public int PlayerHealth { get; set; }
-        public int OpponentHealth { get; set; }
         public List<DtoCard> PlayerHandCards { get; set; }
         public int OpponentHandCardsCount { get; set; }
-        public List<DtoCard> PlayerBoardCards { get; set; }
-        public List<DtoCard> OpponentBoardCards { get; set; }
+        public DtoBoardPlayer Opponent { get; set; }
+        public DtoBoardPlayer Player { get; set; }
     }
 }
