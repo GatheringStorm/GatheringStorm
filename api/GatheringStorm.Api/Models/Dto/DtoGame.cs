@@ -9,14 +9,12 @@ namespace GatheringStorm.Api.Models.Dto
     {
         public Guid Id { get; set; }
         public string CurrentTurnPlayer { get; set; }
+        public string OpponentMail { get; set; }
         public DateTime BeginDate { get; set; }
         public DateTime EndDate { get; set; }
 
         [JsonConverter(typeof(StringEnumConverter), true)]
         public DtoGameStatus Status { get; set; }
-
-        public DtoPlayer Opponent { get; set; }
-        public DtoPlayer Player { get; set; }
     }
 
     public enum DtoGameStatus
