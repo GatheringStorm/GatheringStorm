@@ -15,6 +15,7 @@ namespace GatheringStorm.Api.Auth
         User LoggedInUser { get; }
 
         Task SetLoggedInUser(string mail, CancellationToken cancellationToken = default(CancellationToken));
+        Task<AppResult<User>> CreateUser(string mail, CancellationToken cancellationToken = default(CancellationToken));
     }
 
     public class LoginManager : ILoginManager
@@ -27,6 +28,16 @@ namespace GatheringStorm.Api.Auth
         }
 
         public User LoggedInUser { get; private set; }
+
+        public async Task<AppResult<User>> CreateUser(string mail, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var user = new User
+            {
+                Mail = mail
+            };
+            await this.dbContext.AddAsync(user, cancellationToken);
+            return AppResult<User>.Success(user);
+        }
 
         public async Task SetLoggedInUser(string mail, CancellationToken cancellationToken = default(CancellationToken))
         {

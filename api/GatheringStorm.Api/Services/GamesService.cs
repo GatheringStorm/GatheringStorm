@@ -40,7 +40,7 @@ namespace GatheringStorm.Api.Services
             var findOpponentResult = await this.dbContext.Users.FindEntity(newGameInfo.OpponentMail, cancellationToken);
             if (findOpponentResult.Result != AppActionResultType.Success)
             {
-                return findOpponentResult.GetVoidAppResult();
+                findOpponentResult = await this.loginManager.CreateUser(newGameInfo.OpponentMail, cancellationToken);
             }
 
             var choices = newGameInfo.ClassTypes.Select((classType, index) => new ClassChoice
