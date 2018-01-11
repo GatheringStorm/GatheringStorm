@@ -88,16 +88,16 @@ class GameSelectionCard extends React.Component {
           </div>
         </div >
         :
-        <table onClick={this.props.mode == "new" ? "" : this.play} className={this.createStyle()}>
+        <table onClick={this.play} className={this.createStyle()}>
           <tbody>
             <tr>
               <td>
-                <p>{this.props.mode == "new" ? "New Game" : this.props.email}</p>
+                <p>{this.props.email}</p>
               </td>
             </tr>
             <tr>
               <td>
-                {this.props.mode == "new" ? <input type="email" className="maxWidth" id="newEnemy" placeholder="email" /> : <p>Start: {this.props.date}</p>}
+                <p>Start: {this.props.date}</p>
               </td>
             </tr>
           </tbody>
