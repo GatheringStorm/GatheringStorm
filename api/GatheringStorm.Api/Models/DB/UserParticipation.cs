@@ -17,8 +17,11 @@ namespace GatheringStorm.Api.Models.DB
 
     public enum ClassType
     {
+        [EnumMember(Value = "quick")]
         Quick,
+        [EnumMember(Value = "medium")]
         Medium,
+        [EnumMember(Value = "slow")]
         Slow
     }
 }
