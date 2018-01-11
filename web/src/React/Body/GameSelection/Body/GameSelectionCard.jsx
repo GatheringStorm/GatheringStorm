@@ -13,11 +13,22 @@ class GameSelectionCard extends React.Component {
   }
 
   play() {
-    if (this.props.mode == "new") {
-      defaultWebAccess.startNewGame(document.getElementById("newEnemy").value)
-      return
-    }
     defaultWebAccess.getGame(this.props.email)
+    this.props.stateMachine.action(Action.STARTGAME);
+  }
+
+  createNewGame() {
+    let enemy = document.getElementById("enemy-email").value;
+    let prio = {
+      quick: document.getElementById("Quick-Prio").value,
+      medium: document.getElementById("Medium-Prio").value,
+      slow: document.getElementById("Slow-Prio").value
+    };
+
+    if (enemy == null || prio.quick == prio.medium || prio.quick == prio.slow || prio.medium == prio.slow || prio.quick + prio.medium + prio.slow != 6 || prio.quick == null || prio.medium == null || prio.slow == null); {
+      return
+    };
+    defaultWebAccess.startNewGame(enemy, prio);
     this.props.stateMachine.action(Action.STARTGAME);
   }
 
@@ -35,27 +46,63 @@ class GameSelectionCard extends React.Component {
 
   render() {
     return (
-      <table onClick={this.props.mode == "new" ? "" : this.play} className={this.createStyle()}>
-        <tbody>
-          <tr>
-            <td>
-              <p>{this.props.mode == "new" ? "New Game" : this.props.email}</p>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              {this.props.mode == "new" ? <input type="email" className="maxWidth" id="newEnemy" /> : <p>Start: {this.props.date}</p>}
-            </td>
-          </tr>
-          <tr>
-            <td>
-              {this.props.mode == "new" ?
-                <button className="maxWidth" onClick={this.play}>{this.props.mode == "new" ? "Start Game" : "Play"}</button> : null
-              }
-            </td>
-          </tr>
-        </tbody>
-      </table>)
+      this.props.mode == "new" ?
+        <div>
+          <button type="button" className="btn btn-primary" data-toggle="modal" data-target="#myModal">
+            Start new Game
+      </button>
+
+          <div className="modal fade" id="myModal" tabIndex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div className="modal-dialog" role="document">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title" id="exampleModalLabel">New Game</h5>
+                </div>
+                <div className="modal-body">
+                  <form>
+                    <div className="form-group">
+                      <label htmlFor="enemy-email" className="form-control-label">Enemy:</label>
+                      <input type="text" className="form-control" type="email" id="enemy-email" placeholder="example@example.com" />
+                    </div>
+                    <div className="spacer"></div>
+                    <div className="form-group">
+                      <label htmlFor="Quick-Prio" className="form-control-label">Priority Quick:</label>
+                      <input id="Quick-Prio" className="form-control" type="number" name="quantity" min="1" max="3" placeholder="1" />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="Medium-Prio" className="form-control-label">Priority Medium:</label>
+                      <input id="Medium-Prio" className="form-control" type="number" name="quantity" min="1" max="3" placeholder="2" />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="Slow-Prio" className="form-control-label">Priority Slow:</label>
+                      <input id="Slow-Prio" className="form-control" type="number" name="quantity" min="1" max="3" placeholder="3" />
+                    </div>
+                  </form>
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
+                  <button type="button" className="btn btn-primary" data-dismiss="modal" onClick={this.createNewGame}>Start Game</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div >
+        :
+        <table onClick={this.props.mode == "new" ? "" : this.play} className={this.createStyle()}>
+          <tbody>
+            <tr>
+              <td>
+                <p>{this.props.mode == "new" ? "New Game" : this.props.email}</p>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                {this.props.mode == "new" ? <input type="email" className="maxWidth" id="newEnemy" placeholder="email" /> : <p>Start: {this.props.date}</p>}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+    );
   }
 }
 

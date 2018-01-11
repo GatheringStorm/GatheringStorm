@@ -2,7 +2,7 @@ import {
     addNewLogMessage
 } from "./Log.js"
 
-const uRL = "http://localhost:5000/";
+const uRL = "http://localhost:5000/api/games/";
 
 class webAccess {
     handleResponse(response) {
@@ -12,9 +12,9 @@ class webAccess {
         return response;
     }
 
-    async sample(token, payload) {
+    async sample(urlAdd, token, payload) {
         try {
-            let response = await fetch(uRL, {
+            let response = await fetch(uRL + urlAdd, {
                 headers: {
                     "Authorization": token.token_type + " " + token.id_token,
                     "Accept": "application/josn",
@@ -153,7 +153,19 @@ class webAccess {
         }
     }
 
-    async startNewGame(email) {}
+    async startNewGame(email, prio, token) {
+        let classes = [];
+        classes[prio.quick - 1] = "quick";
+        classes[prio.medium - 1] = "medium";
+        classes[prio.slow - 1] = "slow";
+
+        let payload = {
+            "opponentMail": email,
+            "classTypes": classes
+        };
+
+        this.sample("New", token, payload);
+    }
 
     async getOpenGames() {
         return [{
