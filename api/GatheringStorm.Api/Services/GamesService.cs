@@ -88,7 +88,7 @@ namespace GatheringStorm.Api.Services
                     Id = game.Id,
                     CurrentTurnPlayer = currentPlayerMail,
                     BeginDate = game.BeginDate,
-                    Status = DtoGameStatus.Lost, // TODO: Mapping in separate function
+                    Status = MapGameStatus(game),//DtoGameStatus.Lost, // TODO: Mapping in separate function
                     OpponentMail = opponentMail
                 };
                 
@@ -96,6 +96,18 @@ namespace GatheringStorm.Api.Services
             }
 
             return AppResult<List<DtoGame>>.Success(dtoGames);
+        }
+        public DtoGameStatus MapGameStatus(Game game)
+        {
+            switch (game.Status)
+            {
+                case GameStatus.Finished:
+                    return DtoGameStatus.Lost; //|| DtoGameStatus.Won;
+                case GameStatus.InvitePending:
+                    return DtoGameStatus.InvitePending; //|| DtoGameStatus.Invited;
+                default:    //GameStatus.InProgress is default
+                    return DtoGameStatus.YourTurn; //|| DtoGameStatus.OpponentTurn;
+            }
         }
 
         public async Task<AppResult<DtoBoard>> GetBoardAsync(Guid gameId, CancellationToken cancellationToken = default(CancellationToken))
@@ -195,7 +207,7 @@ namespace GatheringStorm.Api.Services
 
         public async Task<VoidAppResult> EndTurnAsync(Guid gameId, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var game = (await this.dbContext.Games.FindEntity(gameId, cancellationToken)).SuccessReturnValue;
+            var game = (await this.dbContext.Games.FindEntity(gameId, cancellationToken)).SuccessReturnValue; //todo check if its own turn
             var move = new Move
             {
                 Date = DateTime.Now,
