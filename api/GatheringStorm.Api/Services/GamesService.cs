@@ -40,7 +40,7 @@ namespace GatheringStorm.Api.Services
             var findOpponentResult = await this.dbContext.Users.FindEntity(newGameInfo.OpponentMail, cancellationToken);
             if (findOpponentResult.Result != AppActionResultType.Success)
             {
-                return findOpponentResult.GetVoidAppResult();
+                findOpponentResult = await this.loginManager.CreateUser(newGameInfo.OpponentMail, cancellationToken);
             }
 
             var choices = newGameInfo.ClassTypes.Select((classType, index) => new ClassChoice
@@ -82,8 +82,6 @@ namespace GatheringStorm.Api.Services
             {
                 var currentPlayerMail = (await this.GetCurrentTurnPlayer(game.Id, cancellationToken)).SuccessReturnValue.Mail;
                 var opponentMail = game.UserParticipations.Where(_ => _.Mail != loggedInUserMail).Select(_ => _.Mail).ToString();
-                var loggedInUserParticipation = game.UserParticipations.Single(_ => _.Mail == loggedInUserMail && _.GameId == game.Id);
-                var opponentParticipation = game.UserParticipations.Single(_ => _.Mail == opponentMail && _.GameId == game.Id);
 
                 var newDtoGame = new DtoGame
                 {
@@ -91,16 +89,7 @@ namespace GatheringStorm.Api.Services
                     CurrentTurnPlayer = currentPlayerMail,
                     BeginDate = game.BeginDate,
                     Status = DtoGameStatus.Lost, // TODO: Mapping in separate function
-                    Player = new DtoPlayer
-                    {
-                        Mail = loggedInUserMail,
-                        ClassType = loggedInUserParticipation.ClassType
-                    },
-                    Opponent = new DtoPlayer
-                    {
-                        Mail = opponentMail,
-                        ClassType = opponentParticipation.ClassType
-                    }
+                    OpponentMail = opponentMail
                 };
                 
                 dtoGames.Add(newDtoGame);
