@@ -1,29 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Runtime.Serialization;
 using System.Text;
 
 namespace GatheringStorm.Api.Models
 {
     public abstract class AppResult
     {
-        private string result;
-
         public string ErrorMessage { get; protected set; }
 
-        public string Result
-        {
-            get => this.result;
-            protected set
-            {
-                if (!value.IsValidAppActionResultType())
-                {
-                    throw new ArgumentException("Value is not a valid appActionResultType: " + value, nameof(Result));
-                }
-
-                this.result = value;
-            }
-        }
+        public AppActionResultType Result { get; set; }
     }
 
     public class VoidAppResult : AppResult
@@ -40,7 +27,7 @@ namespace GatheringStorm.Api.Models
             };
         }
 
-        public static VoidAppResult Error(string result, string errorMessage)
+        public static VoidAppResult Error(AppActionResultType result, string errorMessage)
         {
             return new VoidAppResult
             {
@@ -65,7 +52,7 @@ namespace GatheringStorm.Api.Models
             };
         }
 
-        public static AppResult<T> Error(string result, string errorMessage)
+        public static AppResult<T> Error(AppActionResultType result, string errorMessage)
         {
             return new AppResult<T>
             {
@@ -84,24 +71,15 @@ namespace GatheringStorm.Api.Models
         public T SuccessReturnValue { get; protected set; }
     }
 
-    public static class AppActionResultType
+    public enum AppActionResultType
     {
-        public static string Success { get; } = "success";
-        public static string UserError { get; } = "userError";
-        public static string ServerError { get; } = "serverError";
-        public static string RuleError { get; } = "ruleError";
-
-        private static readonly List<string> resultTypes = new List<string>
-        {
-            Success,
-            UserError,
-            ServerError,
-            RuleError
-        };
-
-        public static bool IsValidAppActionResultType(this string resultType)
-        {
-            return resultType == null || resultTypes.Contains(resultType);
-        }
+        [EnumMember(Value = "success")]
+        Success,
+        [EnumMember(Value = "userError")]
+        UserError,
+        [EnumMember(Value = "serverError")]
+        ServerError,
+        [EnumMember(Value = "ruleError")]
+        RuleError
     }
 }

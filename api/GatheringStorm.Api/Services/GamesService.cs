@@ -100,35 +100,35 @@ namespace GatheringStorm.Api.Services
 
         public async Task<AppResult<DtoBoard>> GetBoardAsync(Guid gameId, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var game = (await this.dbContext.Games.FindEntity(gameId, cancellationToken)).SuccessReturnValue;
+            var gameResult = await this.dbContext.Games.FindEntity(gameId, cancellationToken);
+            if (gameResult.Result != AppActionResultType.Success)
+            {
+                return AppResult<DtoBoard>.Error(AppActionResultType.ServerError, "There was an error while loading game info.");
+            }
+            var game = gameResult.SuccessReturnValue;
+            if (game.UserParticipations.All(_ => _.Mail != this.loginManager.LoggedInUser.Mail)) 
+            {
+                return AppResult<DtoBoard>.Error(AppActionResultType.UserError, "This user is not part of this game.");
+            }
+
+            var opponent = game.UserParticipations.Single(_ => _.Mail != this.loginManager.LoggedInUser.Mail).User;
+
+            var currentTurnPlayerResult = await this.GetCurrentTurnPlayer(game.Id, cancellationToken);
+            if (currentTurnPlayerResult.Result != AppActionResultType.Success)
+            {
+                return AppResult<DtoBoard>.Error(AppActionResultType.ServerError, "There was an error while loading game info.");
+            }
+            var gameCards = game.Entities.Where(_ => _ is GameCard)
+                .Select(_ => _ as GameCard);
 
             return AppResult<DtoBoard>.Success(new DtoBoard
             {
-                Id = Guid.NewGuid(),
-                CurrentTurnPlayer = "x",    // How do I get the current player? Get move -> the one that didn't do the last move?
-                PlayerHandCards = new List<DtoCard>
+                Id = game.Id,
+                CurrentTurnPlayer = currentTurnPlayerResult.SuccessReturnValue.Mail,
+                PlayerHandCards = gameCards.Where(_ => _.User.Mail == this.loginManager.LoggedInUser.Mail).Select(_ => new DtoCard
                 {
-                    new DtoCard
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = "Drahlget",
-                        Title = "The monk",
-                        Cost = 2,
-                        Attack = 3,
-                        Health = 2,
-                        StatsModifiersCount = 1,
-                        Effects = new List<DtoEffect>
-                        {
-                            new DtoEffect
-                            {
-                                Id = Guid.NewGuid(),
-                                Name = "Buff cards",
-                                Description = "Give all cards with name 'Uni' +1/+1",
-                                TargetsCount = 0
-                            }
-                        }
-                    }
-                },
+                    
+                }).ToList(),
                 OpponentHandCardsCount = 4,
                 Player = new DtoBoardPlayer
                 {

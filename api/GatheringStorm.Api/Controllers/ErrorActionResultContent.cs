@@ -14,6 +14,6 @@ namespace GatheringStorm.Api.Controllers
         }
 
         public string ErrorMessage { get; }
-        public string Result { get; }
+        public AppActionResultType Result { get; }
     }
 }
