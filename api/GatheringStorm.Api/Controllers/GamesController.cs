@@ -31,6 +31,14 @@ namespace GatheringStorm.Api.Controllers
             return utility.GetActionResult(result);
         }
 
+        [HttpPost("Join")]
+        public async Task<IActionResult> JoinGame([FromBody] DtoJoinGameInfo joinGameInfo,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var result = await this.gamesService.JoinGame(joinGameInfo, cancellationToken).ConfigureAwait(false);
+            return utility.GetActionResult(result);
+        }
+
         [HttpGet]
         public async Task<IActionResult> Get()
         {

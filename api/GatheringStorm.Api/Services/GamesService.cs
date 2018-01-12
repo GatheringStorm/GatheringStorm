@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GatheringStorm.Api.Auth;
+using GatheringStorm.Api.Controllers;
 using GatheringStorm.Api.Data;
 using GatheringStorm.Api.Models;
 using GatheringStorm.Api.Models.DB;
@@ -15,6 +16,7 @@ namespace GatheringStorm.Api.Services
     public interface IGamesService
     {
         Task<VoidAppResult> StartNewGame(DtoNewGameInfo newGameInfo, CancellationToken cancellationToken = default(CancellationToken));
+        Task<VoidAppResult> JoinGame(DtoJoinGameInfo joinGameInfo, CancellationToken cancellationToken);
         Task<AppResult<List<DtoGame>>> GetGamesAsync(CancellationToken cancellationToken = default(CancellationToken));
         Task<AppResult<DtoBoard>> GetBoardAsync(Guid gameId, CancellationToken cancellationToken = default(CancellationToken));
         Task<VoidAppResult> EndTurnAsync(Guid gameId, CancellationToken cancellationToken = default(CancellationToken));
@@ -35,19 +37,13 @@ namespace GatheringStorm.Api.Services
 
         public async Task<VoidAppResult> StartNewGame(DtoNewGameInfo newGameInfo, CancellationToken cancellationToken = default(CancellationToken))
         {
-            Console.WriteLine(this.loginManager.LoggedInUser.Mail);
-
             var findOpponentResult = await this.dbContext.Users.FindEntity(newGameInfo.OpponentMail, cancellationToken);
             if (findOpponentResult.Result != AppActionResultType.Success)
             {
                 findOpponentResult = await this.loginManager.CreateUser(newGameInfo.OpponentMail, cancellationToken);
             }
 
-            var choices = newGameInfo.ClassTypes.Select((classType, index) => new ClassChoice
-            {
-                ClassType = classType,
-                Priority = index + 1
-            }).ToList();
+            var choices = ClassChoice.ChoicesFromClassTypes(newGameInfo.ClassTypes);
             var newGame = new Game
             {
                 BeginDate = DateTime.Now,
@@ -68,6 +64,49 @@ namespace GatheringStorm.Api.Services
 
             await this.dbContext.Games.AddAsync(newGame, cancellationToken);
             await this.dbContext.SaveChangesAsync(cancellationToken);
+
+            return VoidAppResult.Success();
+        }
+
+        public async Task<VoidAppResult> JoinGame(DtoJoinGameInfo joinGameInfo, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var gameResult = await this.dbContext.Games.FindEntity(joinGameInfo.GameId);
+            if (gameResult.Result != AppActionResultType.Success)
+            {
+                return VoidAppResult.Error(AppActionResultType.ServerError, "There was an error while loading game data.");
+            }
+            var game = gameResult.SuccessReturnValue;
+
+            game.Status = GameStatus.InProgress;
+            var playerParticipation = game.UserParticipations.Single(_ => _.Mail == this.loginManager.LoggedInUser.Mail);
+            var opponentParticipation = game.UserParticipations.Single(_ => _.Mail != this.loginManager.LoggedInUser.Mail);
+            playerParticipation.ClassChoices = ClassChoice.ChoicesFromClassTypes(joinGameInfo.ClassTypes);
+
+            var classTypesCount = Enum.GetValues(typeof(ClassType)).Length;
+            // Select first choice that was not identical
+            for(var i = 1; i <= classTypesCount; i++)
+            {
+                playerParticipation.ClassType = playerParticipation.ClassChoices.Single(_ => _.Priority == i).ClassType;
+                opponentParticipation.ClassType = opponentParticipation.ClassChoices.Single(_ => _.Priority == i).ClassType;
+
+                if (opponentParticipation != playerParticipation)
+                {
+                    break;
+                }
+            }
+            // If all choices were identical, select random class for both
+            if (playerParticipation.ClassType == opponentParticipation.ClassType)
+            {
+                var random = new Random();
+                do
+                {
+                    playerParticipation.ClassType = (ClassType) random.Next(classTypesCount);
+                    opponentParticipation.ClassType = (ClassType) random.Next(classTypesCount);
+                }
+                while (playerParticipation.ClassType == opponentParticipation.ClassType);
+            }
+
+            await dbContext.SaveChangesAsync();
 
             return VoidAppResult.Success();
         }
