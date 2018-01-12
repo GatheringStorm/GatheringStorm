@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using GatheringStorm.Api.Auth;
+using GatheringStorm.Api.Models;
 using GatheringStorm.Api.Models.DB;
 using GatheringStorm.Api.Models.Dto;
 using GatheringStorm.Api.Services;
@@ -24,6 +26,8 @@ namespace GatheringStorm.Api.Controllers
         }
 
         [HttpPost("New")]
+        [ProducesResponseType(typeof(VoidAppResult), 200)]
+        [ProducesResponseType(typeof(VoidAppResult), 400)]
         public async Task<IActionResult> StartNewGame([FromBody] DtoNewGameInfo newGameInfo,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -32,6 +36,8 @@ namespace GatheringStorm.Api.Controllers
         }
 
         [HttpPost("Join")]
+        [ProducesResponseType(typeof(VoidAppResult), 200)]
+        [ProducesResponseType(typeof(VoidAppResult), 400)]
         public async Task<IActionResult> JoinGame([FromBody] DtoJoinGameInfo joinGameInfo,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -40,6 +46,8 @@ namespace GatheringStorm.Api.Controllers
         }
 
         [HttpGet]
+        [ProducesResponseType(typeof(AppResult<List<DtoGame>>), 200)]
+        [ProducesResponseType(typeof(VoidAppResult), 400)]
         public async Task<IActionResult> Get()
         {
             var result = await this.gamesService.GetGamesAsync().ConfigureAwait(false);
@@ -47,6 +55,8 @@ namespace GatheringStorm.Api.Controllers
         }
 
         [HttpGet("{gameId}/Board")]
+        [ProducesResponseType(typeof(AppResult<DtoBoard>), 200)]
+        [ProducesResponseType(typeof(VoidAppResult), 400)]
         public async Task<IActionResult> GetBoard(Guid gameId)
         {
             var result = await this.gamesService.GetBoardAsync(gameId).ConfigureAwait(false);
@@ -54,6 +64,8 @@ namespace GatheringStorm.Api.Controllers
         }
 
         [HttpPost("{gameId}/EndTurn")]
+        [ProducesResponseType(typeof(VoidAppResult), 200)]
+        [ProducesResponseType(typeof(VoidAppResult), 400)]
         public async Task<IActionResult> EndTurn(Guid gameId)
         {
             var result = await this.gamesService.EndTurnAsync(gameId).ConfigureAwait(false);
@@ -61,6 +73,8 @@ namespace GatheringStorm.Api.Controllers
         }
 
         [HttpPost("{gameId}/PlayCard")]
+        [ProducesResponseType(typeof(VoidAppResult), 200)]
+        [ProducesResponseType(typeof(VoidAppResult), 400)]
         public async Task<IActionResult> PlayCard(Guid gameId, [FromBody] DtoPlayCardMove move)
         {
             var result = await this.gamesService.PlayCardAsync(gameId, move).ConfigureAwait(false);
@@ -68,6 +82,8 @@ namespace GatheringStorm.Api.Controllers
         }
 
         [HttpPost("{gameId}/Attack")]
+        [ProducesResponseType(typeof(VoidAppResult), 200)]
+        [ProducesResponseType(typeof(VoidAppResult), 400)]
         public async Task<IActionResult> Attack(Guid gameId, [FromBody] DtoAttackMove move)
         {
             var result = await this.gamesService.AttackAsync(gameId, move).ConfigureAwait(false);

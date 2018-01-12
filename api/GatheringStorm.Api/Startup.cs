@@ -14,6 +14,7 @@ using GatheringStorm.Api.Auth;
 using GatheringStorm.Api.Controllers;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace GatheringStorm.Api
 {
@@ -36,6 +37,11 @@ namespace GatheringStorm.Api
         {
             services.AddMvc();
 
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Info { Title = "GatheringStorm", Version = "v1" });
+            });
+
             var connString = Configuration["GatheringStormConnection"];
             services.AddDbContext<AppDbContext>(o => o.UseSqlServer(connString));
             services.AddTransient<IGamesService, GamesService>();
@@ -54,6 +60,12 @@ namespace GatheringStorm.Api
             dbContext.Database.EnsureCreated();
 
             app.UseMvc();
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "GatheringStorm v1");
+            });
         }
     }
 }
