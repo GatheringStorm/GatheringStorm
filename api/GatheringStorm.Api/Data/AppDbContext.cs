@@ -56,7 +56,15 @@ namespace GatheringStorm.Api.Data
         public static async Task<AppResult<T>> FindEntity<T>(this DbSet<T> dbSet, object id, CancellationToken cancellationToken = default(CancellationToken))
             where T : class
         {
-            return AppResult<T>.Success(await dbSet.FindAsync(new object[] { id }, cancellationToken));
+            var result = await dbSet.FindAsync(new object[] { id }, cancellationToken);
+            if (result != null)
+            {
+                return AppResult<T>.Success(result);
+            }
+            else
+            {
+                return VoidAppResult.Error(ErrorPreset.OnLoadingData).GetErrorAppResult<T>();
+            }
         }
     }
 }

@@ -29,11 +29,13 @@ namespace GatheringStorm.Api.Services
         private readonly ILoginManager loginManager;
         public readonly AppDbContext dbContext;
         private readonly IEffectsService effectsService;
+        private readonly ICardInitializerService cardInitializerService;
 
-        public GamesService(ILoginManager loginManager, AppDbContext dbContext, IEffectsService effectsService)
+        public GamesService(ILoginManager loginManager, AppDbContext dbContext, IEffectsService effectsService, ICardInitializerService cardInitializerService)
         {
             this.dbContext = dbContext;
             this.effectsService = effectsService;
+            this.cardInitializerService = cardInitializerService;
             this.loginManager = loginManager;
         }
 
@@ -66,8 +68,26 @@ namespace GatheringStorm.Api.Services
                     {
                         User = opponent
                     }
+                },
+                Entities = new List<Entity>
+                {
+                    new Player
+                    {
+                        Id = Guid.NewGuid(),
+                        Health = 20,
+                        User = this.loginManager.LoggedInUser
+                    },
+                    
+                    new Player
+                    {
+                        Id = Guid.NewGuid(),
+                        Health = 20,
+                        User = opponent
+                    }
                 }
             };
+
+            await this.cardInitializerService.InitializeGame(newGame);
 
             await this.dbContext.Games.AddAsync(newGame, cancellationToken);
             await this.dbContext.SaveChangesAsync(cancellationToken);
@@ -127,7 +147,7 @@ namespace GatheringStorm.Api.Services
             foreach (Game game in games)
             {
                 var currentPlayerMail = (await this.GetCurrentTurnPlayer(game.Id, cancellationToken)).SuccessReturnValue.Mail;
-                var opponentMail = game.UserParticipations.Where(_ => _.Mail != loggedInUserMail).Select(_ => _.Mail).ToString();
+                var opponentMail = game.UserParticipations.Single(_ => _.Mail != loggedInUserMail).User.Mail;
 
                 var newDtoGame = new DtoGame
                 {
@@ -252,7 +272,7 @@ namespace GatheringStorm.Api.Services
         }
 
         public async Task<VoidAppResult> EndTurn(Guid gameId, CancellationToken cancellationToken = default(CancellationToken))
-        {
+        {            
             var game = (await this.dbContext.Games.FindEntity(gameId, cancellationToken)).SuccessReturnValue; //todo check if its own turn
             var move = new Move
             {
@@ -376,12 +396,16 @@ namespace GatheringStorm.Api.Services
             var lastEndTurn = await this.dbContext.Moves
                 .Where(_ => _.Type == MoveType.EndTurn && _.Game.Id == gameId)
                 .OrderByDescending(_ => _.Date)
-                .SingleAsync();
+                .SingleOrDefaultAsync();
 
-            var game = (await this.dbContext.Games.FindEntity(gameId, cancellationToken)).SuccessReturnValue;
-            var currentUser = game.UserParticipations.Single(_ => _.Mail != lastEndTurn.SourceEntity.User.Mail).User;
+            var gameUserParticipations = this.dbContext.UserParitcipations.Where(_ => _.GameId == gameId);
 
-            return AppResult<User>.Success(currentUser);
+            if (lastEndTurn == null)
+            {
+                return AppResult<User>.Success(gameUserParticipations.OrderBy(_ => _.ClassType).First().User);
+            }
+
+            return AppResult<User>.Success(gameUserParticipations.Single(_ => _.Mail != lastEndTurn.SourceEntity.User.Mail).User);
         }
     }
 }

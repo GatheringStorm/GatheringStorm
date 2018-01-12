@@ -9,6 +9,7 @@ namespace GatheringStorm.Api.Models.DB
         public int Cost { get; set; }
         public int Attack { get; set; }
         public int BaseHealth { get; set; }
+        public bool IsLegendary { get; set; }
         public List<CardEffect> Effects { get; set; }
         public List<GameCard> GameCards { get; set; }
         public Title Title { get; set; }
