@@ -1,15 +1,6 @@
 namespace GatheringStorm.Api.Models.DB.Effects
 {
-    public class DestroyEffectParameters
+    public class DestroyEffectParameters : TargetingEffectParameters
     {
-        public TargetingType TargetingType { get; set; }
-        public object TargetParameter { get; set; }
-    }
-
-    public enum TargetingType
-    {
-        NumberOfTargets,
-        CharacterName,
-        Title
     }
 }

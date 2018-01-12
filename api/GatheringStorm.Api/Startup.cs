@@ -48,12 +48,13 @@ namespace GatheringStorm.Api
             services.AddTransient<IGamesService, GamesService>();
             services.AddTransient<IEffectsService, EffectsService>();
             services.AddTransient<IDestroyEffect, DestroyEffect>();
+            services.AddTransient<ICardInitializerService, CardInitializerService>();
             services.AddTransient<IControllerUtility, ControllerUtility>();
             services.AddScoped<ILoginManager, LoginManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, AppDbContext dbContext)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, AppDbContext dbContext, ICardInitializerService cardInitializer)
         {
             if (env.IsDevelopment())
             {
@@ -61,6 +62,7 @@ namespace GatheringStorm.Api
             }
 
             dbContext.Database.EnsureCreated();
+            Task.WaitAll(cardInitializer.InitializeCards());
 
             app.UseMvc();
 
