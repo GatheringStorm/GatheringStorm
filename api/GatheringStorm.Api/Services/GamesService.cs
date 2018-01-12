@@ -298,12 +298,12 @@ namespace GatheringStorm.Api.Services
 
             if (attacker.Health <= 0)
             {
-                attacker.CardLocation = null; // TODO: CardLocations string enum
+                attacker.CardLocation = CardLocation.OutOfPlay;
             }
 
             if (target.Health <= 0)
             {
-                target.CardLocation = null; // TODO: CardLocations string enum
+                target.CardLocation = CardLocation.OutOfPlay;
             }
 
             await this.dbContext.Moves.AddAsync(dbMove, cancellationToken);
