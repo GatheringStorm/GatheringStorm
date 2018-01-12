@@ -50,7 +50,7 @@ namespace GatheringStorm.Api.Controllers
         [ProducesResponseType(typeof(VoidAppResult), 400)]
         public async Task<IActionResult> Get()
         {
-            var result = await this.gamesService.GetGamesAsync().ConfigureAwait(false);
+            var result = await this.gamesService.GetGames().ConfigureAwait(false);
             return this.utility.GetActionResult(result);
         }
 
@@ -59,7 +59,7 @@ namespace GatheringStorm.Api.Controllers
         [ProducesResponseType(typeof(VoidAppResult), 400)]
         public async Task<IActionResult> GetBoard(Guid gameId)
         {
-            var result = await this.gamesService.GetBoardAsync(gameId).ConfigureAwait(false);
+            var result = await this.gamesService.GetBoard(gameId).ConfigureAwait(false);
             return this.utility.GetActionResult(result);
         }
 
@@ -68,7 +68,7 @@ namespace GatheringStorm.Api.Controllers
         [ProducesResponseType(typeof(VoidAppResult), 400)]
         public async Task<IActionResult> EndTurn(Guid gameId)
         {
-            var result = await this.gamesService.EndTurnAsync(gameId).ConfigureAwait(false);
+            var result = await this.gamesService.EndTurn(gameId).ConfigureAwait(false);
             return this.utility.GetActionResult(result);
         }
 
@@ -77,7 +77,7 @@ namespace GatheringStorm.Api.Controllers
         [ProducesResponseType(typeof(VoidAppResult), 400)]
         public async Task<IActionResult> PlayCard(Guid gameId, [FromBody] DtoPlayCardMove move)
         {
-            var result = await this.gamesService.PlayCardAsync(gameId, move).ConfigureAwait(false);
+            var result = await this.gamesService.PlayCard(gameId, move).ConfigureAwait(false);
             return this.utility.GetActionResult(result);
         }
 
@@ -86,7 +86,7 @@ namespace GatheringStorm.Api.Controllers
         [ProducesResponseType(typeof(VoidAppResult), 400)]
         public async Task<IActionResult> Attack(Guid gameId, [FromBody] DtoAttackMove move)
         {
-            var result = await this.gamesService.AttackAsync(gameId, move).ConfigureAwait(false);
+            var result = await this.gamesService.Attack(gameId, move).ConfigureAwait(false);
             return this.utility.GetActionResult(result);
         }
     }

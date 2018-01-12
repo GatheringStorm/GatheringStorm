@@ -17,11 +17,11 @@ namespace GatheringStorm.Api.Services
     {
         Task<VoidAppResult> StartNewGame(DtoNewGameInfo newGameInfo, CancellationToken cancellationToken = default(CancellationToken));
         Task<VoidAppResult> JoinGame(DtoJoinGameInfo joinGameInfo, CancellationToken cancellationToken);
-        Task<AppResult<List<DtoGame>>> GetGamesAsync(CancellationToken cancellationToken = default(CancellationToken));
-        Task<AppResult<DtoBoard>> GetBoardAsync(Guid gameId, CancellationToken cancellationToken = default(CancellationToken));
-        Task<VoidAppResult> EndTurnAsync(Guid gameId, CancellationToken cancellationToken = default(CancellationToken));
-        Task<VoidAppResult> PlayCardAsync(Guid gameId, DtoPlayCardMove move, CancellationToken cancellationToken = default(CancellationToken));
-        Task<VoidAppResult> AttackAsync(Guid gameId, DtoAttackMove move, CancellationToken cancellationToken = default(CancellationToken));
+        Task<AppResult<List<DtoGame>>> GetGames(CancellationToken cancellationToken = default(CancellationToken));
+        Task<AppResult<DtoBoard>> GetBoard(Guid gameId, CancellationToken cancellationToken = default(CancellationToken));
+        Task<VoidAppResult> EndTurn(Guid gameId, CancellationToken cancellationToken = default(CancellationToken));
+        Task<VoidAppResult> PlayCard(Guid gameId, DtoPlayCardMove move, CancellationToken cancellationToken = default(CancellationToken));
+        Task<VoidAppResult> Attack(Guid gameId, DtoAttackMove move, CancellationToken cancellationToken = default(CancellationToken));
     }
 
     public class GamesService : IGamesService
@@ -111,7 +111,7 @@ namespace GatheringStorm.Api.Services
             return VoidAppResult.Success();
         }
 
-        public async Task<AppResult<List<DtoGame>>> GetGamesAsync(CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<AppResult<List<DtoGame>>> GetGames(CancellationToken cancellationToken = default(CancellationToken))
         {
             var loggedInUserMail = this.loginManager.LoggedInUser.Mail;
             List<Game> games = await this.dbContext.Games.Where(_ => _.UserParticipations.Any(x => x.Mail == loggedInUserMail)).ToListAsync();
@@ -149,7 +149,7 @@ namespace GatheringStorm.Api.Services
             }
         }
 
-        public async Task<AppResult<DtoBoard>> GetBoardAsync(Guid gameId, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<AppResult<DtoBoard>> GetBoard(Guid gameId, CancellationToken cancellationToken = default(CancellationToken))
         {
             var game = (await this.dbContext.Games.FindEntity(gameId, cancellationToken)).SuccessReturnValue;
 
@@ -244,7 +244,7 @@ namespace GatheringStorm.Api.Services
             });
         }
 
-        public async Task<VoidAppResult> EndTurnAsync(Guid gameId, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<VoidAppResult> EndTurn(Guid gameId, CancellationToken cancellationToken = default(CancellationToken))
         {
             var game = (await this.dbContext.Games.FindEntity(gameId, cancellationToken)).SuccessReturnValue; //todo check if its own turn
             var move = new Move
@@ -262,7 +262,7 @@ namespace GatheringStorm.Api.Services
             return VoidAppResult.Success();
         }
 
-        public async Task<VoidAppResult> PlayCardAsync(Guid gameId, DtoPlayCardMove move, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<VoidAppResult> PlayCard(Guid gameId, DtoPlayCardMove move, CancellationToken cancellationToken = default(CancellationToken))
         {
             var game = (await this.dbContext.Games.FindEntity(gameId, cancellationToken)).SuccessReturnValue;
 
@@ -271,7 +271,7 @@ namespace GatheringStorm.Api.Services
             return VoidAppResult.Success();
         }
 
-        public async Task<VoidAppResult> AttackAsync(Guid gameId, DtoAttackMove move, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<VoidAppResult> Attack(Guid gameId, DtoAttackMove move, CancellationToken cancellationToken = default(CancellationToken))
         {
             var game = (await this.dbContext.Games.FindEntity(gameId, cancellationToken)).SuccessReturnValue;
 
