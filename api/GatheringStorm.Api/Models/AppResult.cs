@@ -32,6 +32,15 @@ namespace GatheringStorm.Api.Models
         {
         }
 
+        public AppResult<T> GetErrorAppResult<T>()
+        {
+            if (this.Result == AppActionResultType.Success)
+            {
+                return AppResult<T>.Error(AppActionResultType.ServerError, "Error when converting AppResult.");
+            }
+            return AppResult<T>.Error(this.Result, this.ErrorMessage);
+        }
+
         public static VoidAppResult Success()
         {
             return new VoidAppResult
@@ -57,17 +66,12 @@ namespace GatheringStorm.Api.Models
                     return VoidAppResult.Error(AppActionResultType.UserError, "It's not your turn.");
                 case ErrorPreset.NotAParticipant:
                     return VoidAppResult.Error(AppActionResultType.UserError, "You are not a participant of this game.");
+                case ErrorPreset.InvalidTargets:
+                    return VoidAppResult.Error(AppActionResultType.UserError, "Some of the targets were invalid targets.");
                 default: // OnLoadingData
                     return VoidAppResult.Error(AppActionResultType.ServerError, "There was an error while loading game data.");   
             }
         }
-    }
-
-    public enum ErrorPreset
-    {
-        NotAParticipant,
-        NotYourTurn,
-        OnLoadingData
     }
 
     public class AppResult<T> : AppResult
@@ -102,6 +106,14 @@ namespace GatheringStorm.Api.Models
         }
 
         public T SuccessReturnValue { get; protected set; }
+    }
+
+    public enum ErrorPreset
+    {
+        OnLoadingData,
+        NotYourTurn,
+        NotAParticipant,
+        InvalidTargets
     }
 
     public static class AppActionResultType

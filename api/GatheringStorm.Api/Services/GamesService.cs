@@ -287,7 +287,7 @@ namespace GatheringStorm.Api.Services
             var playedGameCard = game.Entities.SingleOrDefault(_ => _.Id == move.CardId) as GameCard;
             if (playedGameCard == null || playedGameCard.CardLocation != CardLocation.Hand)
             {
-                return VoidAppResult.Error(AppActionResultType.UserError, "Selected card cannot be played.");
+                return VoidAppResult.Error(AppActionResultType.RuleError, "Selected card cannot be played.");
             }
 
             if (currentTurnPlayer.Mail != this.loginManager.LoggedInUser.Mail)
@@ -303,14 +303,14 @@ namespace GatheringStorm.Api.Services
             // Discard cards
             if (playedGameCard.Card.Cost != move.DiscardedCardIds.Count)
             {
-                return VoidAppResult.Error(AppActionResultType.UserError, $"You must discard exactly {playedGameCard.Card.Cost} cards.");
+                return VoidAppResult.Error(AppActionResultType.RuleError, $"You must discard exactly {playedGameCard.Card.Cost} cards.");
             }
             foreach (var entityId in move.DiscardedCardIds)
             {
                 var gameCard = game.Entities.SingleOrDefault(_ => _.Id == entityId) as GameCard;
                 if (gameCard == null || gameCard.CardLocation != CardLocation.Hand)
                 {
-                    return VoidAppResult.Error(AppActionResultType.UserError, "The selected card cannot be discarded.");
+                    return VoidAppResult.Error(AppActionResultType.RuleError, "The selected card cannot be discarded.");
                 }
                 gameCard.CardLocation = CardLocation.OutOfPlay;
             }

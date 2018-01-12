@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -36,21 +37,27 @@ namespace GatheringStorm.Api.Services.Effects
 
             var parameters = JsonConvert.DeserializeObject<DestroyEffectParameters>(cardEffect.EffectParameters);
 
-            List<GameCard> targets;
+            AppResult<List<GameCard>> targetsResult;
             switch(parameters.TargetingType)
             {
-                default: // TODO other cases
-                case TargetingType.NumberOfTargets:
-                    targets = game.Entities
-                        .Where(_ => effect.TargetIds.Contains(_.Id))
-                        .Select(_ => _ as GameCard)
-                        .Where(_ => _.CardLocation == CardLocation.Board)
-                        .ToList();
-                    if (targets.Count != effect.TargetIds.Count)
-                    {
-                        return VoidAppResult.Error(AppActionResultType.UserError, "Some of the targets were invalid targets.");
-                    }
+                case TargetingType.Title:
+                    targetsResult = this.GetTargetsByTitle(effect, parameters, game);
                     break;
+                case TargetingType.CharacterName:
+                    targetsResult = this.GetTargetsByCharacterName(effect, parameters, game);
+                    break;
+                default: // TargetingType.NumberOfTargets
+                    targetsResult = this.GetTargetsByIds(effect, parameters, game);
+                    break;
+            }
+            if (targetsResult.Result != AppActionResultType.Success)
+            {
+                return targetsResult.GetVoidAppResult();
+            }
+            var targets = targetsResult.SuccessReturnValue;
+            if (targets.Any(_ => _.CardLocation != CardLocation.Board))
+            {
+                return VoidAppResult.Error(ErrorPreset.InvalidTargets);
             }
 
             foreach (var target in targets)
@@ -59,6 +66,49 @@ namespace GatheringStorm.Api.Services.Effects
             }
 
             throw new System.NotImplementedException();
+        }
+
+        private AppResult<List<GameCard>> GetTargetsByIds(DtoEffectTargets effect, DestroyEffectParameters parameters, Game game)
+        {
+            var targetsCount = Convert.ToInt32(parameters.TargetParameter);
+            if (targetsCount != effect.TargetIds.Count)
+            {
+                return AppResult<List<GameCard>>.Error(AppActionResultType.RuleError, $"You must choose exactly {targetsCount} targets to destroy.");
+            }
+            var targets = game.Entities
+                .Where(_ => effect.TargetIds.Contains(_.Id))
+                .Select(_ => _ as GameCard)
+                .ToList();
+            if (targets.Count != effect.TargetIds.Count)
+            {
+                return VoidAppResult.Error(ErrorPreset.InvalidTargets).GetErrorAppResult<List<GameCard>>();
+            }
+
+            return AppResult<List<GameCard>>.Success(targets);
+        }
+
+        private AppResult<List<GameCard>> GetTargetsByTitle(DtoEffectTargets effect, DestroyEffectParameters parameters, Game game)
+        {
+            var title = parameters.TargetParameter.ToString();
+
+            var targets = game.Entities
+                .Select(_ => _ as GameCard)
+                .Where(_ => _ != null && _.Card.Title.Name == title)
+                .ToList();
+
+            return AppResult<List<GameCard>>.Success(targets);
+        }
+
+        private AppResult<List<GameCard>> GetTargetsByCharacterName(DtoEffectTargets effect, DestroyEffectParameters parameters, Game game)
+        {
+            var name = parameters.TargetParameter.ToString();
+
+            var targets = game.Entities
+                .Select(_ => _ as GameCard)
+                .Where(_ => _ != null && _.Card.Character.Name == name)
+                .ToList();
+
+            return AppResult<List<GameCard>>.Success(targets);
         }
     }
 }
