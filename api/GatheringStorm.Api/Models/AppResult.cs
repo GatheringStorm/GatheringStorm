@@ -48,6 +48,26 @@ namespace GatheringStorm.Api.Models
                 ErrorMessage = errorMessage
             };
         }
+
+        public static VoidAppResult Error(ErrorPreset errorPreset)
+        {
+            switch (errorPreset)
+            {
+                case ErrorPreset.NotYourTurn:
+                    return VoidAppResult.Error(AppActionResultType.UserError, "It's not your turn.");
+                case ErrorPreset.NotAParticipant:
+                    return VoidAppResult.Error(AppActionResultType.UserError, "You are not a participant of this game.");
+                default: // OnLoadingData
+                    return VoidAppResult.Error(AppActionResultType.ServerError, "There was an error while loading game data.");   
+            }
+        }
+    }
+
+    public enum ErrorPreset
+    {
+        NotAParticipant,
+        NotYourTurn,
+        OnLoadingData
     }
 
     public class AppResult<T> : AppResult

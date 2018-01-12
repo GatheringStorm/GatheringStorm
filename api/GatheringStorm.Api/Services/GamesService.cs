@@ -28,10 +28,12 @@ namespace GatheringStorm.Api.Services
     {
         private readonly ILoginManager loginManager;
         public readonly AppDbContext dbContext;
+        private readonly IEffectsService effectsService;
 
-        public GamesService(ILoginManager loginManager, AppDbContext dbContext)
+        public GamesService(ILoginManager loginManager, AppDbContext dbContext, IEffectsService effectsService)
         {
             this.dbContext = dbContext;
+            this.effectsService = effectsService;
             this.loginManager = loginManager;
         }
 
@@ -42,6 +44,11 @@ namespace GatheringStorm.Api.Services
             {
                 findOpponentResult = await this.loginManager.CreateUser(newGameInfo.OpponentMail, cancellationToken);
             }
+            if (findOpponentResult.Result != AppActionResultType.Success)
+            {
+                return findOpponentResult.GetVoidAppResult();
+            }
+            var opponent = findOpponentResult.SuccessReturnValue;
 
             var choices = ClassChoice.ChoicesFromClassTypes(newGameInfo.ClassTypes);
             var newGame = new Game
@@ -57,7 +64,7 @@ namespace GatheringStorm.Api.Services
                     },
                     new UserParticipation
                     {
-                        User = findOpponentResult.SuccessReturnValue
+                        User = opponent
                     }
                 }
             };
@@ -73,7 +80,7 @@ namespace GatheringStorm.Api.Services
             var gameResult = await this.dbContext.Games.FindEntity(joinGameInfo.GameId);
             if (gameResult.Result != AppActionResultType.Success)
             {
-                return VoidAppResult.Error(AppActionResultType.ServerError, "There was an error while loading game data.");
+                return gameResult.GetVoidAppResult();
             }
             var game = gameResult.SuccessReturnValue;
 
@@ -84,7 +91,7 @@ namespace GatheringStorm.Api.Services
 
             var classTypesCount = Enum.GetValues(typeof(ClassType)).Length;
             // Select first choice that was not identical
-            for(var i = 1; i <= classTypesCount; i++)
+            for (var i = 1; i <= classTypesCount; i++)
             {
                 playerParticipation.ClassType = playerParticipation.ClassChoices.Single(_ => _.Priority == i).ClassType;
                 opponentParticipation.ClassType = opponentParticipation.ClassChoices.Single(_ => _.Priority == i).ClassType;
@@ -100,8 +107,8 @@ namespace GatheringStorm.Api.Services
                 var random = new Random();
                 do
                 {
-                    playerParticipation.ClassType = (ClassType) random.Next(classTypesCount);
-                    opponentParticipation.ClassType = (ClassType) random.Next(classTypesCount);
+                    playerParticipation.ClassType = (ClassType)random.Next(classTypesCount);
+                    opponentParticipation.ClassType = (ClassType)random.Next(classTypesCount);
                 }
                 while (playerParticipation.ClassType == opponentParticipation.ClassType);
             }
@@ -130,7 +137,7 @@ namespace GatheringStorm.Api.Services
                     Status = MapGameStatus(game),//DtoGameStatus.Lost, // TODO: Mapping in separate function
                     OpponentMail = opponentMail
                 };
-                
+
                 dtoGames.Add(newDtoGame);
             }
 
@@ -252,7 +259,7 @@ namespace GatheringStorm.Api.Services
                 Date = DateTime.Now,
                 Type = MoveType.EndTurn,
                 Game = game,
-                SourceEntity = game.Entities.Single(_ => _.User.Mail == this.loginManager.LoggedInUser.Mail 
+                SourceEntity = game.Entities.Single(_ => _.User.Mail == this.loginManager.LoggedInUser.Mail
                     && _ is Player)
             };
 
@@ -264,9 +271,61 @@ namespace GatheringStorm.Api.Services
 
         public async Task<VoidAppResult> PlayCard(Guid gameId, DtoPlayCardMove move, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var game = (await this.dbContext.Games.FindEntity(gameId, cancellationToken)).SuccessReturnValue;
+            var gameResult = await this.dbContext.Games.FindEntity(gameId, cancellationToken);
+            var currentTurnPlayerResult = await this.GetCurrentTurnPlayer(gameId, cancellationToken);
+            if (gameResult.Result != AppActionResultType.Success)
+            {
+                return gameResult.GetVoidAppResult();
+            }
+            if (currentTurnPlayerResult.Result != AppActionResultType.Success)
+            {
+                return currentTurnPlayerResult.GetVoidAppResult();
+            }
+            var game = gameResult.SuccessReturnValue;
+            var currentTurnPlayer = currentTurnPlayerResult.SuccessReturnValue;
 
-            // TODO
+            var playedGameCard = game.Entities.SingleOrDefault(_ => _.Id == move.CardId) as GameCard;
+            if (playedGameCard == null || playedGameCard.CardLocation != CardLocation.Hand)
+            {
+                return VoidAppResult.Error(AppActionResultType.UserError, "Selected card cannot be played.");
+            }
+
+            if (currentTurnPlayer.Mail != this.loginManager.LoggedInUser.Mail)
+            {
+                return VoidAppResult.Error(ErrorPreset.NotYourTurn);
+            }
+
+            if (game.UserParticipations.All(_ => _.Mail != this.loginManager.LoggedInUser.Mail))
+            {
+                return VoidAppResult.Error(ErrorPreset.NotAParticipant);
+            }
+
+            // Discard cards
+            if (playedGameCard.Card.Cost != move.DiscardedCardIds.Count)
+            {
+                return VoidAppResult.Error(AppActionResultType.UserError, $"You must discard exactly {playedGameCard.Card.Cost} cards.");
+            }
+            foreach (var entityId in move.DiscardedCardIds)
+            {
+                var gameCard = game.Entities.SingleOrDefault(_ => _.Id == entityId) as GameCard;
+                if (gameCard == null || gameCard.CardLocation != CardLocation.Hand)
+                {
+                    return VoidAppResult.Error(AppActionResultType.UserError, "The selected card cannot be discarded.");
+                }
+                gameCard.CardLocation = CardLocation.OutOfPlay;
+            }
+
+            // Execute effects
+            foreach(var effect in move.EffectTargets)
+            {
+                var executeEffectResult = await this.effectsService.ExecuteEffect(effect, game, currentTurnPlayer, cancellationToken);
+                if (executeEffectResult.Result != AppActionResultType.Success)
+                {
+                    return executeEffectResult;
+                }
+            }
+
+            await dbContext.SaveChangesAsync(cancellationToken);
 
             return VoidAppResult.Success();
         }

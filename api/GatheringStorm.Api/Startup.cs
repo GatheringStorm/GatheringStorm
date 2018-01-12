@@ -15,6 +15,7 @@ using GatheringStorm.Api.Controllers;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Swashbuckle.AspNetCore.Swagger;
+using GatheringStorm.Api.Services.Effects;
 
 namespace GatheringStorm.Api
 {
@@ -45,6 +46,8 @@ namespace GatheringStorm.Api
             var connString = Configuration["GatheringStormConnection"];
             services.AddDbContext<AppDbContext>(o => o.UseSqlServer(connString));
             services.AddTransient<IGamesService, GamesService>();
+            services.AddTransient<IEffectsService, EffectsService>();
+            services.AddTransient<IDestroyEffect, DestroyEffect>();
             services.AddTransient<IControllerUtility, ControllerUtility>();
             services.AddScoped<ILoginManager, LoginManager>();
         }

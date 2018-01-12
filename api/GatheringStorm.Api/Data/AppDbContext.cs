@@ -40,7 +40,6 @@ namespace GatheringStorm.Api.Data
         public DbSet<CardEffect> CardEffects { get; set; }
         public DbSet<Character> Characters { get; set; }
         public DbSet<ClassChoice> ClassChoices { get; set; }
-        public DbSet<Effect> Effects { get; set; }
         public DbSet<Entity> Entities { get; set; }
         public DbSet<Game> Games { get; set; }
         public DbSet<GameCard> GameCards { get; set; }
