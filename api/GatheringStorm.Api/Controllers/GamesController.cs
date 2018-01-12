@@ -68,7 +68,7 @@ namespace GatheringStorm.Api.Controllers
         }
 
         [HttpPost("{gameId}/Attack")]
-        public async Task<IActionResult> PlayCard(Guid gameId, [FromBody] DtoAttackMove move)
+        public async Task<IActionResult> Attack(Guid gameId, [FromBody] DtoAttackMove move)
         {
             var result = await this.gamesService.AttackAsync(gameId, move).ConfigureAwait(false);
             return this.utility.GetActionResult(result);
