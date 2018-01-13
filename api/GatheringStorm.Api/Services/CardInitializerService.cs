@@ -14,11 +14,13 @@ namespace GatheringStorm.Api.Services
     {
         Task<VoidAppResult> InitializeCards();
         Task<VoidAppResult> InitializeGame(Game game);
+        Task<AppResult<GameCard>> GenerateStormling(User user);
     }
 
     public class CardInitializerService : ICardInitializerService
     {
         private readonly AppDbContext dbContext;
+        private static readonly Guid StormlingId = Guid.Parse("TEMP");
 
         public CardInitializerService(AppDbContext dbContext)
         {
@@ -138,6 +140,26 @@ namespace GatheringStorm.Api.Services
             }
 
             return VoidAppResult.Success();
+        }
+
+        public async Task<AppResult<GameCard>> GenerateStormling(User user)
+        {
+            var cardResult = await this.dbContext.Cards.FindEntity(Guid.Parse("TEMP"));
+            if (cardResult.Result != AppActionResultType.Success)
+            {
+                return cardResult.GetVoidAppResult().GetErrorAppResult<GameCard>();
+            }
+
+            var card = cardResult.SuccessReturnValue;
+            var stormling = new GameCard
+            {
+                Id = Guid.NewGuid(),
+                Health = card.BaseHealth,
+                Card = card,
+                CardLocation = CardLocation.Board,
+                User = user
+            };
+            return AppResult<GameCard>.Success(stormling);
         }
 
         private async Task<AppResult<List<GameCard>>> CreateGameCard(Guid cardId, User user, int duplicatesCount)

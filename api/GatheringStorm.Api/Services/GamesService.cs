@@ -133,6 +133,37 @@ namespace GatheringStorm.Api.Services
                 while (playerParticipation.ClassType == opponentParticipation.ClassType);
             }
 
+            // Add class bonuses
+            switch(playerParticipation.ClassType)
+            {
+                case ClassType.Medium:
+                    var drawResult = await this.DrawCard(game, playerParticipation.Mail);
+                    if (drawResult.Result != AppActionResultType.Success)
+                    {
+                        return drawResult;
+                    }
+                    break;
+                case ClassType.Slow:
+                    var stormlingResult = await this.cardInitializerService.GenerateStormling(playerParticipation.User);
+                    if (stormlingResult.Result != AppActionResultType.Success)
+                    {
+                        return stormlingResult.GetVoidAppResult();
+                    }
+                    game.Entities.Add(stormlingResult.SuccessReturnValue);
+                    break;
+            }
+
+            var currentTurnPlayerResult = await this.GetCurrentTurnPlayer(game.Id, cancellationToken);
+            if (currentTurnPlayerResult.Result != AppActionResultType.Success)
+            {
+                return currentTurnPlayerResult.GetVoidAppResult();
+            }
+            var drawCardResult = await this.DrawCard(game, currentTurnPlayerResult.SuccessReturnValue.Mail);
+            if (drawCardResult.Result != AppActionResultType.Success)
+            {
+                return drawCardResult;
+            }
+
             await dbContext.SaveChangesAsync();
 
             return VoidAppResult.Success();
@@ -370,6 +401,16 @@ namespace GatheringStorm.Api.Services
             await this.dbContext.SaveChangesAsync(cancellationToken);
 
             return VoidAppResult.Success();
+        }
+
+        private Task<VoidAppResult> DrawCard(Game game, string userMail)
+        {
+            var cards = game.Entities.Select(_ => _ as GameCard)
+                                    .Where(_ => _ != null && _.User.Mail == userMail && _.CardLocation == CardLocation.Cellar)
+                                    .ToList();
+            var drawnCardIndex = new Random().Next(cards.Count());
+            cards[drawnCardIndex].CardLocation = CardLocation.Hand;
+            return Task.FromResult(VoidAppResult.Success());
         }
 
         private async Task<AppResult<List<DtoCard>>> GetDtoCardsFromGameCards(List<GameCard> gameCards)
