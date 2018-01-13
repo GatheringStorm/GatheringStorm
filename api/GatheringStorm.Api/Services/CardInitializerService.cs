@@ -110,6 +110,7 @@ namespace GatheringStorm.Api.Services
         {
             foreach (var participation in game.UserParticipations)
             {
+                var cards = new List<GameCard>();
                 foreach (var card in this.dbContext.Cards)
                 {
                     var cardResult = await this.CreateGameCard(card.Id, participation.User, card.IsLegendary ? 1 : 7);
@@ -118,7 +119,21 @@ namespace GatheringStorm.Api.Services
                         return cardResult.GetVoidAppResult();
                     }
 
+                    cards.AddRange(cardResult.SuccessReturnValue);
                     game.Entities.AddRange(cardResult.SuccessReturnValue);
+                }
+
+                var handCardIndizes = new List<int>();
+                var random = new Random();
+                while (handCardIndizes.Count < 3)
+                {
+                    var newIndex = random.Next(cards.Count);
+                    if (handCardIndizes.Contains(newIndex))
+                    {
+                        continue;
+                    }
+                    cards[newIndex].CardLocation = CardLocation.Hand;
+                    handCardIndizes.Add(newIndex);
                 }
             }
 
