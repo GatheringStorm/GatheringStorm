@@ -38,19 +38,17 @@ namespace GatheringStorm.Api.Data
 
         public DbSet<Card> Cards { get; set; }
         public DbSet<CardEffect> CardEffects { get; set; }
-        public DbSet<CardLocation> CardLocations { get; set; }
-        public DbSet<Effect> Effects { get; set; }
+        public DbSet<Character> Characters { get; set; }
+        public DbSet<ClassChoice> ClassChoices { get; set; }
         public DbSet<Entity> Entities { get; set; }
         public DbSet<Game> Games { get; set; }
         public DbSet<GameCard> GameCards { get; set; }
         public DbSet<Move> Moves { get; set; }
         public DbSet<MoveTargetEntity> MoveTargetEntities { get; set; }
-        // public DbSet<MoveType> MoveTypes { get; set; }
         public DbSet<Player> Players { get; set; }
         public DbSet<Title> Titles { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<UserParticipation> UserParitcipations { get; set; }
-        public DbSet<ClassChoice> ClassChoices { get; set; }
     }
 
     public static class DbContextExtensions
@@ -58,7 +56,15 @@ namespace GatheringStorm.Api.Data
         public static async Task<AppResult<T>> FindEntity<T>(this DbSet<T> dbSet, object id, CancellationToken cancellationToken = default(CancellationToken))
             where T : class
         {
-            return AppResult<T>.Success(await dbSet.FindAsync(new object[] { id }, cancellationToken));
+            var result = await dbSet.FindAsync(new object[] { id }, cancellationToken);
+            if (result != null)
+            {
+                return AppResult<T>.Success(result);
+            }
+            else
+            {
+                return VoidAppResult.Error(ErrorPreset.OnLoadingData).GetErrorAppResult<T>();
+            }
         }
     }
 }

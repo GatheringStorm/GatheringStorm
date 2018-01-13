@@ -5,7 +5,7 @@ namespace GatheringStorm.Api.Models.Dto
 {
     public class DtoEffectTargets
     {
-        public Guid Id { get; set; }
+        public Guid CardEffectId { get; set; }
         public List<Guid> TargetIds { get; set; }
     }
 }

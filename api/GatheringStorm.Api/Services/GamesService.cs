@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GatheringStorm.Api.Auth;
+using GatheringStorm.Api.Controllers;
 using GatheringStorm.Api.Data;
 using GatheringStorm.Api.Models;
 using GatheringStorm.Api.Models.DB;
@@ -15,39 +16,43 @@ namespace GatheringStorm.Api.Services
     public interface IGamesService
     {
         Task<VoidAppResult> StartNewGame(DtoNewGameInfo newGameInfo, CancellationToken cancellationToken = default(CancellationToken));
-        Task<AppResult<List<DtoGame>>> GetGamesAsync(CancellationToken cancellationToken = default(CancellationToken));
-        Task<AppResult<DtoBoard>> GetBoardAsync(Guid gameId, CancellationToken cancellationToken = default(CancellationToken));
-        Task<VoidAppResult> EndTurnAsync(Guid gameId, CancellationToken cancellationToken = default(CancellationToken));
-        Task<VoidAppResult> PlayCardAsync(Guid gameId, DtoPlayCardMove move, CancellationToken cancellationToken = default(CancellationToken));
-        Task<VoidAppResult> AttackAsync(Guid gameId, DtoAttackMove move, CancellationToken cancellationToken = default(CancellationToken));
+        Task<VoidAppResult> JoinGame(DtoJoinGameInfo joinGameInfo, CancellationToken cancellationToken);
+        Task<AppResult<List<DtoGame>>> GetGames(CancellationToken cancellationToken = default(CancellationToken));
+        Task<AppResult<DtoBoard>> GetBoard(Guid gameId, CancellationToken cancellationToken = default(CancellationToken));
+        Task<VoidAppResult> EndTurn(Guid gameId, CancellationToken cancellationToken = default(CancellationToken));
+        Task<VoidAppResult> PlayCard(Guid gameId, DtoPlayCardMove move, CancellationToken cancellationToken = default(CancellationToken));
+        Task<VoidAppResult> Attack(Guid gameId, DtoAttackMove move, CancellationToken cancellationToken = default(CancellationToken));
     }
 
     public class GamesService : IGamesService
     {
         private readonly ILoginManager loginManager;
         public readonly AppDbContext dbContext;
+        private readonly IEffectsService effectsService;
+        private readonly ICardInitializerService cardInitializerService;
 
-        public GamesService(ILoginManager loginManager, AppDbContext dbContext)
+        public GamesService(ILoginManager loginManager, AppDbContext dbContext, IEffectsService effectsService, ICardInitializerService cardInitializerService)
         {
             this.dbContext = dbContext;
+            this.effectsService = effectsService;
+            this.cardInitializerService = cardInitializerService;
             this.loginManager = loginManager;
         }
 
         public async Task<VoidAppResult> StartNewGame(DtoNewGameInfo newGameInfo, CancellationToken cancellationToken = default(CancellationToken))
         {
-            Console.WriteLine(this.loginManager.LoggedInUser.Mail);
-
             var findOpponentResult = await this.dbContext.Users.FindEntity(newGameInfo.OpponentMail, cancellationToken);
             if (findOpponentResult.Result != AppActionResultType.Success)
             {
                 findOpponentResult = await this.loginManager.CreateUser(newGameInfo.OpponentMail, cancellationToken);
             }
-
-            var choices = newGameInfo.ClassTypes.Select((classType, index) => new ClassChoice
+            if (findOpponentResult.Result != AppActionResultType.Success)
             {
-                ClassType = classType,
-                Priority = index + 1
-            }).ToList();
+                return findOpponentResult.GetVoidAppResult();
+            }
+            var opponent = findOpponentResult.SuccessReturnValue;
+
+            var choices = ClassChoice.ChoicesFromClassTypes(newGameInfo.ClassTypes);
             var newGame = new Game
             {
                 BeginDate = DateTime.Now,
@@ -61,10 +66,28 @@ namespace GatheringStorm.Api.Services
                     },
                     new UserParticipation
                     {
-                        User = findOpponentResult.SuccessReturnValue
+                        User = opponent
+                    }
+                },
+                Entities = new List<Entity>
+                {
+                    new Player
+                    {
+                        Id = Guid.NewGuid(),
+                        Health = 20,
+                        User = this.loginManager.LoggedInUser
+                    },
+                    
+                    new Player
+                    {
+                        Id = Guid.NewGuid(),
+                        Health = 20,
+                        User = opponent
                     }
                 }
             };
+
+            await this.cardInitializerService.InitializeGame(newGame);
 
             await this.dbContext.Games.AddAsync(newGame, cancellationToken);
             await this.dbContext.SaveChangesAsync(cancellationToken);
@@ -72,7 +95,50 @@ namespace GatheringStorm.Api.Services
             return VoidAppResult.Success();
         }
 
-        public async Task<AppResult<List<DtoGame>>> GetGamesAsync(CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<VoidAppResult> JoinGame(DtoJoinGameInfo joinGameInfo, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var gameResult = await this.dbContext.Games.FindEntity(joinGameInfo.GameId);
+            if (gameResult.Result != AppActionResultType.Success)
+            {
+                return gameResult.GetVoidAppResult();
+            }
+            var game = gameResult.SuccessReturnValue;
+
+            game.Status = GameStatus.InProgress;
+            var playerParticipation = game.UserParticipations.Single(_ => _.Mail == this.loginManager.LoggedInUser.Mail);
+            var opponentParticipation = game.UserParticipations.Single(_ => _.Mail != this.loginManager.LoggedInUser.Mail);
+            playerParticipation.ClassChoices = ClassChoice.ChoicesFromClassTypes(joinGameInfo.ClassTypes);
+
+            var classTypesCount = Enum.GetValues(typeof(ClassType)).Length;
+            // Select first choice that was not identical
+            for (var i = 1; i <= classTypesCount; i++)
+            {
+                playerParticipation.ClassType = playerParticipation.ClassChoices.Single(_ => _.Priority == i).ClassType;
+                opponentParticipation.ClassType = opponentParticipation.ClassChoices.Single(_ => _.Priority == i).ClassType;
+
+                if (opponentParticipation != playerParticipation)
+                {
+                    break;
+                }
+            }
+            // If all choices were identical, select random class for both
+            if (playerParticipation.ClassType == opponentParticipation.ClassType)
+            {
+                var random = new Random();
+                do
+                {
+                    playerParticipation.ClassType = (ClassType)random.Next(classTypesCount);
+                    opponentParticipation.ClassType = (ClassType)random.Next(classTypesCount);
+                }
+                while (playerParticipation.ClassType == opponentParticipation.ClassType);
+            }
+
+            await dbContext.SaveChangesAsync();
+
+            return VoidAppResult.Success();
+        }
+
+        public async Task<AppResult<List<DtoGame>>> GetGames(CancellationToken cancellationToken = default(CancellationToken))
         {
             var loggedInUserMail = this.loginManager.LoggedInUser.Mail;
             List<Game> games = await this.dbContext.Games.Where(_ => _.UserParticipations.Any(x => x.Mail == loggedInUserMail)).ToListAsync();
@@ -81,24 +147,36 @@ namespace GatheringStorm.Api.Services
             foreach (Game game in games)
             {
                 var currentPlayerMail = (await this.GetCurrentTurnPlayer(game.Id, cancellationToken)).SuccessReturnValue.Mail;
-                var opponentMail = game.UserParticipations.Where(_ => _.Mail != loggedInUserMail).Select(_ => _.Mail).ToString();
+                var opponentMail = game.UserParticipations.Single(_ => _.Mail != loggedInUserMail).User.Mail;
 
                 var newDtoGame = new DtoGame
                 {
                     Id = game.Id,
                     CurrentTurnPlayer = currentPlayerMail,
                     BeginDate = game.BeginDate,
-                    Status = DtoGameStatus.Lost, // TODO: Mapping in separate function
+                    Status = MapGameStatus(game),//DtoGameStatus.Lost, // TODO: Mapping in separate function
                     OpponentMail = opponentMail
                 };
-                
+
                 dtoGames.Add(newDtoGame);
             }
 
             return AppResult<List<DtoGame>>.Success(dtoGames);
         }
+        public DtoGameStatus MapGameStatus(Game game)
+        {
+            switch (game.Status)
+            {
+                case GameStatus.Finished:
+                    return DtoGameStatus.Lost; //|| DtoGameStatus.Won;
+                case GameStatus.InvitePending:
+                    return DtoGameStatus.InvitePending; //|| DtoGameStatus.Invited;
+                default:    //GameStatus.InProgress is default
+                    return DtoGameStatus.YourTurn; //|| DtoGameStatus.OpponentTurn;
+            }
+        }
 
-        public async Task<AppResult<DtoBoard>> GetBoardAsync(Guid gameId, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<AppResult<DtoBoard>> GetBoard(Guid gameId, CancellationToken cancellationToken = default(CancellationToken))
         {
             var gameResult = await this.dbContext.Games.FindEntity(gameId, cancellationToken);
             if (gameResult.Result != AppActionResultType.Success)
@@ -193,15 +271,15 @@ namespace GatheringStorm.Api.Services
             });
         }
 
-        public async Task<VoidAppResult> EndTurnAsync(Guid gameId, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            var game = (await this.dbContext.Games.FindEntity(gameId, cancellationToken)).SuccessReturnValue;
+        public async Task<VoidAppResult> EndTurn(Guid gameId, CancellationToken cancellationToken = default(CancellationToken))
+        {            
+            var game = (await this.dbContext.Games.FindEntity(gameId, cancellationToken)).SuccessReturnValue; //todo check if its own turn
             var move = new Move
             {
                 Date = DateTime.Now,
                 Type = MoveType.EndTurn,
                 Game = game,
-                SourceEntity = game.Entities.Single(_ => _.User.Mail == this.loginManager.LoggedInUser.Mail 
+                SourceEntity = game.Entities.Single(_ => _.User.Mail == this.loginManager.LoggedInUser.Mail
                     && _ is Player)
             };
 
@@ -211,16 +289,68 @@ namespace GatheringStorm.Api.Services
             return VoidAppResult.Success();
         }
 
-        public async Task<VoidAppResult> PlayCardAsync(Guid gameId, DtoPlayCardMove move, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<VoidAppResult> PlayCard(Guid gameId, DtoPlayCardMove move, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var game = (await this.dbContext.Games.FindEntity(gameId, cancellationToken)).SuccessReturnValue;
+            var gameResult = await this.dbContext.Games.FindEntity(gameId, cancellationToken);
+            var currentTurnPlayerResult = await this.GetCurrentTurnPlayer(gameId, cancellationToken);
+            if (gameResult.Result != AppActionResultType.Success)
+            {
+                return gameResult.GetVoidAppResult();
+            }
+            if (currentTurnPlayerResult.Result != AppActionResultType.Success)
+            {
+                return currentTurnPlayerResult.GetVoidAppResult();
+            }
+            var game = gameResult.SuccessReturnValue;
+            var currentTurnPlayer = currentTurnPlayerResult.SuccessReturnValue;
 
-            // TODO
+            var playedGameCard = game.Entities.SingleOrDefault(_ => _.Id == move.CardId) as GameCard;
+            if (playedGameCard == null || playedGameCard.CardLocation != CardLocation.Hand)
+            {
+                return VoidAppResult.Error(AppActionResultType.RuleError, "Selected card cannot be played.");
+            }
+
+            if (currentTurnPlayer.Mail != this.loginManager.LoggedInUser.Mail)
+            {
+                return VoidAppResult.Error(ErrorPreset.NotYourTurn);
+            }
+
+            if (game.UserParticipations.All(_ => _.Mail != this.loginManager.LoggedInUser.Mail))
+            {
+                return VoidAppResult.Error(ErrorPreset.NotAParticipant);
+            }
+
+            // Discard cards
+            if (playedGameCard.Card.Cost != move.DiscardedCardIds.Count)
+            {
+                return VoidAppResult.Error(AppActionResultType.RuleError, $"You must discard exactly {playedGameCard.Card.Cost} cards.");
+            }
+            foreach (var entityId in move.DiscardedCardIds)
+            {
+                var gameCard = game.Entities.SingleOrDefault(_ => _.Id == entityId) as GameCard;
+                if (gameCard == null || gameCard.CardLocation != CardLocation.Hand)
+                {
+                    return VoidAppResult.Error(AppActionResultType.RuleError, "The selected card cannot be discarded.");
+                }
+                gameCard.CardLocation = CardLocation.OutOfPlay;
+            }
+
+            // Execute effects
+            foreach(var effect in move.EffectTargets)
+            {
+                var executeEffectResult = await this.effectsService.ExecuteEffect(effect, game, currentTurnPlayer, cancellationToken);
+                if (executeEffectResult.Result != AppActionResultType.Success)
+                {
+                    return executeEffectResult;
+                }
+            }
+
+            await dbContext.SaveChangesAsync(cancellationToken);
 
             return VoidAppResult.Success();
         }
 
-        public async Task<VoidAppResult> AttackAsync(Guid gameId, DtoAttackMove move, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<VoidAppResult> Attack(Guid gameId, DtoAttackMove move, CancellationToken cancellationToken = default(CancellationToken))
         {
             var game = (await this.dbContext.Games.FindEntity(gameId, cancellationToken)).SuccessReturnValue;
 
@@ -247,12 +377,12 @@ namespace GatheringStorm.Api.Services
 
             if (attacker.Health <= 0)
             {
-                attacker.CardLocation = null; // TODO: CardLocations string enum
+                attacker.CardLocation = CardLocation.OutOfPlay;
             }
 
             if (target.Health <= 0)
             {
-                target.CardLocation = null; // TODO: CardLocations string enum
+                target.CardLocation = CardLocation.OutOfPlay;
             }
 
             await this.dbContext.Moves.AddAsync(dbMove, cancellationToken);
@@ -266,12 +396,16 @@ namespace GatheringStorm.Api.Services
             var lastEndTurn = await this.dbContext.Moves
                 .Where(_ => _.Type == MoveType.EndTurn && _.Game.Id == gameId)
                 .OrderByDescending(_ => _.Date)
-                .SingleAsync();
+                .SingleOrDefaultAsync();
 
-            var game = (await this.dbContext.Games.FindEntity(gameId, cancellationToken)).SuccessReturnValue;
-            var currentUser = game.UserParticipations.Single(_ => _.Mail != lastEndTurn.SourceEntity.User.Mail).User;
+            var gameUserParticipations = this.dbContext.UserParitcipations.Where(_ => _.GameId == gameId);
 
-            return AppResult<User>.Success(currentUser);
+            if (lastEndTurn == null)
+            {
+                return AppResult<User>.Success(gameUserParticipations.OrderBy(_ => _.ClassType).First().User);
+            }
+
+            return AppResult<User>.Success(gameUserParticipations.Single(_ => _.Mail != lastEndTurn.SourceEntity.User.Mail).User);
         }
     }
 }
