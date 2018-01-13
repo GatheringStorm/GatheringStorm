@@ -116,7 +116,7 @@ namespace GatheringStorm.Api.Services
                 foreach (var card in this.dbContext.Cards)
                 {
                     var cardResult = await this.CreateGameCard(card.Id, participation.User, card.IsLegendary ? 1 : 7);
-                    if (cardResult.Result != AppActionResultType.Success)
+                    if (cardResult.IsErrorResult)
                     {
                         return cardResult.GetVoidAppResult();
                     }
@@ -145,7 +145,7 @@ namespace GatheringStorm.Api.Services
         public async Task<AppResult<GameCard>> GenerateStormling(User user)
         {
             var cardResult = await this.dbContext.Cards.FindEntity(Guid.Parse("TEMP"));
-            if (cardResult.Result != AppActionResultType.Success)
+            if (cardResult.IsErrorResult)
             {
                 return cardResult.GetVoidAppResult().GetErrorAppResult<GameCard>();
             }
@@ -165,7 +165,7 @@ namespace GatheringStorm.Api.Services
         private async Task<AppResult<List<GameCard>>> CreateGameCard(Guid cardId, User user, int duplicatesCount)
         {
             var cardResult = await this.dbContext.Cards.FindEntity(cardId);
-            if (cardResult.Result != AppActionResultType.Success)
+            if (cardResult.IsErrorResult)
             {
                 return cardResult.GetVoidAppResult().GetErrorAppResult<List<GameCard>>();
             }

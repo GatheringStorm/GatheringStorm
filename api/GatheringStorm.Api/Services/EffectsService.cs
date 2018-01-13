@@ -49,7 +49,7 @@ namespace GatheringStorm.Api.Services
             };
 
             var configureResult = await this.effects[cardEffect.EffectType].ConfigureDtoEffect(cardEffect, dtoEffect);
-            if (configureResult.Result != AppActionResultType.Success)
+            if (configureResult.IsErrorResult)
             {
                 return configureResult.GetErrorAppResult<DtoEffect>();
             }

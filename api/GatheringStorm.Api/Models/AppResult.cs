@@ -11,6 +11,14 @@ namespace GatheringStorm.Api.Models
         public string ErrorMessage { get; protected set; }
 
         public AppActionResultType Result { get; set; }
+
+        public bool IsErrorResult
+        {
+            get
+            {
+                return this.Result != AppActionResultType.Success;
+            }
+        }
     }
 
     public class VoidAppResult : AppResult
@@ -56,7 +64,7 @@ namespace GatheringStorm.Api.Models
                 case ErrorPreset.InvalidTargets:
                     return VoidAppResult.Error(AppActionResultType.UserError, "Some of the targets were invalid targets.");
                 default: // OnLoadingData
-                    return VoidAppResult.Error(AppActionResultType.ServerError, "There was an error while loading game data.");   
+                    return VoidAppResult.Error(AppActionResultType.ServerError, "There was an error while loading game data.");
             }
         }
     }

@@ -42,11 +42,11 @@ namespace GatheringStorm.Api.Services
         public async Task<VoidAppResult> StartNewGame(DtoNewGameInfo newGameInfo, CancellationToken cancellationToken = default(CancellationToken))
         {
             var findOpponentResult = await this.dbContext.Users.FindEntity(newGameInfo.OpponentMail, cancellationToken);
-            if (findOpponentResult.Result != AppActionResultType.Success)
+            if (findOpponentResult.IsErrorResult)
             {
                 findOpponentResult = await this.loginManager.CreateUser(newGameInfo.OpponentMail, cancellationToken);
             }
-            if (findOpponentResult.Result != AppActionResultType.Success)
+            if (findOpponentResult.IsErrorResult)
             {
                 return findOpponentResult.GetVoidAppResult();
             }
@@ -98,7 +98,7 @@ namespace GatheringStorm.Api.Services
         public async Task<VoidAppResult> JoinGame(DtoJoinGameInfo joinGameInfo, CancellationToken cancellationToken = default(CancellationToken))
         {
             var gameResult = await this.dbContext.Games.FindEntity(joinGameInfo.GameId);
-            if (gameResult.Result != AppActionResultType.Success)
+            if (gameResult.IsErrorResult)
             {
                 return gameResult.GetVoidAppResult();
             }
@@ -138,14 +138,14 @@ namespace GatheringStorm.Api.Services
             {
                 case ClassType.Medium:
                     var drawResult = await this.DrawCard(game, playerParticipation.Mail);
-                    if (drawResult.Result != AppActionResultType.Success)
+                    if (drawResult.IsErrorResult)
                     {
                         return drawResult;
                     }
                     break;
                 case ClassType.Slow:
                     var stormlingResult = await this.cardInitializerService.GenerateStormling(playerParticipation.User);
-                    if (stormlingResult.Result != AppActionResultType.Success)
+                    if (stormlingResult.IsErrorResult)
                     {
                         return stormlingResult.GetVoidAppResult();
                     }
@@ -154,12 +154,12 @@ namespace GatheringStorm.Api.Services
             }
 
             var currentTurnPlayerResult = await this.GetCurrentTurnPlayer(game.Id, cancellationToken);
-            if (currentTurnPlayerResult.Result != AppActionResultType.Success)
+            if (currentTurnPlayerResult.IsErrorResult)
             {
                 return currentTurnPlayerResult.GetVoidAppResult();
             }
             var drawCardResult = await this.DrawCard(game, currentTurnPlayerResult.SuccessReturnValue.Mail);
-            if (drawCardResult.Result != AppActionResultType.Success)
+            if (drawCardResult.IsErrorResult)
             {
                 return drawCardResult;
             }
@@ -211,7 +211,7 @@ namespace GatheringStorm.Api.Services
         public async Task<AppResult<DtoBoard>> GetBoard(Guid gameId, CancellationToken cancellationToken = default(CancellationToken))
         {
             var gameResult = await this.dbContext.Games.FindEntity(gameId, cancellationToken);
-            if (gameResult.Result != AppActionResultType.Success)
+            if (gameResult.IsErrorResult)
             {
                 return AppResult<DtoBoard>.Error(AppActionResultType.ServerError, "There was an error while loading game info.");
             }
@@ -229,7 +229,7 @@ namespace GatheringStorm.Api.Services
             var loggedInEntity = game.Entities.Select(_ => _ as Player).Single(_ => _ != null && _.User.Mail == this.loginManager.LoggedInUser.Mail);
 
             var currentTurnPlayerResult = await this.GetCurrentTurnPlayer(game.Id, cancellationToken);
-            if (currentTurnPlayerResult.Result != AppActionResultType.Success)
+            if (currentTurnPlayerResult.IsErrorResult)
             {
                 return AppResult<DtoBoard>.Error(AppActionResultType.ServerError, "There was an error while loading game info.");
             }
@@ -239,7 +239,7 @@ namespace GatheringStorm.Api.Services
             var loggedInHandCardsResult = await this.GetDtoCardsFromGameCards(gameCards
                 .Where(_ => _.User.Mail == this.loginManager.LoggedInUser.Mail && _.CardLocation == CardLocation.Hand)
                 .ToList());
-            if (loggedInHandCardsResult.Result != AppActionResultType.Success)
+            if (loggedInHandCardsResult.IsErrorResult)
             {
                 return loggedInHandCardsResult.GetVoidAppResult().GetErrorAppResult<DtoBoard>();
             }
@@ -247,7 +247,7 @@ namespace GatheringStorm.Api.Services
             var loggedInBoardCardsResult = await this.GetDtoCardsFromGameCards(gameCards
                 .Where(_ => _.User.Mail == this.loginManager.LoggedInUser.Mail && _.CardLocation == CardLocation.Board)
                 .ToList());
-            if (loggedInBoardCardsResult.Result != AppActionResultType.Success)
+            if (loggedInBoardCardsResult.IsErrorResult)
             {
                 return loggedInBoardCardsResult.GetVoidAppResult().GetErrorAppResult<DtoBoard>();
             }
@@ -255,7 +255,7 @@ namespace GatheringStorm.Api.Services
             var opponentBoardCardsResult = await this.GetDtoCardsFromGameCards(gameCards
                 .Where(_ => _.User.Mail == opponent.Mail && _.CardLocation == CardLocation.Board)
                 .ToList());
-            if (opponentBoardCardsResult.Result != AppActionResultType.Success)
+            if (opponentBoardCardsResult.IsErrorResult)
             {
                 return opponentBoardCardsResult.GetVoidAppResult().GetErrorAppResult<DtoBoard>();
             }
@@ -305,11 +305,11 @@ namespace GatheringStorm.Api.Services
         {
             var gameResult = await this.dbContext.Games.FindEntity(gameId, cancellationToken);
             var currentTurnPlayerResult = await this.GetCurrentTurnPlayer(gameId, cancellationToken);
-            if (gameResult.Result != AppActionResultType.Success)
+            if (gameResult.IsErrorResult)
             {
                 return gameResult.GetVoidAppResult();
             }
-            if (currentTurnPlayerResult.Result != AppActionResultType.Success)
+            if (currentTurnPlayerResult.IsErrorResult)
             {
                 return currentTurnPlayerResult.GetVoidAppResult();
             }
@@ -351,7 +351,7 @@ namespace GatheringStorm.Api.Services
             foreach(var effect in move.EffectTargets)
             {
                 var executeEffectResult = await this.effectsService.ExecuteEffect(effect, game, currentTurnPlayer, cancellationToken);
-                if (executeEffectResult.Result != AppActionResultType.Success)
+                if (executeEffectResult.IsErrorResult)
                 {
                     return executeEffectResult;
                 }
@@ -423,7 +423,7 @@ namespace GatheringStorm.Api.Services
                 foreach(var cardEffect in gameCard.Card.Effects)
                 {
                     var effectResult = await this.effectsService.GetDtoEffect(cardEffect);
-                    if (effectResult.Result != AppActionResultType.Success)
+                    if (effectResult.IsErrorResult)
                     {
                         return effectResult.GetVoidAppResult().GetErrorAppResult<List<DtoCard>>();
                     }

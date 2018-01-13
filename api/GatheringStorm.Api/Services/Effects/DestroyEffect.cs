@@ -29,7 +29,7 @@ namespace GatheringStorm.Api.Services.Effects
             CancellationToken cancellationToken = default(CancellationToken))
         {
             var cardEffectResult = await this.dbContext.CardEffects.FindEntity(effect.CardEffectId);
-            if (cardEffectResult.Result != AppActionResultType.Success)
+            if (cardEffectResult.IsErrorResult)
             {
                 return cardEffectResult.GetVoidAppResult();
             }
@@ -50,7 +50,7 @@ namespace GatheringStorm.Api.Services.Effects
                     targetsResult = this.GetTargetsByIds(effect, parameters, game);
                     break;
             }
-            if (targetsResult.Result != AppActionResultType.Success)
+            if (targetsResult.IsErrorResult)
             {
                 return targetsResult.GetVoidAppResult();
             }
