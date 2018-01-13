@@ -163,6 +163,7 @@ namespace GatheringStorm.Api.Services
 
             return AppResult<List<DtoGame>>.Success(dtoGames);
         }
+        
         public DtoGameStatus MapGameStatus(Game game)
         {
             switch (game.Status)
