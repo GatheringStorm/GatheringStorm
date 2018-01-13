@@ -190,7 +190,12 @@ namespace GatheringStorm.Api.Services
                 return AppResult<DtoBoard>.Error(AppActionResultType.UserError, "This user is not part of this game.");
             }
 
-            var opponent = game.UserParticipations.Single(_ => _.Mail != this.loginManager.LoggedInUser.Mail).User;
+            var opponentParticipation = game.UserParticipations.Single(_ => _.Mail != this.loginManager.LoggedInUser.Mail);
+            var opponent = opponentParticipation.User;
+            var opponentEntity = game.Entities.Select(_ => _ as Player).Single(_ => _ != null && _.User.Mail == opponent.Mail);
+
+            var loggedInParticipation = game.UserParticipations.Single(_ => _.Mail == this.loginManager.LoggedInUser.Mail);
+            var loggedInEntity = game.Entities.Select(_ => _ as Player).Single(_ => _ != null && _.User.Mail == this.loginManager.LoggedInUser.Mail);
 
             var currentTurnPlayerResult = await this.GetCurrentTurnPlayer(game.Id, cancellationToken);
             if (currentTurnPlayerResult.Result != AppActionResultType.Success)
@@ -200,74 +205,49 @@ namespace GatheringStorm.Api.Services
             var gameCards = game.Entities.Where(_ => _ is GameCard)
                 .Select(_ => _ as GameCard);
 
+            var loggedInHandCardsResult = await this.GetDtoCardsFromGameCards(gameCards
+                .Where(_ => _.User.Mail == this.loginManager.LoggedInUser.Mail && _.CardLocation == CardLocation.Hand)
+                .ToList());
+            if (loggedInHandCardsResult.Result != AppActionResultType.Success)
+            {
+                return loggedInHandCardsResult.GetVoidAppResult().GetErrorAppResult<DtoBoard>();
+            }
+
+            var loggedInBoardCardsResult = await this.GetDtoCardsFromGameCards(gameCards
+                .Where(_ => _.User.Mail == this.loginManager.LoggedInUser.Mail && _.CardLocation == CardLocation.Board)
+                .ToList());
+            if (loggedInBoardCardsResult.Result != AppActionResultType.Success)
+            {
+                return loggedInBoardCardsResult.GetVoidAppResult().GetErrorAppResult<DtoBoard>();
+            }
+
+            var opponentBoardCardsResult = await this.GetDtoCardsFromGameCards(gameCards
+                .Where(_ => _.User.Mail == opponent.Mail && _.CardLocation == CardLocation.Board)
+                .ToList());
+            if (opponentBoardCardsResult.Result != AppActionResultType.Success)
+            {
+                return opponentBoardCardsResult.GetVoidAppResult().GetErrorAppResult<DtoBoard>();
+            }
+
             return AppResult<DtoBoard>.Success(new DtoBoard
             {
                 Id = game.Id,
                 CurrentTurnPlayer = currentTurnPlayerResult.SuccessReturnValue.Mail,
-                PlayerHandCards = gameCards.Where(_ => _.User.Mail == this.loginManager.LoggedInUser.Mail).Select(_ => new DtoCard
-                {
-                    
-                }).ToList(),
+                PlayerHandCards = loggedInHandCardsResult.SuccessReturnValue,
                 OpponentHandCardsCount = 4,
                 Player = new DtoBoardPlayer
                 {
-                    Health = 20,
-                    Mail = "you@gmail.com",
-                    BoardCards = new List<DtoCard>
-                    {
-                        new DtoCard
-                        {
-                            Id = Guid.NewGuid(),
-                            Name = "Drahlget",
-                            Title = "The monk",
-                            Cost = 5,
-                            CanAttack = false,
-                            Attack = 3,
-                            Health = 1,
-                            StatsModifiersCount = 1,
-                            Effects = new List<DtoEffect>
-                            {
-                                new DtoEffect
-                                {
-                                    Id = Guid.NewGuid(),
-                                    Name = "Buff cards",
-                                    Description = "Give all cards with name 'Uni' +1/+1",
-                                    TargetsCount = 0
-                                }
-                            }
-                        }
-                    },
-                    ClassType = ClassType.Medium
+                    Health = loggedInEntity.Health,
+                    Mail = this.loginManager.LoggedInUser.Mail,
+                    BoardCards = loggedInBoardCardsResult.SuccessReturnValue,
+                    ClassType = loggedInParticipation.ClassType
                 },
                 Opponent = new DtoBoardPlayer
                 {
-                    Health = 1,
-                    Mail = "xXTHE_EVILXx@gmail.com",
-                    BoardCards = new List<DtoCard>
-                    {
-                        new DtoCard
-                        {
-                            Id = Guid.NewGuid(),
-                            Name = "Drahlget",
-                            Title = "The monk",
-                            Cost = 5,
-                            CanAttack = true,
-                            Attack = 3,
-                            Health = 1,
-                            StatsModifiersCount = 1,
-                            Effects = new List<DtoEffect>
-                            {
-                                new DtoEffect
-                                {
-                                    Id = Guid.NewGuid(),
-                                    Name = "Buff cards",
-                                    Description = "Give all cards with name 'Uni' +1/+1",
-                                    TargetsCount = 0
-                                }
-                            }
-                        }
-                    },
-                    ClassType = ClassType.Quick
+                    Health = opponentEntity.Health,
+                    Mail = opponent.Mail,
+                    BoardCards = opponentBoardCardsResult.SuccessReturnValue,
+                    ClassType = opponentParticipation.ClassType
                 }
             });
         }
@@ -390,6 +370,39 @@ namespace GatheringStorm.Api.Services
             await this.dbContext.SaveChangesAsync(cancellationToken);
 
             return VoidAppResult.Success();
+        }
+
+        private async Task<AppResult<List<DtoCard>>> GetDtoCardsFromGameCards(List<GameCard> gameCards)
+        {
+            var dtoCards = new List<DtoCard>();
+
+            foreach(var gameCard in gameCards.Where(_ => _.User.Mail == this.loginManager.LoggedInUser.Mail))
+            {
+                var effects = new List<DtoEffect>();
+                foreach(var cardEffect in gameCard.Card.Effects)
+                {
+                    var effectResult = await this.effectsService.GetDtoEffect(cardEffect);
+                    if (effectResult.Result != AppActionResultType.Success)
+                    {
+                        return effectResult.GetVoidAppResult().GetErrorAppResult<List<DtoCard>>();
+                    }
+                }
+
+                dtoCards.Add(new DtoCard
+                {
+                    Id = gameCard.Id,
+                    Name = gameCard.Card.Character.Name,
+                    Title = gameCard.Card.Title.Name,
+                    Cost = gameCard.Card.Cost,
+                    Attack = gameCard.Card.Attack,
+                    CanAttack = false,
+                    Health = gameCard.Health,
+                    StatsModifiersCount = gameCard.StatModifiersCount,
+                    Effects = effects
+                });
+            }
+
+            return AppResult<List<DtoCard>>.Success(dtoCards);
         }
 
         private async Task<AppResult<User>> GetCurrentTurnPlayer(Guid gameId, CancellationToken cancellationToken)

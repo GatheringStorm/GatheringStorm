@@ -13,12 +13,14 @@ namespace GatheringStorm.Api.Services
     {
         Task<VoidAppResult> ExecuteEffect(DtoEffectTargets effect, Game game, User currentTurnPlayer,
             CancellationToken cancellationToken = default(CancellationToken));
+        Task<AppResult<DtoEffect>> GetDtoEffect(CardEffect cardEffect);
     }
 
     public interface IEffect
     {
         Task<VoidAppResult> ExecuteEffect(DtoEffectTargets effect, Game game, User currentTurnPlayer,
             CancellationToken cancellationToken = default(CancellationToken));
+        Task<VoidAppResult> ConfigureDtoEffect(CardEffect cardEffect, DtoEffect dtoEffect);
     }
 
     public class EffectsService : IEffectsService
@@ -37,6 +39,22 @@ namespace GatheringStorm.Api.Services
             CancellationToken cancellationToken = default(CancellationToken))
         {
             return await this.effects[EffectType.Destroy].ExecuteEffect(effect, game, currentTurnPlayer);
+        }
+
+        public async Task<AppResult<DtoEffect>> GetDtoEffect(CardEffect cardEffect)
+        {
+            var dtoEffect = new DtoEffect
+            {
+                EffectType = cardEffect.EffectType
+            };
+
+            var configureResult = await this.effects[cardEffect.EffectType].ConfigureDtoEffect(cardEffect, dtoEffect);
+            if (configureResult.Result != AppActionResultType.Success)
+            {
+                return configureResult.GetErrorAppResult<DtoEffect>();
+            }
+
+            return AppResult<DtoEffect>.Success(dtoEffect);
         }
     }
 }

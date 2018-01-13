@@ -110,5 +110,30 @@ namespace GatheringStorm.Api.Services.Effects
 
             return AppResult<List<GameCard>>.Success(targets);
         }
+
+        public Task<VoidAppResult> ConfigureDtoEffect(CardEffect cardEffect, DtoEffect dtoEffect)
+        {
+            dtoEffect.Name = "Destroy";
+
+            var parameters = JsonConvert.DeserializeObject<DestroyEffectParameters>(cardEffect.EffectParameters);
+            dtoEffect.TargetsCount = parameters.TargetingType == TargetingType.NumberOfTargets
+                ? Convert.ToInt32(parameters.TargetParameter)
+                : 0;
+
+            switch (parameters.TargetingType)
+            {
+                case TargetingType.Title:
+                    dtoEffect.Description = $"Destroy all cards with the title '{parameters.TargetParameter}'.";
+                    break;
+                case TargetingType.CharacterName:
+                    dtoEffect.Description = $"Destroy all '{parameters.TargetParameter}'.";
+                    break;
+                default: // TargetingType.NumberOfTargets
+                    dtoEffect.Description = $"Destroy {parameters.TargetParameter} cards.";
+                    break;
+            }
+
+            return Task.FromResult(VoidAppResult.Success());
+        }
     }
 }
