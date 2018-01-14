@@ -185,7 +185,7 @@ namespace GatheringStorm.Api.Services
                     Id = game.Id,
                     CurrentTurnPlayer = currentPlayerMail,
                     BeginDate = game.BeginDate,
-                    Status = MapGameStatus(game),//DtoGameStatus.Lost, // TODO: Mapping in separate function
+                    Status = MapGameStatus(game, currentPlayerMail),
                     OpponentMail = opponentMail
                 };
 
@@ -195,16 +195,31 @@ namespace GatheringStorm.Api.Services
             return AppResult<List<DtoGame>>.Success(dtoGames);
         }
         
-        public DtoGameStatus MapGameStatus(Game game)
+        public DtoGameStatus MapGameStatus(Game game, string currentPlayerMail)
         {
             switch (game.Status)
             {
                 case GameStatus.Finished:
-                    return DtoGameStatus.Lost; //|| DtoGameStatus.Won;
+                    if (currentPlayerMail == this.loginManager.LoggedInUser.Mail) {
+                        return DtoGameStatus.Won;
+                    }
+                    else
+                    {
+                        return DtoGameStatus.Lost;
+                    }
                 case GameStatus.InvitePending:
-                    return DtoGameStatus.InvitePending; //|| DtoGameStatus.Invited;
+                    var invitedUserMail = game.UserParticipations.Single(_ => _.ClassChoices.Count == 0).Mail;
+                    if (invitedUserMail == this.loginManager.LoggedInUser.Mail)
+                    {
+                        return DtoGameStatus.Invited;
+                    }
+                    return DtoGameStatus.InvitePending;
                 default:    //GameStatus.InProgress is default
-                    return DtoGameStatus.YourTurn; //|| DtoGameStatus.OpponentTurn;
+                    if (currentPlayerMail == this.loginManager.LoggedInUser.Mail)
+                    {
+                        return DtoGameStatus.YourTurn;
+                    }
+                    return DtoGameStatus.OpponentTurn;
             }
         }
 
