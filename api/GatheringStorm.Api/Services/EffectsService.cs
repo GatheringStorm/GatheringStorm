@@ -27,11 +27,12 @@ namespace GatheringStorm.Api.Services
     {
         private Dictionary<EffectType, IEffect> effects;
 
-        public EffectsService(IDestroyEffect destroyEffect)
+        public EffectsService(IDestroyEffect destroyEffect, IChangeStatsEffect changeStatsEffect)
         {
             effects = new Dictionary<EffectType, IEffect>
             {
-                [EffectType.Destroy] = destroyEffect
+                [EffectType.Destroy] = destroyEffect,
+                [EffectType.ChangeStats] = changeStatsEffect
             };
         }
 

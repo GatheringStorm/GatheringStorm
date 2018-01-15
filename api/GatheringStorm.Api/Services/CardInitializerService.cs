@@ -77,7 +77,7 @@ namespace GatheringStorm.Api.Services
                 BaseHealth = 2,
                 IsLegendary = false,
                 Title = pawn,
-                Character = claus
+                Character = sepp
             },
             new Card
             {

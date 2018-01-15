@@ -48,6 +48,7 @@ namespace GatheringStorm.Api
             services.AddTransient<IGamesService, GamesService>();
             services.AddTransient<IEffectsService, EffectsService>();
             services.AddTransient<IDestroyEffect, DestroyEffect>();
+            services.AddTransient<IChangeStatsEffect, ChangeStatsEffect>();
             services.AddTransient<ICardInitializerService, CardInitializerService>();
             services.AddTransient<IControllerUtility, ControllerUtility>();
             services.AddScoped<ILoginManager, LoginManager>();

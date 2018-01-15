@@ -115,7 +115,7 @@ namespace GatheringStorm.Api.Services
                 playerParticipation.ClassType = playerParticipation.ClassChoices.Single(_ => _.Priority == i).ClassType;
                 opponentParticipation.ClassType = opponentParticipation.ClassChoices.Single(_ => _.Priority == i).ClassType;
 
-                if (opponentParticipation != playerParticipation)
+                if (opponentParticipation.ClassType != playerParticipation.ClassType)
                 {
                     break;
                 }
@@ -136,7 +136,7 @@ namespace GatheringStorm.Api.Services
             switch(playerParticipation.ClassType)
             {
                 case ClassType.Medium:
-                    var drawResult = await this.DrawCard(game, playerParticipation.Mail);
+                    var drawResult = await this.DrawCard(game, playerParticipation.Mail, 1);
                     if (drawResult.IsErrorResult)
                     {
                         return drawResult;
@@ -157,7 +157,7 @@ namespace GatheringStorm.Api.Services
             {
                 return currentTurnPlayerResult.GetVoidAppResult();
             }
-            var drawCardResult = await this.DrawCard(game, currentTurnPlayerResult.SuccessReturnValue.Mail);
+            var drawCardResult = await this.DrawCard(game, currentTurnPlayerResult.SuccessReturnValue.Mail, 2);
             if (drawCardResult.IsErrorResult)
             {
                 return drawCardResult;
@@ -307,7 +307,7 @@ namespace GatheringStorm.Api.Services
 
         public async Task<VoidAppResult> EndTurn(Guid gameId, CancellationToken cancellationToken = default(CancellationToken))
         {            
-            var game = await this.dbContext.Games.IncludeEntities().SingleOrDefaultAsync(_ => _.Id == gameId, cancellationToken);
+            var game = await this.dbContext.Games.IncludeEntities().IncludeUserParticipations().SingleOrDefaultAsync(_ => _.Id == gameId, cancellationToken);
             if (game == null)
             {
                 return VoidAppResult.Error(ErrorPreset.OnLoadingData);
@@ -323,6 +323,13 @@ namespace GatheringStorm.Api.Services
             };
 
             await this.dbContext.Moves.AddAsync(move, cancellationToken);
+
+            var drawCardResult = await this.DrawCard(game, game.UserParticipations.SingleOrDefault(_ => _.Mail != this.loginManager.LoggedInUser.Mail).Mail, 2);
+            if (drawCardResult.IsErrorResult)
+            {
+                return drawCardResult;
+            }
+
             await this.dbContext.SaveChangesAsync(cancellationToken);
 
             return VoidAppResult.Success();
@@ -358,6 +365,8 @@ namespace GatheringStorm.Api.Services
                 return VoidAppResult.Error(ErrorPreset.NotAParticipant);
             }
 
+            playedGameCard.CardLocation = CardLocation.Board;
+
             // Discard cards
             if (playedGameCard.Card.Cost != move.DiscardedCardIds.Count)
             {
@@ -390,9 +399,9 @@ namespace GatheringStorm.Api.Services
 
         public async Task<VoidAppResult> Attack(Guid gameId, DtoAttackMove move, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var game = await this.dbContext.Games.IncludeEntities().SingleOrDefaultAsync(_ => _.Id == gameId, cancellationToken);
-            var attacker = game?.Entities.SingleOrDefault(_ => _.Id == move.AttackerId) as GameCard;
-            var target = game?.Entities.SingleOrDefault(_ => _.Id == move.TargetId) as GameCard;
+            var game = await this.dbContext.Games.SingleOrDefaultAsync(_ => _.Id == gameId, cancellationToken);
+            var attacker = await this.dbContext.GameCards.IncludeCards().SingleOrDefaultAsync(_ => _.Id == move.AttackerId);
+            var target = await this.dbContext.GameCards.IncludeCards().SingleOrDefaultAsync(_ => _.Id == move.TargetId);
             
             if (game == null || attacker == null || target == null)
             {
@@ -433,19 +442,22 @@ namespace GatheringStorm.Api.Services
             return VoidAppResult.Success();
         }
 
-        private Task<VoidAppResult> DrawCard(Game game, string userMail)
+        private Task<VoidAppResult> DrawCard(Game game, string userMail, int cardsCount)
         {
-            var cards = game.Entities.Select(_ => _ as GameCard)
-                                    .Where(_ => _ != null && _.User.Mail == userMail && _.CardLocation == CardLocation.Cellar)
-                                    .ToList();
-
-            if (cards.Count == 0)
+            for(var i = 0; i < cardsCount; i++)
             {
-                return Task.FromResult(VoidAppResult.Success());
-            }
+                var cards = game.Entities.Select(_ => _ as GameCard)
+                                        .Where(_ => _ != null && _.User.Mail == userMail && _.CardLocation == CardLocation.Cellar)
+                                        .ToList();
 
-            var drawnCardIndex = new Random().Next(cards.Count());
-            cards[drawnCardIndex].CardLocation = CardLocation.Hand;
+                if (cards.Count == 0)
+                {
+                    return Task.FromResult(VoidAppResult.Success());
+                }
+
+                var drawnCardIndex = new Random().Next(cards.Count());
+                cards[drawnCardIndex].CardLocation = CardLocation.Hand;
+            }
             return Task.FromResult(VoidAppResult.Success());
         }
 
@@ -484,15 +496,15 @@ namespace GatheringStorm.Api.Services
 
         private async Task<AppResult<User>> GetCurrentTurnPlayer(Game game, CancellationToken cancellationToken)
         {
-            var lastEndTurn = await this.dbContext.Moves
-                .Where(_ => _.Type == MoveType.EndTurn && _.Game.Id == game.Id)
-                .OrderByDescending(_ => _.Date)
-                .SingleOrDefaultAsync();
-
             if (game.UserParticipations.Any(_ => _.ClassType == null))
             {
                 return AppResult<User>.Success(null);
             }
+
+            var lastEndTurn = await this.dbContext.Moves
+                .Where(_ => _.Type == MoveType.EndTurn && _.Game.Id == game.Id)
+                .OrderByDescending(_ => _.Date)
+                .FirstOrDefaultAsync();
 
             if (lastEndTurn == null)
             {
