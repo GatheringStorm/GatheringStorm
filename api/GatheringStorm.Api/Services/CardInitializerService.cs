@@ -21,7 +21,7 @@ namespace GatheringStorm.Api.Services
     public class CardInitializerService : ICardInitializerService
     {
         private readonly AppDbContext dbContext;
-        private static readonly Guid StormlingId = Guid.Parse("TEMP");
+        private static readonly Guid StormlingId = Guid.Parse("53746f72-6d6c-696e-6700-000000000000");
 
         public CardInitializerService(AppDbContext dbContext)
         {

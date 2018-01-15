@@ -287,7 +287,7 @@ namespace GatheringStorm.Api.Services
                 Id = game.Id,
                 CurrentTurnPlayer = currentTurnPlayerResult.SuccessReturnValue.Mail,
                 PlayerHandCards = loggedInHandCardsResult.SuccessReturnValue,
-                OpponentHandCardsCount = 4,
+                OpponentHandCardsCount = gameCards.Where(_ => _.User.Mail == opponent.Mail && _.CardLocation == CardLocation.Hand).Count(),
                 Player = new DtoBoardPlayer
                 {
                     Health = loggedInEntity.Health,
@@ -453,7 +453,7 @@ namespace GatheringStorm.Api.Services
         {
             var dtoCards = new List<DtoCard>();
 
-            foreach(var gameCard in gameCards.Where(_ => _.User.Mail == this.loginManager.LoggedInUser.Mail))
+            foreach(var gameCard in gameCards)
             {
                 var effects = new List<DtoEffect>();
                 foreach(var cardEffect in gameCard.Card.Effects)
