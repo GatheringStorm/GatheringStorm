@@ -2,175 +2,88 @@ import {
     addNewLogMessage
 } from "./Log.js"
 
-const uRL = "http://localhost:5000/";
+const baseUrl = "http://localhost:5000/api/games/";
 
 class webAccess {
+    async startNewGame(opponentMail, classChoices) {
+        return await this.post('new', {
+            opponentMail: opponentMail,
+            classChoices: classChoices
+        });
+    }
+
+    async joinGame(gameId, classChoices) {
+        return await this.post('new', {
+            gameId: gameId,
+            classChoices: classChoices
+        });
+    }
+
+    async getGames() {
+        return await this.get('');
+    }
+
+    async getBoard(gameId) {
+        return await this.get(gameId + '/board');
+    }
+    
+    async endTurn(gameId) {
+        return await this.post(gameId + '/endTurn');
+    }
+    
+    async playCard(gameId, cardId, discardedCardIds, effectTargets) {
+        return await this.post(gameId + '/playCard', {
+            cardId: cardId,
+            discardedCardIds: discardedCardIds,
+            effectTargets: effectTargets
+        });
+    }
+    
+    async attack(gameId, attackerId, targetId) {
+        return await this.post(gameId + '/attack', {
+            attackerId: attackerId,
+            targetId: targetId
+        });
+    }
+
+    async post(route, payload) {
+        let response = await fetch(baseUrl + route, {
+            method: "POST",
+            body: payload,
+            headers: this.getHeaders()
+        });
+        return handleResponse(response);
+    }
+    
+    async get(route) {
+        let response = await fetch(baseUrl + route, {
+            method: "GET",
+            headers: this.getHeaders()
+        });
+        return handleResponse(response);
+    }
+
     handleResponse(response) {
         if (!response.ok) {
-            throw Error(response.statusText);
+            /* response.body format: 
+            {
+                errorMessage: 'errorMessage',
+                result: enum // possible values: userError, serverError, ruleError
+            }
+            */
+            console.log('Request error: ' + route, response.body);
+            throw new Error('Request error, TODO: Error handling.');
         }
-        return response;
+        return response.body;
     }
 
-    async sample(token, payload) {
-        try {
-            let response = await fetch(uRL, {
-                headers: {
-                    "Authorization": token.token_type + " " + token.id_token,
-                    "Accept": "application/josn",
-                    "Content-Type": "application/json"
-                },
-                method: "POST",
-                body: payload
-            })
-
-            this.handleResponse(response);
-            console.log(response);
-        } catch (err) {
-            addNewLogMessage("@sampleRequest " + err)
-        }
-
-    }
-
-    async getBoard(email) {
+    getHeaders() {
+        let token = localStorage.getItem("userToken");
         return {
-            "opponentPlayer": "enemy@gmail.com",
-            "currentTurnPlayer": "you@gmail.com",
-            "opponentHandCardsCount": 5,
-            "playerHandCards": [{
-                    "id": "GUID",
-                    "name": "Bob",
-                    "title": "The destroyer",
-                    "attack": 10,
-                    "health": 4,
-                    "statsModifiersCount": -1,
-                    "effects": [{
-                        "id": "GUID",
-                        "name": "Destroy",
-                        "description": "Destroy 2 targets",
-                        "targetsCount": 2
-                    }]
-                },
-                {
-                    "id": "GUID",
-                    "name": "Akuga",
-                    "title": "The flame empress",
-                    "attack": 99,
-                    "health": 99,
-                    "statsModifiersCount": 0,
-                    "effects": [{
-                        "id": "GUID",
-                        "name": "Destroy",
-                        "description": "Destroy all",
-                        "targetsCount": 15
-                    }]
-                }
-            ],
-            "opponentBoardCards": [{
-                    "id": "GUID",
-                    "name": "Snor",
-                    "title": "The destroyer",
-                    "attack": 10,
-                    "health": 4,
-                    "statsModifiersCount": -1,
-                    "effects": [{
-                        "id": "GUID",
-                        "name": "Destroy",
-                        "description": "Destroy 2 targets",
-                        "targetsCount": 2
-                    }]
-                },
-                {
-                    "id": "GUID",
-                    "name": "Naz",
-                    "title": "The flame empress",
-                    "attack": 99,
-                    "health": 99,
-                    "statsModifiersCount": 0,
-                    "effects": [{
-                        "id": "GUID",
-                        "name": "Destroy",
-                        "description": "Destroy all",
-                        "targetsCount": 15
-                    }]
-                }
-            ],
-            "playerBoardCards": [{
-                    "id": "GUID",
-                    "name": "Dors",
-                    "title": "The destroyer",
-                    "attack": 10,
-                    "health": 4,
-                    "statsModifiersCount": -1,
-                    "effects": [{
-                        "id": "GUID",
-                        "name": "Destroy",
-                        "description": "Destroy 2 targets",
-                        "targetsCount": 2
-                    }]
-                },
-                {
-                    "id": "GUID",
-                    "name": "Raz",
-                    "title": "The flame empress",
-                    "attack": 99,
-                    "health": 99,
-                    "statsModifiersCount": 0,
-                    "effects": [{
-                        "id": "GUID",
-                        "name": "Destroy",
-                        "description": "Destroy all",
-                        "targetsCount": 15
-                    }]
-                }
-            ],
-            "opponentHealth": 20,
-            "playerHealth": 10
-        }
-
-    }
-
-    async getGame(email) {
-        return {
-            "id": "GUID",
-            "currentTurnPlayer": "you@gmail.com",
-            "opponent": {
-                "mail": "test@gmail.com",
-                "class": {
-                    "id": 1,
-                    "name": "Schnell"
-                }
-            },
-            "player": {
-                "mail": "you@gmail.com",
-                "class": {
-                    "id": 3,
-                    "name": "Langsam"
-                }
-            },
-            "beginDate": "2017-11-29T10:00.123+01:00",
-            "isFinished": false
-        }
-    }
-
-    async startNewGame(email) {}
-
-    async getOpenGames() {
-        return [{
-            opponent: {
-                email: "enemy@now.com"
-            },
-            beginDate: "20.11.2010"
-        }, {
-            opponent: {
-                email: "test@gmail.com"
-            },
-            beginDate: "14.12.2014"
-        }]
-    }
-
-    async useCard(GUID) {
-        return true;
+            "Authorization": token.token_type + " " + token.id_token,
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+        };
     }
 }
 
