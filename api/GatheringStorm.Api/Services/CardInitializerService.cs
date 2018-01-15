@@ -6,6 +6,7 @@ using GatheringStorm.Api.Data;
 using GatheringStorm.Api.Models;
 using GatheringStorm.Api.Models.DB;
 using GatheringStorm.Api.Models.DB.Effects;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
 namespace GatheringStorm.Api.Services
@@ -144,18 +145,17 @@ namespace GatheringStorm.Api.Services
 
         public async Task<AppResult<GameCard>> GenerateStormling(User user)
         {
-            var cardResult = await this.dbContext.Cards.FindEntity(Guid.Parse("TEMP"));
-            if (cardResult.IsErrorResult)
+            var stormlingCard = await this.dbContext.Cards.SingleOrDefaultAsync(_ => _.Id == StormlingId);
+            if (stormlingCard == null)
             {
-                return cardResult.GetVoidAppResult().GetErrorAppResult<GameCard>();
+                return VoidAppResult.Error(ErrorPreset.OnLoadingData).GetErrorAppResult<GameCard>();
             }
 
-            var card = cardResult.SuccessReturnValue;
             var stormling = new GameCard
             {
                 Id = Guid.NewGuid(),
-                Health = card.BaseHealth,
-                Card = card,
+                Health = stormlingCard.BaseHealth,
+                Card = stormlingCard,
                 CardLocation = CardLocation.Board,
                 User = user
             };
@@ -164,13 +164,12 @@ namespace GatheringStorm.Api.Services
 
         private async Task<AppResult<List<GameCard>>> CreateGameCard(Guid cardId, User user, int duplicatesCount)
         {
-            var cardResult = await this.dbContext.Cards.FindEntity(cardId);
-            if (cardResult.IsErrorResult)
+            var card = await this.dbContext.Cards.SingleOrDefaultAsync(_ => _.Id == cardId);
+            if (card == null)
             {
-                return cardResult.GetVoidAppResult().GetErrorAppResult<List<GameCard>>();
+                return VoidAppResult.Error(ErrorPreset.OnLoadingData).GetErrorAppResult<List<GameCard>>();
             }
             var cards = new List<GameCard>();
-            var card = cardResult.SuccessReturnValue;
             for(var i = 0; i < duplicatesCount; i++)
             {
                 cards.Add(new GameCard

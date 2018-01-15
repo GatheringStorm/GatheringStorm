@@ -8,6 +8,7 @@ using GatheringStorm.Api.Models;
 using GatheringStorm.Api.Models.DB;
 using GatheringStorm.Api.Models.DB.Effects;
 using GatheringStorm.Api.Models.Dto;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
 namespace GatheringStorm.Api.Services.Effects
@@ -28,12 +29,11 @@ namespace GatheringStorm.Api.Services.Effects
         public async Task<VoidAppResult> ExecuteEffect(DtoEffectTargets effect, Game game, User currentTurnPlayer,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            var cardEffectResult = await this.dbContext.CardEffects.FindEntity(effect.CardEffectId);
-            if (cardEffectResult.IsErrorResult)
+            var cardEffect = await this.dbContext.CardEffects.SingleOrDefaultAsync(_ => _.Id == effect.CardEffectId);
+            if (cardEffect == null)
             {
-                return cardEffectResult.GetVoidAppResult();
+                return VoidAppResult.Error(ErrorPreset.OnLoadingData);
             }
-            var cardEffect = cardEffectResult.SuccessReturnValue;
 
             var parameters = JsonConvert.DeserializeObject<DestroyEffectParameters>(cardEffect.EffectParameters);
 

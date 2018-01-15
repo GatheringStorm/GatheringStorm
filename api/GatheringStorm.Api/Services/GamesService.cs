@@ -41,16 +41,16 @@ namespace GatheringStorm.Api.Services
 
         public async Task<VoidAppResult> StartNewGame(DtoNewGameInfo newGameInfo, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var findOpponentResult = await this.dbContext.Users.FindEntity(newGameInfo.OpponentMail, cancellationToken);
-            if (findOpponentResult.IsErrorResult)
+            var opponent = await this.dbContext.Users.SingleOrDefaultAsync(_ => _.Mail == newGameInfo.OpponentMail.ToLower());
+            if (opponent == null)
             {
-                findOpponentResult = await this.loginManager.CreateUser(newGameInfo.OpponentMail, cancellationToken);
+                var createOpponentResult = await this.loginManager.CreateUser(newGameInfo.OpponentMail, cancellationToken);
+                if (createOpponentResult.IsErrorResult)
+                {
+                    return createOpponentResult.GetVoidAppResult();
+                }
+                opponent = createOpponentResult.SuccessReturnValue;
             }
-            if (findOpponentResult.IsErrorResult)
-            {
-                return findOpponentResult.GetVoidAppResult();
-            }
-            var opponent = findOpponentResult.SuccessReturnValue;
 
             var choices = ClassChoice.ChoicesFromClassTypes(newGameInfo.ClassTypes);
             var newGame = new Game
@@ -97,12 +97,11 @@ namespace GatheringStorm.Api.Services
 
         public async Task<VoidAppResult> JoinGame(DtoJoinGameInfo joinGameInfo, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var gameResult = await this.dbContext.Games.FindEntity(joinGameInfo.GameId);
-            if (gameResult.IsErrorResult)
+            var game = await this.dbContext.Games.IncludeUserParticipations().IncludeEntities().SingleOrDefaultAsync(_ => _.Id == joinGameInfo.GameId);
+            if (game == null)
             {
-                return gameResult.GetVoidAppResult();
+                return VoidAppResult.Error(ErrorPreset.OnLoadingData);
             }
-            var game = gameResult.SuccessReturnValue;
 
             game.Status = GameStatus.InProgress;
             var playerParticipation = game.UserParticipations.Single(_ => _.Mail == this.loginManager.LoggedInUser.Mail);
@@ -153,7 +152,7 @@ namespace GatheringStorm.Api.Services
                     break;
             }
 
-            var currentTurnPlayerResult = await this.GetCurrentTurnPlayer(game.Id, cancellationToken);
+            var currentTurnPlayerResult = await this.GetCurrentTurnPlayer(game, cancellationToken);
             if (currentTurnPlayerResult.IsErrorResult)
             {
                 return currentTurnPlayerResult.GetVoidAppResult();
@@ -172,20 +171,30 @@ namespace GatheringStorm.Api.Services
         public async Task<AppResult<List<DtoGame>>> GetGames(CancellationToken cancellationToken = default(CancellationToken))
         {
             var loggedInUserMail = this.loginManager.LoggedInUser.Mail;
-            List<Game> games = await this.dbContext.Games.Where(_ => _.UserParticipations.Any(x => x.Mail == loggedInUserMail)).ToListAsync();
+            List<Game> games = await this.dbContext.Games.Where(_ => _.UserParticipations.Any(x => x.Mail == loggedInUserMail))
+                .Include(_ => _.UserParticipations)
+                    .ThenInclude(_ => _.User)
+                .Include(_ => _.UserParticipations)
+                    .ThenInclude(_ => _.ClassChoices)
+                .ToListAsync();
             List<DtoGame> dtoGames = new List<DtoGame>();
 
             foreach (Game game in games)
             {
-                var currentPlayerMail = (await this.GetCurrentTurnPlayer(game.Id, cancellationToken)).SuccessReturnValue.Mail;
+                var currentTurnPlayerResult = await this.GetCurrentTurnPlayer(game, cancellationToken);
+                if (currentTurnPlayerResult.IsErrorResult)
+                {
+                    return currentTurnPlayerResult.GetVoidAppResult().GetErrorAppResult<List<DtoGame>>();
+                }
+                var currentTurnPlayerMail = currentTurnPlayerResult.SuccessReturnValue?.Mail;
                 var opponentMail = game.UserParticipations.Single(_ => _.Mail != loggedInUserMail).User.Mail;
 
                 var newDtoGame = new DtoGame
                 {
                     Id = game.Id,
-                    CurrentTurnPlayer = currentPlayerMail,
+                    CurrentTurnPlayer = currentTurnPlayerMail,
                     BeginDate = game.BeginDate,
-                    Status = MapGameStatus(game, currentPlayerMail),
+                    Status = MapGameStatus(game, currentTurnPlayerMail),
                     OpponentMail = opponentMail
                 };
 
@@ -225,12 +234,11 @@ namespace GatheringStorm.Api.Services
 
         public async Task<AppResult<DtoBoard>> GetBoard(Guid gameId, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var gameResult = await this.dbContext.Games.FindEntity(gameId, cancellationToken);
-            if (gameResult.IsErrorResult)
+            var game = await this.dbContext.Games.IncludeUserParticipations().IncludeEntities().SingleOrDefaultAsync(_ => _.Id == gameId, cancellationToken);
+            if (game == null)
             {
-                return AppResult<DtoBoard>.Error(AppActionResultType.ServerError, "There was an error while loading game info.");
+                return VoidAppResult.Error(ErrorPreset.OnLoadingData).GetErrorAppResult<DtoBoard>();
             }
-            var game = gameResult.SuccessReturnValue;
             if (game.UserParticipations.All(_ => _.Mail != this.loginManager.LoggedInUser.Mail)) 
             {
                 return AppResult<DtoBoard>.Error(AppActionResultType.UserError, "This user is not part of this game.");
@@ -243,13 +251,12 @@ namespace GatheringStorm.Api.Services
             var loggedInParticipation = game.UserParticipations.Single(_ => _.Mail == this.loginManager.LoggedInUser.Mail);
             var loggedInEntity = game.Entities.Select(_ => _ as Player).Single(_ => _ != null && _.User.Mail == this.loginManager.LoggedInUser.Mail);
 
-            var currentTurnPlayerResult = await this.GetCurrentTurnPlayer(game.Id, cancellationToken);
+            var currentTurnPlayerResult = await this.GetCurrentTurnPlayer(game, cancellationToken);
             if (currentTurnPlayerResult.IsErrorResult)
             {
                 return AppResult<DtoBoard>.Error(AppActionResultType.ServerError, "There was an error while loading game info.");
             }
-            var gameCards = game.Entities.Where(_ => _ is GameCard)
-                .Select(_ => _ as GameCard);
+            var gameCards = await this.dbContext.GameCards.IncludeAll().Where(_ => _.Game.Id == gameId).ToListAsync();
 
             var loggedInHandCardsResult = await this.GetDtoCardsFromGameCards(gameCards
                 .Where(_ => _.User.Mail == this.loginManager.LoggedInUser.Mail && _.CardLocation == CardLocation.Hand)
@@ -300,7 +307,12 @@ namespace GatheringStorm.Api.Services
 
         public async Task<VoidAppResult> EndTurn(Guid gameId, CancellationToken cancellationToken = default(CancellationToken))
         {            
-            var game = (await this.dbContext.Games.FindEntity(gameId, cancellationToken)).SuccessReturnValue; //todo check if its own turn
+            var game = await this.dbContext.Games.IncludeEntities().SingleOrDefaultAsync(_ => _.Id == gameId, cancellationToken);
+            if (game == null)
+            {
+                return VoidAppResult.Error(ErrorPreset.OnLoadingData);
+            }
+
             var move = new Move
             {
                 Date = DateTime.Now,
@@ -318,20 +330,19 @@ namespace GatheringStorm.Api.Services
 
         public async Task<VoidAppResult> PlayCard(Guid gameId, DtoPlayCardMove move, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var gameResult = await this.dbContext.Games.FindEntity(gameId, cancellationToken);
-            var currentTurnPlayerResult = await this.GetCurrentTurnPlayer(gameId, cancellationToken);
-            if (gameResult.IsErrorResult)
+            var game = await this.dbContext.Games.IncludeUserParticipations().IncludeEntities().SingleOrDefaultAsync(_ => _.Id == gameId, cancellationToken);
+            var currentTurnPlayerResult = await this.GetCurrentTurnPlayer(game, cancellationToken);
+            if (game == null)
             {
-                return gameResult.GetVoidAppResult();
+                return VoidAppResult.Error(ErrorPreset.OnLoadingData);
             }
             if (currentTurnPlayerResult.IsErrorResult)
             {
                 return currentTurnPlayerResult.GetVoidAppResult();
             }
-            var game = gameResult.SuccessReturnValue;
             var currentTurnPlayer = currentTurnPlayerResult.SuccessReturnValue;
 
-            var playedGameCard = game.Entities.SingleOrDefault(_ => _.Id == move.CardId) as GameCard;
+            var playedGameCard = await this.dbContext.GameCards.IncludeCards().SingleOrDefaultAsync(_ => _.Id == move.CardId);
             if (playedGameCard == null || playedGameCard.CardLocation != CardLocation.Hand)
             {
                 return VoidAppResult.Error(AppActionResultType.RuleError, "Selected card cannot be played.");
@@ -379,10 +390,14 @@ namespace GatheringStorm.Api.Services
 
         public async Task<VoidAppResult> Attack(Guid gameId, DtoAttackMove move, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var game = (await this.dbContext.Games.FindEntity(gameId, cancellationToken)).SuccessReturnValue;
-
-            var attacker = (await this.dbContext.GameCards.FindEntity(move.AttackerId, cancellationToken)).SuccessReturnValue;
-            var target = (await this.dbContext.GameCards.FindEntity(move.TargetId, cancellationToken)).SuccessReturnValue;
+            var game = await this.dbContext.Games.IncludeEntities().SingleOrDefaultAsync(_ => _.Id == gameId, cancellationToken);
+            var attacker = game?.Entities.SingleOrDefault(_ => _.Id == move.AttackerId) as GameCard;
+            var target = game?.Entities.SingleOrDefault(_ => _.Id == move.TargetId) as GameCard;
+            
+            if (game == null || attacker == null || target == null)
+            {
+                return VoidAppResult.Error(ErrorPreset.OnLoadingData);
+            }
 
             var dbMove = new Move
             {
@@ -423,6 +438,12 @@ namespace GatheringStorm.Api.Services
             var cards = game.Entities.Select(_ => _ as GameCard)
                                     .Where(_ => _ != null && _.User.Mail == userMail && _.CardLocation == CardLocation.Cellar)
                                     .ToList();
+
+            if (cards.Count == 0)
+            {
+                return Task.FromResult(VoidAppResult.Success());
+            }
+
             var drawnCardIndex = new Random().Next(cards.Count());
             cards[drawnCardIndex].CardLocation = CardLocation.Hand;
             return Task.FromResult(VoidAppResult.Success());
@@ -461,21 +482,24 @@ namespace GatheringStorm.Api.Services
             return AppResult<List<DtoCard>>.Success(dtoCards);
         }
 
-        private async Task<AppResult<User>> GetCurrentTurnPlayer(Guid gameId, CancellationToken cancellationToken)
+        private async Task<AppResult<User>> GetCurrentTurnPlayer(Game game, CancellationToken cancellationToken)
         {
             var lastEndTurn = await this.dbContext.Moves
-                .Where(_ => _.Type == MoveType.EndTurn && _.Game.Id == gameId)
+                .Where(_ => _.Type == MoveType.EndTurn && _.Game.Id == game.Id)
                 .OrderByDescending(_ => _.Date)
                 .SingleOrDefaultAsync();
 
-            var gameUserParticipations = this.dbContext.UserParitcipations.Where(_ => _.GameId == gameId);
+            if (game.UserParticipations.Any(_ => _.ClassType == null))
+            {
+                return AppResult<User>.Success(null);
+            }
 
             if (lastEndTurn == null)
             {
-                return AppResult<User>.Success(gameUserParticipations.OrderBy(_ => _.ClassType).First().User);
+                return AppResult<User>.Success(game.UserParticipations.OrderBy(_ => _.ClassType).First().User);
             }
 
-            return AppResult<User>.Success(gameUserParticipations.Single(_ => _.Mail != lastEndTurn.SourceEntity.User.Mail).User);
+            return AppResult<User>.Success(game.UserParticipations.Single(_ => _.Mail != lastEndTurn.SourceEntity.User.Mail).User);
         }
     }
 }

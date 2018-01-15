@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GatheringStorm.Api.Models;
@@ -51,20 +53,41 @@ namespace GatheringStorm.Api.Data
         public DbSet<UserParticipation> UserParitcipations { get; set; }
     }
 
-    public static class DbContextExtensions
+    public static class AppDbContextExtensions
     {
-        public static async Task<AppResult<T>> FindEntity<T>(this DbSet<T> dbSet, object id, CancellationToken cancellationToken = default(CancellationToken))
-            where T : class
+        public static IQueryable<Game> IncludeUserParticipations(this IQueryable<Game> dbSet)
         {
-            var result = await dbSet.FindAsync(new object[] { id }, cancellationToken);
-            if (result != null)
-            {
-                return AppResult<T>.Success(result);
-            }
-            else
-            {
-                return VoidAppResult.Error(ErrorPreset.OnLoadingData).GetErrorAppResult<T>();
-            }
+            return dbSet
+                .Include(_ => _.UserParticipations)
+                    .ThenInclude(_ => _.User)
+                .Include(_ => _.UserParticipations)
+                    .ThenInclude(_ => _.ClassChoices);
+        }
+
+        public static IQueryable<Game> IncludeEntities(this IQueryable<Game> dbSet)
+        {
+            return dbSet
+                .Include(_ => _.Entities)
+                    .ThenInclude(_ => _.User);
+        }
+
+        public static IQueryable<GameCard> IncludeAll(this IQueryable<GameCard> dbSet)
+        {
+            return dbSet
+                .IncludeCards()
+                .Include(_ => _.User)
+                .Include(_ => _.Game);
+        }
+
+        public static IQueryable<GameCard> IncludeCards(this IQueryable<GameCard> dbSet)
+        {
+            return dbSet
+                .Include(_ => _.Card)
+                    .ThenInclude(_ => _.Character)
+                .Include(_ => _.Card)
+                    .ThenInclude(_ => _.Title)
+                .Include(_ => _.Card)
+                    .ThenInclude(_ => _.Effects);
         }
     }
 }

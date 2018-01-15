@@ -12,6 +12,6 @@ namespace GatheringStorm.Api.Models.Dto
         public List<DtoCard> BoardCards { get; set; }
         
         [JsonConverter(typeof(StringEnumConverter), true)]
-        public ClassType ClassType { get;set; }
+        public ClassType? ClassType { get;set; }
     }
 }
