@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using GatheringStorm.Api.Models.DB;
 
 namespace GatheringStorm.Api.Models.Dto
 {

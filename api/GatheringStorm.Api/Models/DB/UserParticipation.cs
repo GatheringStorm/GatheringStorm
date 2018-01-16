@@ -9,7 +9,7 @@ namespace GatheringStorm.Api.Models.DB
     {
         public string Mail { get; set; }
         public User User { get; set; }
-        public ClassType ClassType { get; set; }
+        public ClassType? ClassType { get; set; }
         public List<ClassChoice> ClassChoices { get; set; }
         public Guid GameId { get; set; }
         public Game Game { get; set; }

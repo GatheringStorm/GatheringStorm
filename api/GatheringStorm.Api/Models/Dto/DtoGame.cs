@@ -28,6 +28,8 @@ namespace GatheringStorm.Api.Models.Dto
         [EnumMember(Value = "opponentTurn")]
         OpponentTurn,
         [EnumMember(Value = "invitePending")]
-        InvitePending
+        InvitePending,
+        [EnumMember(Value = "invited")]
+        Invited
     }
 }

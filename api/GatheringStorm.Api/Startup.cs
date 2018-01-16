@@ -14,6 +14,8 @@ using GatheringStorm.Api.Auth;
 using GatheringStorm.Api.Controllers;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
+using Swashbuckle.AspNetCore.Swagger;
+using GatheringStorm.Api.Services.Effects;
 
 namespace GatheringStorm.Api
 {
@@ -36,24 +38,42 @@ namespace GatheringStorm.Api
         {
             services.AddMvc();
 
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Info { Title = "GatheringStorm", Version = "v1" });
+
+                c.OperationFilter<ResponseTypesOperationFilter>();
+
+                c.DescribeAllEnumsAsStrings();
+                c.DescribeStringEnumsInCamelCase();
+            });
+
             var connString = Configuration["GatheringStormConnection"];
             services.AddDbContext<AppDbContext>(o => o.UseSqlServer(connString));
             services.AddTransient<IGamesService, GamesService>();
+            services.AddTransient<IEffectsService, EffectsService>();
+            services.AddTransient<IDestroyEffect, DestroyEffect>();
+            services.AddTransient<IChangeStatsEffect, ChangeStatsEffect>();
+            services.AddTransient<ICardInitializerService, CardInitializerService>();
             services.AddTransient<IControllerUtility, ControllerUtility>();
             services.AddScoped<ILoginManager, LoginManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, AppDbContext dbContext)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, AppDbContext dbContext, ICardInitializerService cardInitializer)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
+            app.UseMiddleware<CatchInternalServerErrorMiddleware>();
 
             dbContext.Database.EnsureCreated();
+            Task.WaitAll(cardInitializer.InitializeCards());
 
             app.UseMvc();
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "GatheringStorm v1");
+            });
         }
     }
 }

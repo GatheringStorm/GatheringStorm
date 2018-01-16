@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GatheringStorm.Api.Models;
@@ -38,27 +40,54 @@ namespace GatheringStorm.Api.Data
 
         public DbSet<Card> Cards { get; set; }
         public DbSet<CardEffect> CardEffects { get; set; }
-        public DbSet<CardLocation> CardLocations { get; set; }
-        public DbSet<Effect> Effects { get; set; }
+        public DbSet<Character> Characters { get; set; }
+        public DbSet<ClassChoice> ClassChoices { get; set; }
         public DbSet<Entity> Entities { get; set; }
         public DbSet<Game> Games { get; set; }
         public DbSet<GameCard> GameCards { get; set; }
         public DbSet<Move> Moves { get; set; }
         public DbSet<MoveTargetEntity> MoveTargetEntities { get; set; }
-        // public DbSet<MoveType> MoveTypes { get; set; }
         public DbSet<Player> Players { get; set; }
         public DbSet<Title> Titles { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<UserParticipation> UserParitcipations { get; set; }
-        public DbSet<ClassChoice> ClassChoices { get; set; }
     }
 
-    public static class DbContextExtensions
+    public static class AppDbContextExtensions
     {
-        public static async Task<AppResult<T>> FindEntity<T>(this DbSet<T> dbSet, object id, CancellationToken cancellationToken = default(CancellationToken))
-            where T : class
+        public static IQueryable<Game> IncludeUserParticipations(this IQueryable<Game> dbSet)
         {
-            return AppResult<T>.Success(await dbSet.FindAsync(new object[] { id }, cancellationToken));
+            return dbSet
+                .Include(_ => _.UserParticipations)
+                    .ThenInclude(_ => _.User)
+                .Include(_ => _.UserParticipations)
+                    .ThenInclude(_ => _.ClassChoices);
+        }
+
+        public static IQueryable<Game> IncludeEntities(this IQueryable<Game> dbSet)
+        {
+            return dbSet
+                .Include(_ => _.Entities)
+                    .ThenInclude(_ => _.User);
+        }
+
+        public static IQueryable<GameCard> IncludeAll(this IQueryable<GameCard> dbSet)
+        {
+            return dbSet
+                .IncludeCards()
+                .Include(_ => _.User)
+                .Include(_ => _.Game);
+        }
+
+        public static IQueryable<GameCard> IncludeCards(this IQueryable<GameCard> dbSet)
+        {
+            return dbSet
+                .Include(_ => _.Card)
+                    .ThenInclude(_ => _.Character)
+                .Include(_ => _.Card)
+                    .ThenInclude(_ => _.Title)
+                .Include(_ => _.Card)
+                    .ThenInclude(_ => _.Effects);
         }
     }
 }

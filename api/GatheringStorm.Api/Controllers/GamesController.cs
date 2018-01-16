@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using GatheringStorm.Api.Auth;
+using GatheringStorm.Api.Models;
 using GatheringStorm.Api.Models.DB;
 using GatheringStorm.Api.Models.Dto;
 using GatheringStorm.Api.Services;
@@ -24,6 +26,8 @@ namespace GatheringStorm.Api.Controllers
         }
 
         [HttpPost("New")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(typeof(ErrorActionResultContent), 400)]
         public async Task<IActionResult> StartNewGame([FromBody] DtoNewGameInfo newGameInfo,
             CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -31,38 +35,58 @@ namespace GatheringStorm.Api.Controllers
             return utility.GetActionResult(result);
         }
 
+        [HttpPost("Join")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(typeof(ErrorActionResultContent), 400)]
+        public async Task<IActionResult> JoinGame([FromBody] DtoJoinGameInfo joinGameInfo,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var result = await this.gamesService.JoinGame(joinGameInfo, cancellationToken).ConfigureAwait(false);
+            return utility.GetActionResult(result);
+        }
+
         [HttpGet]
+        [ProducesResponseType(typeof(List<DtoGame>), 200)]
+        [ProducesResponseType(typeof(ErrorActionResultContent), 400)]
         public async Task<IActionResult> Get()
         {
-            var result = await this.gamesService.GetGamesAsync().ConfigureAwait(false);
+            var result = await this.gamesService.GetGames().ConfigureAwait(false);
             return this.utility.GetActionResult(result);
         }
 
         [HttpGet("{gameId}/Board")]
+        [ProducesResponseType(typeof(DtoBoard), 200)]
+        [ProducesResponseType(typeof(ErrorActionResultContent), 400)]
         public async Task<IActionResult> GetBoard(Guid gameId)
         {
-            var result = await this.gamesService.GetBoardAsync(gameId).ConfigureAwait(false);
+            var result = await this.gamesService.GetBoard(gameId).ConfigureAwait(false);
             return this.utility.GetActionResult(result);
         }
 
         [HttpPost("{gameId}/EndTurn")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(typeof(ErrorActionResultContent), 400)]
         public async Task<IActionResult> EndTurn(Guid gameId)
         {
-            var result = await this.gamesService.EndTurnAsync(gameId).ConfigureAwait(false);
+            var result = await this.gamesService.EndTurn(gameId).ConfigureAwait(false);
             return this.utility.GetActionResult(result);
         }
 
         [HttpPost("{gameId}/PlayCard")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(typeof(ErrorActionResultContent), 400)]
         public async Task<IActionResult> PlayCard(Guid gameId, [FromBody] DtoPlayCardMove move)
         {
-            var result = await this.gamesService.PlayCardAsync(gameId, move).ConfigureAwait(false);
+            var result = await this.gamesService.PlayCard(gameId, move).ConfigureAwait(false);
             return this.utility.GetActionResult(result);
         }
 
         [HttpPost("{gameId}/Attack")]
-        public async Task<IActionResult> PlayCard(Guid gameId, [FromBody] DtoAttackMove move)
+        [ProducesResponseType(200)]
+        [ProducesResponseType(typeof(ErrorActionResultContent), 400)]
+        public async Task<IActionResult> Attack(Guid gameId, [FromBody] DtoAttackMove move)
         {
-            var result = await this.gamesService.AttackAsync(gameId, move).ConfigureAwait(false);
+            var result = await this.gamesService.Attack(gameId, move).ConfigureAwait(false);
             return this.utility.GetActionResult(result);
         }
     }
