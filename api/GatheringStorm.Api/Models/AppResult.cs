@@ -19,12 +19,12 @@ namespace GatheringStorm.Api.Models
                 return this.Result != AppActionResultType.Success;
             }
         }
-    }
 
-    public class VoidAppResult : AppResult
-    {
-        protected VoidAppResult()
+        public VoidAppResult GetVoidAppResult()
         {
+            return this.Result == AppActionResultType.Success
+                ? VoidAppResult.Success()
+                : VoidAppResult.Error(this.Result, this.ErrorMessage);
         }
 
         public AppResult<T> GetErrorAppResult<T>()
@@ -34,6 +34,13 @@ namespace GatheringStorm.Api.Models
                 return AppResult<T>.Error(AppActionResultType.ServerError, "Error when converting AppResult.");
             }
             return AppResult<T>.Error(this.Result, this.ErrorMessage);
+        }
+    }
+
+    public class VoidAppResult : AppResult
+    {
+        protected VoidAppResult()
+        {
         }
 
         public static VoidAppResult Success()
@@ -91,13 +98,6 @@ namespace GatheringStorm.Api.Models
                 Result = result,
                 ErrorMessage = errorMessage
             };
-        }
-
-        public VoidAppResult GetVoidAppResult()
-        {
-            return this.Result == AppActionResultType.Success
-                ? VoidAppResult.Success()
-                : VoidAppResult.Error(this.Result, this.ErrorMessage);
         }
 
         public T SuccessReturnValue { get; protected set; }

@@ -41,6 +41,11 @@ namespace GatheringStorm.Api
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Info { Title = "GatheringStorm", Version = "v1" });
+
+                c.OperationFilter<ResponseTypesOperationFilter>();
+
+                c.DescribeAllEnumsAsStrings();
+                c.DescribeStringEnumsInCamelCase();
             });
 
             var connString = Configuration["GatheringStormConnection"];
@@ -57,10 +62,7 @@ namespace GatheringStorm.Api
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, AppDbContext dbContext, ICardInitializerService cardInitializer)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
+            app.UseMiddleware<CatchInternalServerErrorMiddleware>();
 
             dbContext.Database.EnsureCreated();
             Task.WaitAll(cardInitializer.InitializeCards());

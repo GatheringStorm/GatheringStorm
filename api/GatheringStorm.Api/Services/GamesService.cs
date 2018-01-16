@@ -169,9 +169,9 @@ namespace GatheringStorm.Api.Services
         }
 
         public async Task<AppResult<List<DtoGame>>> GetGames(CancellationToken cancellationToken = default(CancellationToken))
-        {
+        {            
             var loggedInUserMail = this.loginManager.LoggedInUser.Mail;
-            List<Game> games = await this.dbContext.Games.Where(_ => _.UserParticipations.Any(x => x.Mail == loggedInUserMail))
+            List<Game> games = await this.dbContext.Games.IncludeUserParticipations().Where(_ => _.UserParticipations.Any(x => x.Mail == loggedInUserMail))
                 .Include(_ => _.UserParticipations)
                     .ThenInclude(_ => _.User)
                 .Include(_ => _.UserParticipations)
@@ -184,7 +184,7 @@ namespace GatheringStorm.Api.Services
                 var currentTurnPlayerResult = await this.GetCurrentTurnPlayer(game, cancellationToken);
                 if (currentTurnPlayerResult.IsErrorResult)
                 {
-                    return currentTurnPlayerResult.GetVoidAppResult().GetErrorAppResult<List<DtoGame>>();
+                    return currentTurnPlayerResult.GetErrorAppResult<List<DtoGame>>();
                 }
                 var currentTurnPlayerMail = currentTurnPlayerResult.SuccessReturnValue?.Mail;
                 var opponentMail = game.UserParticipations.Single(_ => _.Mail != loggedInUserMail).User.Mail;
@@ -263,7 +263,7 @@ namespace GatheringStorm.Api.Services
                 .ToList());
             if (loggedInHandCardsResult.IsErrorResult)
             {
-                return loggedInHandCardsResult.GetVoidAppResult().GetErrorAppResult<DtoBoard>();
+                return loggedInHandCardsResult.GetErrorAppResult<DtoBoard>();
             }
 
             var loggedInBoardCardsResult = await this.GetDtoCardsFromGameCards(gameCards
@@ -271,7 +271,7 @@ namespace GatheringStorm.Api.Services
                 .ToList());
             if (loggedInBoardCardsResult.IsErrorResult)
             {
-                return loggedInBoardCardsResult.GetVoidAppResult().GetErrorAppResult<DtoBoard>();
+                return loggedInBoardCardsResult.GetErrorAppResult<DtoBoard>();
             }
 
             var opponentBoardCardsResult = await this.GetDtoCardsFromGameCards(gameCards
@@ -279,7 +279,7 @@ namespace GatheringStorm.Api.Services
                 .ToList());
             if (opponentBoardCardsResult.IsErrorResult)
             {
-                return opponentBoardCardsResult.GetVoidAppResult().GetErrorAppResult<DtoBoard>();
+                return opponentBoardCardsResult.GetErrorAppResult<DtoBoard>();
             }
 
             return AppResult<DtoBoard>.Success(new DtoBoard
@@ -473,7 +473,7 @@ namespace GatheringStorm.Api.Services
                     var effectResult = await this.effectsService.GetDtoEffect(cardEffect);
                     if (effectResult.IsErrorResult)
                     {
-                        return effectResult.GetVoidAppResult().GetErrorAppResult<List<DtoCard>>();
+                        return effectResult.GetErrorAppResult<List<DtoCard>>();
                     }
                 }
 
