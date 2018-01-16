@@ -13,7 +13,7 @@ class GameSelectionCard extends React.Component {
   }
 
   play() {
-    defaultWebAccess.getGame(this.props.email)
+    defaultWebAccess.getBoard(this.props.ID)
     this.props.stateMachine.action(Action.STARTGAME);
   }
 
@@ -29,7 +29,6 @@ class GameSelectionCard extends React.Component {
       return
     };
     defaultWebAccess.startNewGame(enemy, prio);
-    this.props.stateMachine.action(Action.STARTGAME);
   }
 
   createStyle() {
@@ -50,8 +49,7 @@ class GameSelectionCard extends React.Component {
         <div>
           <button type="button" className="btn btn-primary" data-toggle="modal" data-target="#myModal">
             Start new Game
-      </button>
-
+          </button>
           <div className="modal fade" id="myModal" tabIndex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div className="modal-dialog" role="document">
               <div className="modal-content">
