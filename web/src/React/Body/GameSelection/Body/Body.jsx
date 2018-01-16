@@ -11,7 +11,7 @@ class Body extends React.Component {
     }
 
     async getOpenGames() {
-        let response = await defaultWebAccess.getOpenGames();
+        let response = await defaultWebAccess.getGames();
         return response.map(_ => {
             _.mode = "existing";
             return _;

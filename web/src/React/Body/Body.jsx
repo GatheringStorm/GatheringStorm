@@ -31,7 +31,7 @@ class Body extends React.Component {
         clientId="24931599658-o9q66rbqprq0lcgrtlbfhcs3kcfqs8rg.apps.googleusercontent.com"
         buttonText="Login"
         onSuccess={this.responseGoogle}
-        onFailure={this.responseGoogle}
+        onFailure=""
       />);
     else
       return <div />;

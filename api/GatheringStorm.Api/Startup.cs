@@ -48,6 +48,12 @@ namespace GatheringStorm.Api
                 c.DescribeStringEnumsInCamelCase();
             });
 
+            services.AddCors(o => o.AddPolicy("AllowAll", builder =>
+                            builder.AllowAnyOrigin()
+                                .AllowAnyHeader()
+                                .AllowAnyMethod()
+            .AllowCredentials()));
+
             var connString = Configuration["GatheringStormConnection"];
             services.AddDbContext<AppDbContext>(o => o.UseSqlServer(connString));
             services.AddTransient<IGamesService, GamesService>();
@@ -67,6 +73,7 @@ namespace GatheringStorm.Api
             dbContext.Database.EnsureCreated();
             Task.WaitAll(cardInitializer.InitializeCards());
 
+            app.UseCors("AllowAll");
             app.UseMvc();
 
             app.UseSwagger();

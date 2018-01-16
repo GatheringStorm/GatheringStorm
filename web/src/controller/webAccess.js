@@ -78,9 +78,9 @@ class webAccess {
     }
 
     getHeaders() {
-        let token = localStorage.getItem("userToken");
+        let token = JSON.parse(localStorage.getItem("userToken"));
         return {
-            "Authorization": token.token_type + " " + token.id_token,
+            "Authorization": token.Zi.token_type + " " + token.Zi.id_token,
             "Accept": "application/json",
             "Content-Type": "application/json"
         };
