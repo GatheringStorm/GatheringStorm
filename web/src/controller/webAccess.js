@@ -26,11 +26,11 @@ class webAccess {
     async getBoard(gameId) {
         return await this.get(gameId + '/board');
     }
-    
+
     async endTurn(gameId) {
         return await this.post(gameId + '/endTurn');
     }
-    
+
     async playCard(gameId, cardId, discardedCardIds, effectTargets) {
         return await this.post(gameId + '/playCard', {
             cardId: cardId,
@@ -38,7 +38,7 @@ class webAccess {
             effectTargets: effectTargets
         });
     }
-    
+
     async attack(gameId, attackerId, targetId) {
         return await this.post(gameId + '/attack', {
             attackerId: attackerId,
@@ -52,15 +52,15 @@ class webAccess {
             body: payload,
             headers: this.getHeaders()
         });
-        return handleResponse(response);
+        return this.handleResponse(response);
     }
-    
+
     async get(route) {
         let response = await fetch(baseUrl + route, {
             method: "GET",
             headers: this.getHeaders()
         });
-        return handleResponse(response);
+        return this.handleResponse(response);
     }
 
     handleResponse(response) {
