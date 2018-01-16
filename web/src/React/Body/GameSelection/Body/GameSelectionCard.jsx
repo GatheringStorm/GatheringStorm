@@ -25,10 +25,16 @@ class GameSelectionCard extends React.Component {
       slow: document.getElementById("Slow-Prio").value
     };
 
-    if (enemy == null || prio.quick == prio.medium || prio.quick == prio.slow || prio.medium == prio.slow || prio.quick + prio.medium + prio.slow != 6 || prio.quick == null || prio.medium == null || prio.slow == null); {
+    if (enemy == null || prio.quick == prio.medium || prio.quick == prio.slow || prio.medium == prio.slow || parseInt(prio.quick) + parseInt(prio.medium) + parseInt(prio.slow) != 6 || prio.quick == null || prio.medium == null || prio.slow == null) {
       return
     };
-    defaultWebAccess.startNewGame(enemy, prio);
+
+    let prioSorted = [];
+    prioSorted[prio.quick - 1] = "quick";
+    prioSorted[prio.medium - 1] = "medium";
+    prioSorted[prio.slow - 1] = "slow";
+
+    defaultWebAccess.startNewGame(enemy, prioSorted);
   }
 
   createStyle() {
