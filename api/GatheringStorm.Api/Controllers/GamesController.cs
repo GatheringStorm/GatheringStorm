@@ -48,55 +48,45 @@ namespace GatheringStorm.Api.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(List<DtoGame>), 200)]
         [ProducesResponseType(typeof(ErrorActionResultContent), 400)]
-        public async Task<IActionResult> Get(CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<IActionResult> Get()
         {
-            var result = await this.gamesService.GetGames(cancellationToken).ConfigureAwait(false);
+            var result = await this.gamesService.GetGames().ConfigureAwait(false);
             return this.utility.GetActionResult(result);
         }
 
         [HttpGet("{gameId}/Board")]
         [ProducesResponseType(typeof(DtoBoard), 200)]
         [ProducesResponseType(typeof(ErrorActionResultContent), 400)]
-        public async Task<IActionResult> GetBoard(Guid gameId, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<IActionResult> GetBoard(Guid gameId)
         {
-            var result = await this.gamesService.GetBoard(gameId, cancellationToken).ConfigureAwait(false);
+            var result = await this.gamesService.GetBoard(gameId).ConfigureAwait(false);
             return this.utility.GetActionResult(result);
         }
 
         [HttpPost("{gameId}/EndTurn")]
         [ProducesResponseType(200)]
         [ProducesResponseType(typeof(ErrorActionResultContent), 400)]
-        public async Task<IActionResult> EndTurn(Guid gameId, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<IActionResult> EndTurn(Guid gameId)
         {
-            var result = await this.gamesService.EndTurn(gameId, cancellationToken).ConfigureAwait(false);
+            var result = await this.gamesService.EndTurn(gameId).ConfigureAwait(false);
             return this.utility.GetActionResult(result);
         }
 
         [HttpPost("{gameId}/PlayCard")]
         [ProducesResponseType(200)]
         [ProducesResponseType(typeof(ErrorActionResultContent), 400)]
-        public async Task<IActionResult> PlayCard(Guid gameId, [FromBody] DtoPlayCardMove move, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<IActionResult> PlayCard(Guid gameId, [FromBody] DtoPlayCardMove move)
         {
-            var result = await this.gamesService.PlayCard(gameId, move, cancellationToken).ConfigureAwait(false);
+            var result = await this.gamesService.PlayCard(gameId, move).ConfigureAwait(false);
             return this.utility.GetActionResult(result);
         }
 
         [HttpPost("{gameId}/Attack")]
         [ProducesResponseType(200)]
         [ProducesResponseType(typeof(ErrorActionResultContent), 400)]
-        public async Task<IActionResult> Attack(Guid gameId, [FromBody] DtoAttackMove move, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<IActionResult> Attack(Guid gameId, [FromBody] DtoAttackMove move)
         {
-            var result = await this.gamesService.Attack(gameId, move, cancellationToken).ConfigureAwait(false);
-            return this.utility.GetActionResult(result);
-        }
-
-        [HttpPost("{gameId}/AttackPlayer")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(typeof(ErrorActionResultContent), 400)]
-        public async Task<IActionResult> AttackPlayer(Guid gameId, [FromBody] DtoAttackPlayerMove attackPlayerMove,
-            CancellationToken cancellationToken = default(CancellationToken))
-        {
-            var result = await this.gamesService.AttackPlayer(gameId, attackPlayerMove, cancellationToken).ConfigureAwait(false);
+            var result = await this.gamesService.Attack(gameId, move).ConfigureAwait(false);
             return this.utility.GetActionResult(result);
         }
     }
