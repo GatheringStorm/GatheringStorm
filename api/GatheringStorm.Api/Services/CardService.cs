@@ -111,7 +111,7 @@ namespace GatheringStorm.Api.Services
                 Id = Guid.NewGuid(),
                 Name = "Akuga"
             };
-            var yerag= new Character
+            var yerag = new Character
             {
                 Id = Guid.NewGuid(),
                 Name = "Yerag"
@@ -121,8 +121,13 @@ namespace GatheringStorm.Api.Services
                 Id = Guid.NewGuid(),
                 Name = "Drahlget"
             };
+            var stormling = new Character
+            {
+                Id = Guid.NewGuid(),
+                Name = "Stormling"
+            };
             await dbContext.Characters.AddRangeAsync(claus, sepp, azgul, ison, rink, aiba, uni, okika,
-                zorya, yorza, yuu, velza, palutena, akuga, yerag, drahlget);
+                zorya, yorza, yuu, velza, palutena, akuga, yerag, drahlget, stormling);
 
             var pawn = new Title
             {
@@ -279,20 +284,48 @@ namespace GatheringStorm.Api.Services
                 IsLegendary = false,
                 Title = librarian,
                 Character = azgul,
-                Effects = new List<CardEffect> //TODO UPDATE
+                Effects = new List<CardEffect>
                 {
                     new CardEffect
                     {
                         Id = Guid.NewGuid(),
-                        EffectType = EffectType.ChangeStats,
-                        EffectParameters = JsonConvert.SerializeObject(new ChangeStatsEffectParameters
+                        EffectType = EffectType.DrawCards,
+                        EffectParameters = JsonConvert.SerializeObject(new DrawCardsEffectParameters
                         {
-                            TargetingType = TargetingType.Title,
-                            TargetParameter = pawn.Name,
-                            EffectStrength = -1
+                            //TODO UPDATE
                         })
                     }
                 }
+            },
+            new Card
+            {
+                Id = Guid.NewGuid(),
+                Cost = 2,
+                Attack = 2,
+                BaseHealth = 3,
+                IsLegendary = false,
+                Title = recruit,
+                Character = ison
+            },
+            new Card
+            {
+                Id = Guid.NewGuid(),
+                Cost = 2,
+                Attack = 3,
+                BaseHealth = 2,
+                IsLegendary = false,
+                Title = recruit,
+                Character = rink
+            },
+            new Card
+            {
+                Id = Guid.NewGuid(),
+                Cost = 2,
+                Attack = 1,
+                BaseHealth = 4,
+                IsLegendary = false,
+                Title = recruit,
+                Character = aiba
             },
             new Card
             {
@@ -317,6 +350,15 @@ namespace GatheringStorm.Api.Services
                         })
                     }
                 }
+            },
+            new Card
+            {
+                Id = Guid.NewGuid(),
+                Cost = 0,
+                Attack = 1,
+                BaseHealth = 1,
+                IsLegendary = false,
+                Character = stormling
             });
 
             await this.dbContext.SaveChangesAsync();
@@ -379,7 +421,7 @@ namespace GatheringStorm.Api.Services
 
         public Task<VoidAppResult> DrawCard(Game game, string userMail, int cardsCount)
         {
-            for(var i = 0; i < cardsCount; i++)
+            for (var i = 0; i < cardsCount; i++)
             {
                 var cards = game.Entities.Select(_ => _ as GameCard)
                                         .Where(_ => _ != null && _.User.Mail == userMail && _.CardLocation == CardLocation.Cellar)
@@ -404,7 +446,7 @@ namespace GatheringStorm.Api.Services
                 return VoidAppResult.Error(ErrorPreset.OnLoadingData).GetErrorAppResult<List<GameCard>>();
             }
             var cards = new List<GameCard>();
-            for(var i = 0; i < duplicatesCount; i++)
+            for (var i = 0; i < duplicatesCount; i++)
             {
                 cards.Add(new GameCard
                 {
