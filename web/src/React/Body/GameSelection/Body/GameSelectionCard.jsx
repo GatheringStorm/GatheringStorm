@@ -11,7 +11,6 @@ class GameSelectionCard extends React.Component {
 
     this.createStyle = this.createStyle.bind(this);
     this.joinGame = this.joinGame.bind(this);
-    this.createNewGame = this.createNewGame.bind(this);
   }
 
   play() {
@@ -37,7 +36,7 @@ class GameSelectionCard extends React.Component {
 
     defaultWebAccess.joinGame(this.props.ID, prioSorted);
 
-    this.setState({});
+    window.location.reload();
   }
 
   createNewGame() {
@@ -62,7 +61,7 @@ class GameSelectionCard extends React.Component {
 
     defaultWebAccess.startNewGame(enemy, prioSorted);
 
-    this.setState({});
+    window.location.reload();
   }
 
   createStyle() {
