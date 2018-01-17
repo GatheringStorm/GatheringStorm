@@ -28,18 +28,21 @@ export function cardMove(card, pos, owner, payCost) {
             } else {
                 // maximum 1 target
                 if (target(card, 1))
-                    return getTargets();
+                    return {
+                        move: "attack",
+                        targets: getTargets()
+                    };
                 return "pending";
             }
             break;
         case "hand":
             // pay costs
             if (target(card, payCost))
-                return getTargets();
+                return {
+                    move: "pay",
+                    targets: getTargets()
+                };
             return "pending";
-            break;
-        case "paid":
-            // effects
             break;
         default:
             break;

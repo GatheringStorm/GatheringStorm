@@ -32,7 +32,7 @@ class Game extends React.Component {
             <div className="Layout">
                 <input type="button" value="< Game Selection" onClick={this.returnToGameSelection} />
                 <p className="GameHeader">{JSON.parse(localStorage.getItem("userToken")).profileObj.email} vs {this.state.board.opponent.mail}</p>
-                <Board board={this.state.board} />
+                <Board board={this.state.board} playerHP={this.state.board.player.health} opponentHP={this.state.board.opponent.health} />
             </div>
         )
     }
