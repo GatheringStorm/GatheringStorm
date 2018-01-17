@@ -260,7 +260,8 @@ namespace GatheringStorm.Api.Services
 
             var loggedInHandCardsResult = await this.GetDtoCardsFromGameCards(gameCards
                 .Where(_ => _.User.Mail == this.loginManager.LoggedInUser.Mail && _.CardLocation == CardLocation.Hand)
-                .ToList());
+                .ToList(),
+                gameId);
             if (loggedInHandCardsResult.IsErrorResult)
             {
                 return loggedInHandCardsResult.GetErrorAppResult<DtoBoard>();
@@ -268,7 +269,8 @@ namespace GatheringStorm.Api.Services
 
             var loggedInBoardCardsResult = await this.GetDtoCardsFromGameCards(gameCards
                 .Where(_ => _.User.Mail == this.loginManager.LoggedInUser.Mail && _.CardLocation == CardLocation.Board)
-                .ToList());
+                .ToList(),
+                gameId);
             if (loggedInBoardCardsResult.IsErrorResult)
             {
                 return loggedInBoardCardsResult.GetErrorAppResult<DtoBoard>();
@@ -276,7 +278,8 @@ namespace GatheringStorm.Api.Services
 
             var opponentBoardCardsResult = await this.GetDtoCardsFromGameCards(gameCards
                 .Where(_ => _.User.Mail == opponent.Mail && _.CardLocation == CardLocation.Board)
-                .ToList());
+                .ToList(),
+                gameId);
             if (opponentBoardCardsResult.IsErrorResult)
             {
                 return opponentBoardCardsResult.GetErrorAppResult<DtoBoard>();
@@ -442,9 +445,16 @@ namespace GatheringStorm.Api.Services
             return VoidAppResult.Success();
         }
 
-        private async Task<AppResult<List<DtoCard>>> GetDtoCardsFromGameCards(List<GameCard> gameCards)
+        private async Task<AppResult<List<DtoCard>>> GetDtoCardsFromGameCards(List<GameCard> gameCards, Guid gameId)
         {
             var dtoCards = new List<DtoCard>();
+
+            var lastEndTurnResult = await this.GetLastEndTurn(gameId);
+            if (lastEndTurnResult.IsErrorResult)
+            {
+                return lastEndTurnResult.GetErrorAppResult<List<DtoCard>>();
+            }
+            var lastEndTurn = lastEndTurnResult.SuccessReturnValue;
 
             foreach(var gameCard in gameCards)
             {
@@ -459,6 +469,12 @@ namespace GatheringStorm.Api.Services
                     effects.Add(effectResult.SuccessReturnValue);
                 }
 
+                var lastAttack = await dbContext.Moves
+                    .Include(_ => _.SourceEntity)
+                    .Where(_ => _.SourceEntity.Id == gameCard.Id)
+                    .OrderByDescending(_ => _.Date)
+                    .FirstOrDefaultAsync();
+
                 dtoCards.Add(new DtoCard
                 {
                     Id = gameCard.Id,
@@ -466,7 +482,7 @@ namespace GatheringStorm.Api.Services
                     Title = gameCard.Card.Title.Name,
                     Cost = gameCard.Card.Cost,
                     Attack = gameCard.Card.Attack,
-                    CanAttack = true, // TODO
+                    CanAttack = lastAttack == null || lastEndTurn == null || lastAttack.Date < lastEndTurn.Date,
                     Health = gameCard.Health,
                     StatsModifiersCount = gameCard.StatModifiersCount,
                     Effects = effects
@@ -483,20 +499,31 @@ namespace GatheringStorm.Api.Services
                 return AppResult<User>.Success(null);
             }
 
-            var lastEndTurn = await this.dbContext.Moves
-                .Include(_ => _.Game)
-                .Include(_ => _.SourceEntity)
-                    .ThenInclude(_ => _.User)
-                .Where(_ => _.Type == MoveType.EndTurn && _.Game.Id == game.Id)
-                .OrderByDescending(_ => _.Date)
-                .FirstOrDefaultAsync();
+            var lastEndTurnResult = await this.GetLastEndTurn(game.Id);
+            if (lastEndTurnResult.IsErrorResult)
+            {
+                return lastEndTurnResult.GetErrorAppResult<User>();
+            }
 
+            var lastEndTurn = lastEndTurnResult.SuccessReturnValue;
             if (lastEndTurn == null)
             {
                 return AppResult<User>.Success(game.UserParticipations.OrderBy(_ => _.ClassType).First().User);
             }
 
             return AppResult<User>.Success(game.UserParticipations.Single(_ => _.Mail != lastEndTurn.SourceEntity.User.Mail).User);
+        }
+
+        private async Task<AppResult<Move>> GetLastEndTurn(Guid gameId)
+        {
+            var lastEndTurn = await this.dbContext.Moves
+                .Include(_ => _.Game)
+                .Include(_ => _.SourceEntity)
+                    .ThenInclude(_ => _.User)
+                .Where(_ => _.Type == MoveType.EndTurn && _.Game.Id == gameId)
+                .OrderByDescending(_ => _.Date)
+                .FirstOrDefaultAsync();
+            return AppResult<Move>.Success(lastEndTurn);
         }
     }
 }
