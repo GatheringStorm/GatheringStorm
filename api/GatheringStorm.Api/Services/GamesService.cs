@@ -503,6 +503,9 @@ namespace GatheringStorm.Api.Services
             }
 
             var lastEndTurn = await this.dbContext.Moves
+                .Include(_ => _.Game)
+                .Include(_ => _.SourceEntity)
+                    .ThenInclude(_ => _.User)
                 .Where(_ => _.Type == MoveType.EndTurn && _.Game.Id == game.Id)
                 .OrderByDescending(_ => _.Date)
                 .FirstOrDefaultAsync();

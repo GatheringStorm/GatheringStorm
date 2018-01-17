@@ -10,6 +10,8 @@ namespace GatheringStorm.Api.Data
 {
     public class AppDbContext : DbContext
     {
+        public Guid Id { get; } = Guid.NewGuid();
+
         public AppDbContext(DbContextOptions options) : base(options)
         {
         }
