@@ -71,7 +71,6 @@ class webAccess {
                 result: enum // possible values: userError, serverError, ruleError
             }
             */
-            console.log('Request error: ' + route, await response.json());
             throw new Error('Request error, TODO: Error handling.');
         }
         return await response.json();
