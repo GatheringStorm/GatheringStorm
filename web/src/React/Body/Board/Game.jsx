@@ -26,7 +26,6 @@ class Game extends React.Component {
     }
 
     render() {
-        console.log(this.state.board);
         if (this.state.board == null)
             return <p>Loading ... </p>
         return (
