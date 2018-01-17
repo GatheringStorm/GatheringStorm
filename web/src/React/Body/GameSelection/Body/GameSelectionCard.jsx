@@ -2,6 +2,7 @@ import React from "react";
 
 import defaultWebAccess from "../../../../controller/webAccess.js";
 import { Action } from "../../../../controller/statemachine.js"
+import { setCurrentGame } from "../../../../controller/currentBoard.js"
 
 class GameSelectionCard extends React.Component {
   constructor(props) {
@@ -14,7 +15,7 @@ class GameSelectionCard extends React.Component {
   }
 
   play() {
-    defaultWebAccess.getBoard(this.props.ID)
+    setCurrentGame(this.props.ID);
     this.props.stateMachine.action(Action.STARTGAME);
   }
 
