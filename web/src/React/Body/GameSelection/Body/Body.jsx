@@ -15,18 +15,17 @@ class Body extends React.Component {
         if (response == undefined)
             return [];
         return response.map(_ => {
-            _.mode = "existing";
             return _;
         });
     }
 
     async componentDidMount() {
-        let games = [{ mode: "new" }];
+        let games = [{ status: "new" }];
         games.push(...await this.getOpenGames());
         let obj = (
             <div className="flex-container-horizontal-wrap">{
                 games.map((item, index) => {
-                    return <GameSelectionCard key={index} stateMachine={this.props.stateMachine} mode={item.mode} ID={item.id} email={item.opponentMail} date={item.beginDate} currentTurnPlayer={item.currentTurnPlayer} gameState={item.state} />
+                    return <GameSelectionCard key={index} stateMachine={this.props.stateMachine} mode={item.status} ID={item.id} email={item.opponentMail} date={item.beginDate} currentTurnPlayer={item.currentTurnPlayer} gameState={item.state} />
                 })
             }</div>
         )
