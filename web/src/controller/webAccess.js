@@ -5,17 +5,17 @@ import {
 const baseUrl = "http://localhost:5000/api/games/";
 
 class webAccess {
-    async startNewGame(opponentMail, classChoices) {
+    async startNewGame(opponentMail, classTypes) {
         return await this.post('new', {
             opponentMail: opponentMail,
-            classChoices: classChoices
+            classTypes: classTypes
         });
     }
 
-    async joinGame(gameId, classChoices) {
+    async joinGame(gameId, classTypes) {
         return await this.post('new', {
             gameId: gameId,
-            classChoices: classChoices
+            classTypes: classTypes
         });
     }
 
@@ -49,10 +49,10 @@ class webAccess {
     async post(route, payload) {
         let response = await fetch(baseUrl + route, {
             method: "POST",
-            body: payload,
+            body: JSON.stringify(payload),
             headers: this.getHeaders()
         });
-        return this.handleResponse(response);
+        return await this.handleResponse(response);
     }
 
     async get(route) {
@@ -60,10 +60,10 @@ class webAccess {
             method: "GET",
             headers: this.getHeaders()
         });
-        return this.handleResponse(response);
+        return await this.handleResponse(response);
     }
 
-    handleResponse(response) {
+    async handleResponse(response) {
         if (!response.ok) {
             /* response.body format: 
             {
@@ -71,10 +71,10 @@ class webAccess {
                 result: enum // possible values: userError, serverError, ruleError
             }
             */
-            console.log('Request error: ' + route, response.body);
+            console.log('Request error: ' + route, await response.json());
             throw new Error('Request error, TODO: Error handling.');
         }
-        return response.body;
+        return await response.json();
     }
 
     getHeaders() {
