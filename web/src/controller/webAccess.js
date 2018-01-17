@@ -13,7 +13,7 @@ class webAccess {
     }
 
     async joinGame(gameId, classTypes) {
-        return await this.post('new', {
+        return await this.post('join', {
             gameId: gameId,
             classTypes: classTypes
         });
