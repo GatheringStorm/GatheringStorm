@@ -67,7 +67,20 @@ namespace GatheringStorm.Api.Services
                 BaseHealth = 1,
                 IsLegendary = false,
                 Title = pawn,
-                Character = claus
+                Character = claus,
+                Effects = new List<CardEffect> // TODO: EFFECT ONLY FOR TESTING!
+                {
+                    new CardEffect
+                    {
+                        Id = Guid.NewGuid(),
+                        EffectType = EffectType.Destroy,
+                        EffectParameters = JsonConvert.SerializeObject(new DestroyEffectParameters
+                        {
+                            TargetingType = TargetingType.CharacterName,
+                            TargetParameter = claus.Name
+                        })
+                    }
+                }
             },
             new Card
             {
@@ -77,7 +90,21 @@ namespace GatheringStorm.Api.Services
                 BaseHealth = 2,
                 IsLegendary = false,
                 Title = pawn,
-                Character = sepp
+                Character = sepp,
+                Effects = new List<CardEffect> // TODO: EFFECT ONLY FOR TESTING!
+                {
+                    new CardEffect
+                    {
+                        Id = Guid.NewGuid(),
+                        EffectType = EffectType.ChangeStats,
+                        EffectParameters = JsonConvert.SerializeObject(new ChangeStatsEffectParameters
+                        {
+                            TargetingType = TargetingType.Title,
+                            TargetParameter = pawn.Name,
+                            EffectStrength = -1
+                        })
+                    }
+                }
             },
             new Card
             {

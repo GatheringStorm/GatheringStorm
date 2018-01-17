@@ -338,11 +338,11 @@ namespace GatheringStorm.Api.Services
         public async Task<VoidAppResult> PlayCard(Guid gameId, DtoPlayCardMove move, CancellationToken cancellationToken = default(CancellationToken))
         {
             var game = await this.dbContext.Games.IncludeUserParticipations().IncludeEntities().SingleOrDefaultAsync(_ => _.Id == gameId, cancellationToken);
-            var currentTurnPlayerResult = await this.GetCurrentTurnPlayer(game, cancellationToken);
             if (game == null)
             {
                 return VoidAppResult.Error(ErrorPreset.OnLoadingData);
             }
+            var currentTurnPlayerResult = await this.GetCurrentTurnPlayer(game, cancellationToken);
             if (currentTurnPlayerResult.IsErrorResult)
             {
                 return currentTurnPlayerResult.GetVoidAppResult();
@@ -475,6 +475,7 @@ namespace GatheringStorm.Api.Services
                     {
                         return effectResult.GetErrorAppResult<List<DtoCard>>();
                     }
+                    effects.Add(effectResult.SuccessReturnValue);
                 }
 
                 dtoCards.Add(new DtoCard
@@ -484,7 +485,7 @@ namespace GatheringStorm.Api.Services
                     Title = gameCard.Card.Title.Name,
                     Cost = gameCard.Card.Cost,
                     Attack = gameCard.Card.Attack,
-                    CanAttack = false,
+                    CanAttack = true, // TODO
                     Health = gameCard.Health,
                     StatsModifiersCount = gameCard.StatModifiersCount,
                     Effects = effects

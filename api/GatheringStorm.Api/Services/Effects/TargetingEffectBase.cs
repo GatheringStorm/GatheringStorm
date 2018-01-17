@@ -7,6 +7,7 @@ using GatheringStorm.Api.Models;
 using GatheringStorm.Api.Models.DB;
 using GatheringStorm.Api.Models.DB.Effects;
 using GatheringStorm.Api.Models.Dto;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
 namespace GatheringStorm.Api.Services.Effects
@@ -20,17 +21,16 @@ namespace GatheringStorm.Api.Services.Effects
             this.dbContext = dbContext;
         }
 
-        protected AppResult<List<GameCard>> GetTargetsByIds(DtoEffectTargets effect, DestroyEffectParameters parameters, Game game)
+        protected async Task<AppResult<List<GameCard>>> GetTargetsByIds(DtoEffectTargets effect, TargetingEffectParameters parameters, Game game)
         {
             var targetsCount = Convert.ToInt32(parameters.TargetParameter);
             if (targetsCount != effect.TargetIds.Count)
             {
                 return AppResult<List<GameCard>>.Error(AppActionResultType.RuleError, $"You must choose exactly {targetsCount} targets to destroy.");
             }
-            var targets = game.Entities
+            var targets = await dbContext.GameCards.IncludeAll()
                 .Where(_ => effect.TargetIds.Contains(_.Id))
-                .Select(_ => _ as GameCard)
-                .ToList();
+                .ToListAsync();
             if (targets.Count != effect.TargetIds.Count)
             {
                 return VoidAppResult.Error(ErrorPreset.InvalidTargets).GetErrorAppResult<List<GameCard>>();
@@ -39,34 +39,30 @@ namespace GatheringStorm.Api.Services.Effects
             return AppResult<List<GameCard>>.Success(targets);
         }
 
-        protected AppResult<List<GameCard>> GetTargetsByTitle(DtoEffectTargets effect, DestroyEffectParameters parameters, Game game)
+        protected async Task<AppResult<List<GameCard>>> GetTargetsByTitle(DtoEffectTargets effect, TargetingEffectParameters parameters, Game game)
         {
             var title = parameters.TargetParameter.ToString();
 
-            var targets = game.Entities
-                .Select(_ => _ as GameCard)
-                .Where(_ => _ != null && _.Card.Title.Name == title)
-                .ToList();
+            var targets = await dbContext.GameCards.IncludeAll()
+                .Where(_ => _.Card.Title.Name == title && _.CardLocation == CardLocation.Board)
+                .ToListAsync();
 
             return AppResult<List<GameCard>>.Success(targets);
         }
 
-        protected AppResult<List<GameCard>> GetTargetsByCharacterName(DtoEffectTargets effect, DestroyEffectParameters parameters, Game game)
+        protected async Task<AppResult<List<GameCard>>> GetTargetsByCharacterName(DtoEffectTargets effect, TargetingEffectParameters parameters, Game game)
         {
             var name = parameters.TargetParameter.ToString();
 
-            var targets = game.Entities
-                .Select(_ => _ as GameCard)
-                .Where(_ => _ != null && _.Card.Character.Name == name)
-                .ToList();
+            var targets = await dbContext.GameCards.IncludeAll()
+                .Where(_ => _.Card.Character.Name == name && _.CardLocation == CardLocation.Board)
+                .ToListAsync();
 
             return AppResult<List<GameCard>>.Success(targets);
         }
 
         protected Task<VoidAppResult> ConfigureDtoEffect(CardEffect cardEffect, DtoEffect dtoEffect, string effectPrefix, string effectSuffix)
         {
-            dtoEffect.Name = "Destroy";
-
             var parameters = JsonConvert.DeserializeObject<TargetingEffectParameters>(cardEffect.EffectParameters);
             dtoEffect.TargetsCount = parameters.TargetingType == TargetingType.NumberOfTargets
                 ? Convert.ToInt32(parameters.TargetParameter)

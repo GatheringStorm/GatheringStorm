@@ -38,13 +38,13 @@ namespace GatheringStorm.Api.Services.Effects
             switch(parameters.TargetingType)
             {
                 case TargetingType.Title:
-                    targetsResult = base.GetTargetsByTitle(effect, parameters, game);
+                    targetsResult = await base.GetTargetsByTitle(effect, parameters, game);
                     break;
                 case TargetingType.CharacterName:
-                    targetsResult = base.GetTargetsByCharacterName(effect, parameters, game);
+                    targetsResult = await base.GetTargetsByCharacterName(effect, parameters, game);
                     break;
                 default: // TargetingType.NumberOfTargets
-                    targetsResult = base.GetTargetsByIds(effect, parameters, game);
+                    targetsResult = await base.GetTargetsByIds(effect, parameters, game);
                     break;
             }
             if (targetsResult.IsErrorResult)
@@ -62,14 +62,14 @@ namespace GatheringStorm.Api.Services.Effects
                 target.CardLocation = CardLocation.OutOfPlay;
             }
 
-            throw new System.NotImplementedException();
+            return VoidAppResult.Success();
         }
 
         public Task<VoidAppResult> ConfigureDtoEffect(CardEffect cardEffect, DtoEffect dtoEffect)
         {
             dtoEffect.Name = "Destroy";
 
-            return base.ConfigureDtoEffect(cardEffect, dtoEffect, "Destroy", "");
+            return base.ConfigureDtoEffect(cardEffect, dtoEffect, "Destroy ", "");
         }
     }
 }

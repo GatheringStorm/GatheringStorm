@@ -46,6 +46,7 @@ namespace GatheringStorm.Api.Services
         {
             var dtoEffect = new DtoEffect
             {
+                Id = cardEffect.Id,
                 EffectType = cardEffect.EffectType
             };
 
