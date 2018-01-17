@@ -13,8 +13,11 @@ namespace GatheringStorm.Api.Models.DB
 
     public enum EffectType
     {
+        [EnumMember(Value = "destroy")]
         Destroy,
-        PlayCard,
+        [EnumMember(Value = "drawCards")]
+        DrawCards,
+        [EnumMember(Value = "changeStats")]
         ChangeStats
     }
 }

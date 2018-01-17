@@ -30,13 +30,14 @@ namespace GatheringStorm.Api.Services
         private Dictionary<EffectType, IEffect> effects;
         private readonly AppDbContext dbContext;
 
-        public EffectsService(IDestroyEffect destroyEffect, IChangeStatsEffect changeStatsEffect, AppDbContext dbContext)
+        public EffectsService(IDestroyEffect destroyEffect, IChangeStatsEffect changeStatsEffect, IDrawCardsEffect drawCardsEffect, AppDbContext dbContext)
         {
             this.dbContext = dbContext;
             
             effects = new Dictionary<EffectType, IEffect>
             {
                 [EffectType.Destroy] = destroyEffect,
+                [EffectType.DrawCards] = drawCardsEffect,
                 [EffectType.ChangeStats] = changeStatsEffect
             };
         }
