@@ -29,13 +29,13 @@ namespace GatheringStorm.Api.Services
         private readonly ILoginManager loginManager;
         public readonly AppDbContext dbContext;
         private readonly IEffectsService effectsService;
-        private readonly ICardInitializerService cardInitializerService;
+        private readonly ICardService cardService;
 
-        public GamesService(ILoginManager loginManager, AppDbContext dbContext, IEffectsService effectsService, ICardInitializerService cardInitializerService)
+        public GamesService(ILoginManager loginManager, AppDbContext dbContext, IEffectsService effectsService, ICardService cardInitializerService)
         {
             this.dbContext = dbContext;
             this.effectsService = effectsService;
-            this.cardInitializerService = cardInitializerService;
+            this.cardService = cardInitializerService;
             this.loginManager = loginManager;
         }
 
@@ -87,7 +87,7 @@ namespace GatheringStorm.Api.Services
                 }
             };
 
-            await this.cardInitializerService.InitializeGame(newGame);
+            await this.cardService.InitializeGame(newGame);
 
             await this.dbContext.Games.AddAsync(newGame, cancellationToken);
             await this.dbContext.SaveChangesAsync(cancellationToken);
@@ -136,14 +136,14 @@ namespace GatheringStorm.Api.Services
             switch(playerParticipation.ClassType)
             {
                 case ClassType.Medium:
-                    var drawResult = await this.DrawCard(game, playerParticipation.Mail, 1);
+                    var drawResult = await this.cardService.DrawCard(game, playerParticipation.Mail, 1);
                     if (drawResult.IsErrorResult)
                     {
                         return drawResult;
                     }
                     break;
                 case ClassType.Slow:
-                    var stormlingResult = await this.cardInitializerService.GenerateStormling(playerParticipation.User);
+                    var stormlingResult = await this.cardService.GenerateStormling(playerParticipation.User);
                     if (stormlingResult.IsErrorResult)
                     {
                         return stormlingResult.GetVoidAppResult();
@@ -157,7 +157,7 @@ namespace GatheringStorm.Api.Services
             {
                 return currentTurnPlayerResult.GetVoidAppResult();
             }
-            var drawCardResult = await this.DrawCard(game, currentTurnPlayerResult.SuccessReturnValue.Mail, 2);
+            var drawCardResult = await this.cardService.DrawCard(game, currentTurnPlayerResult.SuccessReturnValue.Mail, 2);
             if (drawCardResult.IsErrorResult)
             {
                 return drawCardResult;
@@ -324,7 +324,7 @@ namespace GatheringStorm.Api.Services
 
             await this.dbContext.Moves.AddAsync(move, cancellationToken);
 
-            var drawCardResult = await this.DrawCard(game, game.UserParticipations.SingleOrDefault(_ => _.Mail != this.loginManager.LoggedInUser.Mail).Mail, 2);
+            var drawCardResult = await this.cardService.DrawCard(game, game.UserParticipations.SingleOrDefault(_ => _.Mail != this.loginManager.LoggedInUser.Mail).Mail, 2);
             if (drawCardResult.IsErrorResult)
             {
                 return drawCardResult;
@@ -440,25 +440,6 @@ namespace GatheringStorm.Api.Services
             await this.dbContext.SaveChangesAsync(cancellationToken);
 
             return VoidAppResult.Success();
-        }
-
-        private Task<VoidAppResult> DrawCard(Game game, string userMail, int cardsCount)
-        {
-            for(var i = 0; i < cardsCount; i++)
-            {
-                var cards = game.Entities.Select(_ => _ as GameCard)
-                                        .Where(_ => _ != null && _.User.Mail == userMail && _.CardLocation == CardLocation.Cellar)
-                                        .ToList();
-
-                if (cards.Count == 0)
-                {
-                    return Task.FromResult(VoidAppResult.Success());
-                }
-
-                var drawnCardIndex = new Random().Next(cards.Count());
-                cards[drawnCardIndex].CardLocation = CardLocation.Hand;
-            }
-            return Task.FromResult(VoidAppResult.Success());
         }
 
         private async Task<AppResult<List<DtoCard>>> GetDtoCardsFromGameCards(List<GameCard> gameCards)

@@ -61,13 +61,13 @@ namespace GatheringStorm.Api
             services.AddTransient<IDestroyEffect, DestroyEffect>();
             services.AddTransient<IChangeStatsEffect, ChangeStatsEffect>();
             services.AddTransient<IDrawCardsEffect, DrawCardsEffect>();
-            services.AddTransient<ICardInitializerService, CardInitializerService>();
+            services.AddTransient<ICardService, CardService>();
             services.AddTransient<IControllerUtility, ControllerUtility>();
             services.AddScoped<ILoginManager, LoginManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, AppDbContext dbContext, ICardInitializerService cardInitializer)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, AppDbContext dbContext, ICardService cardInitializer)
         {
             app.UseMiddleware<CatchInternalServerErrorMiddleware>();
 

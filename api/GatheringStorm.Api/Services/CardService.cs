@@ -11,19 +11,20 @@ using Newtonsoft.Json;
 
 namespace GatheringStorm.Api.Services
 {
-    public interface ICardInitializerService
+    public interface ICardService
     {
         Task<VoidAppResult> InitializeCards();
         Task<VoidAppResult> InitializeGame(Game game);
         Task<AppResult<GameCard>> GenerateStormling(User user);
+        Task<VoidAppResult> DrawCard(Game game, string userMail, int cardsCount);
     }
 
-    public class CardInitializerService : ICardInitializerService
+    public class CardService : ICardService
     {
         private readonly AppDbContext dbContext;
         private static readonly Guid StormlingId = Guid.Parse("53746f72-6d6c-696e-6700-000000000000");
 
-        public CardInitializerService(AppDbContext dbContext)
+        public CardService(AppDbContext dbContext)
         {
             this.dbContext = dbContext;
         }
@@ -374,6 +375,25 @@ namespace GatheringStorm.Api.Services
                 User = user
             };
             return AppResult<GameCard>.Success(stormling);
+        }
+
+        public Task<VoidAppResult> DrawCard(Game game, string userMail, int cardsCount)
+        {
+            for(var i = 0; i < cardsCount; i++)
+            {
+                var cards = game.Entities.Select(_ => _ as GameCard)
+                                        .Where(_ => _ != null && _.User.Mail == userMail && _.CardLocation == CardLocation.Cellar)
+                                        .ToList();
+
+                if (cards.Count == 0)
+                {
+                    return Task.FromResult(VoidAppResult.Success());
+                }
+
+                var drawnCardIndex = new Random().Next(cards.Count());
+                cards[drawnCardIndex].CardLocation = CardLocation.Hand;
+            }
+            return Task.FromResult(VoidAppResult.Success());
         }
 
         private async Task<AppResult<List<GameCard>>> CreateGameCard(Guid cardId, User user, int duplicatesCount)
