@@ -17,7 +17,7 @@ class Game extends React.Component {
 
     async componentDidMount() {
         this.setState({
-            board: await defaultWebAccess.getBoard(getCurrentGame)
+            board: await defaultWebAccess.getBoard(getCurrentGame())
         })
     }
 
