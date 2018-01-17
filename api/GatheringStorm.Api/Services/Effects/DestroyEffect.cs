@@ -19,7 +19,7 @@ namespace GatheringStorm.Api.Services.Effects
 
     public class DestroyEffect : TargetingEffectBase, IDestroyEffect
     {
-        public DestroyEffect(AppDbContext dbContext) : base(dbContext, "Destroy ", "")
+        public DestroyEffect(AppDbContext dbContext) : base(dbContext)
         {
         }
 
