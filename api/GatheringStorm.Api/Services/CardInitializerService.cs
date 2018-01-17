@@ -45,19 +45,182 @@ namespace GatheringStorm.Api.Services
                 Id = Guid.NewGuid(),
                 Name = "Sepp"
             };
-            await dbContext.Characters.AddRangeAsync(claus, sepp);
+            var azgul = new Character
+            {
+                Id = Guid.NewGuid(),
+                Name = "Azgul"
+            };
+            var ison = new Character
+            {
+                Id = Guid.NewGuid(),
+                Name = "Ison"
+            };
+            var rink = new Character
+            {
+                Id = Guid.NewGuid(),
+                Name = "Rink"
+            };
+            var aiba = new Character
+            {
+                Id = Guid.NewGuid(),
+                Name = "Aiba"
+            };
+            var uni = new Character
+            {
+                Id = Guid.NewGuid(),
+                Name = "Uni"
+            };
+            var okika = new Character
+            {
+                Id = Guid.NewGuid(),
+                Name = "Okika"
+            };
+            var zorya = new Character
+            {
+                Id = Guid.NewGuid(),
+                Name = "Zorya"
+            };
+            var yorza = new Character
+            {
+                Id = Guid.NewGuid(),
+                Name = "Yorza"
+            };
+            var nono = new Character
+            {
+                Id = Guid.NewGuid(),
+                Name = "Nono"
+            };
+            var yuu = new Character
+            {
+                Id = Guid.NewGuid(),
+                Name = "Yuu"
+            };
+            var velza = new Character
+            {
+                Id = Guid.NewGuid(),
+                Name = "Velza"
+            };
+            var palutena = new Character
+            {
+                Id = Guid.NewGuid(),
+                Name = "Palutena"
+            };
+            var akuga = new Character
+            {
+                Id = Guid.NewGuid(),
+                Name = "Akuga"
+            };
+            var yerag= new Character
+            {
+                Id = Guid.NewGuid(),
+                Name = "Yerag"
+            };
+            var drahlget = new Character
+            {
+                Id = Guid.NewGuid(),
+                Name = "Drahlget"
+            };
+            await dbContext.Characters.AddRangeAsync(claus, sepp, azgul, ison, rink, aiba, uni, okika,
+                zorya, yorza, yuu, velza, palutena, akuga, yerag, drahlget);
 
             var pawn = new Title
             {
                 Id = Guid.NewGuid(),
                 Name = "The pawn"
             };
+            var librarian = new Title
+            {
+                Id = Guid.NewGuid(),
+                Name = "The librarian"
+            };
+            var recruit = new Title
+            {
+                Id = Guid.NewGuid(),
+                Name = "The recruit"
+            };
+            var berserker = new Title
+            {
+                Id = Guid.NewGuid(),
+                Name = "The berserker"
+            };
+            var defender = new Title
+            {
+                Id = Guid.NewGuid(),
+                Name = "The defender"
+            };
+            var soldier = new Title
+            {
+                Id = Guid.NewGuid(),
+                Name = "The soldier"
+            };
+            var executioner = new Title
+            {
+                Id = Guid.NewGuid(),
+                Name = "The executioner"
+            };
             var bard = new Title
             {
                 Id = Guid.NewGuid(),
                 Name = "The bard"
             };
-            await dbContext.Titles.AddRangeAsync(pawn);
+            var sergeant = new Title
+            {
+                Id = Guid.NewGuid(),
+                Name = "The sergeant"
+            };
+            var guardian = new Title
+            {
+                Id = Guid.NewGuid(),
+                Name = "The guardian"
+            };
+            var flameEmpress = new Title
+            {
+                Id = Guid.NewGuid(),
+                Name = "The flame empress"
+            };
+            var executer = new Title
+            {
+                Id = Guid.NewGuid(),
+                Name = "The executer"
+            };
+            var demonQueen = new Title
+            {
+                Id = Guid.NewGuid(),
+                Name = "The demon queen"
+            };
+            var holy = new Title
+            {
+                Id = Guid.NewGuid(),
+                Name = "The holy"
+            };
+            var sinner = new Title
+            {
+                Id = Guid.NewGuid(),
+                Name = "The sinner"
+            };
+            var undead = new Title
+            {
+                Id = Guid.NewGuid(),
+                Name = "The undead"
+            };
+            var monk = new Title
+            {
+                Id = Guid.NewGuid(),
+                Name = "The monk"
+            };
+            var fist = new Title
+            {
+                Id = Guid.NewGuid(),
+                Name = "The fist"
+            };
+            var leader = new Title
+            {
+                Id = Guid.NewGuid(),
+                Name = "The leader"
+            };
+            await dbContext.Titles.AddRangeAsync(pawn, librarian, recruit, berserker, defender,
+                soldier, executioner, bard, sergeant, guardian,
+                flameEmpress, executer, demonQueen, holy, sinner, undead, monk, fist, leader);
 
             await dbContext.Cards.AddRangeAsync(new Card
             {
@@ -92,6 +255,30 @@ namespace GatheringStorm.Api.Services
                 Title = pawn,
                 Character = sepp,
                 Effects = new List<CardEffect> // TODO: EFFECT ONLY FOR TESTING!
+                {
+                    new CardEffect
+                    {
+                        Id = Guid.NewGuid(),
+                        EffectType = EffectType.ChangeStats,
+                        EffectParameters = JsonConvert.SerializeObject(new ChangeStatsEffectParameters
+                        {
+                            TargetingType = TargetingType.Title,
+                            TargetParameter = pawn.Name,
+                            EffectStrength = -1
+                        })
+                    }
+                }
+            },
+            new Card
+            {
+                Id = Guid.NewGuid(),
+                Cost = 1,
+                Attack = 0,
+                BaseHealth = 2,
+                IsLegendary = false,
+                Title = librarian,
+                Character = azgul,
+                Effects = new List<CardEffect> //TODO UPDATE
                 {
                     new CardEffect
                     {
