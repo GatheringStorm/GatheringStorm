@@ -23,15 +23,9 @@ namespace GatheringStorm.Api.Services.Effects
         {
         }
 
-        public async Task<VoidAppResult> ExecuteEffect(DtoEffectTargets effect, Game game, User currentTurnPlayer,
+        public async Task<VoidAppResult> ExecuteEffect(DtoEffectTargets effect, CardEffect cardEffect, Game game, User currentTurnPlayer,
             CancellationToken cancellationToken = default(CancellationToken))
         {
-            var cardEffect = await this.dbContext.CardEffects.SingleOrDefaultAsync(_ => _.Id == effect.CardEffectId);
-            if (cardEffect == null)
-            {
-                return VoidAppResult.Error(ErrorPreset.OnLoadingData);
-            }
-
             var parameters = JsonConvert.DeserializeObject<DestroyEffectParameters>(cardEffect.EffectParameters);
 
             AppResult<List<GameCard>> targetsResult;
