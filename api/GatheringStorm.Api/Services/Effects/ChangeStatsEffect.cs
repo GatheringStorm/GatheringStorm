@@ -17,13 +17,10 @@ namespace GatheringStorm.Api.Services.Effects
     {
     }
 
-    public class ChangeStatsEffect : IChangeStatsEffect
+    public class ChangeStatsEffect : TargetingEffectBase, IChangeStatsEffect
     {
-        private readonly AppDbContext dbContext;
-
-        public ChangeStatsEffect(AppDbContext dbContext)
+        public ChangeStatsEffect(AppDbContext dbContext) : base(dbContext)
         {
-            this.dbContext = dbContext;
         }
 
         public Task<VoidAppResult> ExecuteEffect(DtoEffectTargets effect, Game game, User currentTurnPlayer,
@@ -34,12 +31,11 @@ namespace GatheringStorm.Api.Services.Effects
 
         public Task<VoidAppResult> ConfigureDtoEffect(CardEffect cardEffect, DtoEffect dtoEffect)
         {
-            var parameters = JsonConvert.DeserializeObject<ChangeStatsEffectParameters>(cardEffect.EffectParameters);
+            var parameters = JsonConvert.DeserializeObject<ChangeStatsEffectParameters>(cardEffect.EffectParameters);            
             dtoEffect.Name = parameters.EffectStrength > 0 ? "Buff" : "Debuff";
             
-            // TODO: Description, TargetsCount non-redundant
-
-            return Task.FromResult(VoidAppResult.Success());
+            var sign = parameters.EffectStrength > 0 ? "+" : "-";
+            return base.ConfigureDtoEffect(cardEffect, dtoEffect, "Give ", $" {sign}{parameters.EffectStrength}/{sign}{parameters.EffectStrength}");
         }
     }
 }
