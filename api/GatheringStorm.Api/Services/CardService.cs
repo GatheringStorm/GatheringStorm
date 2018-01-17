@@ -236,20 +236,7 @@ namespace GatheringStorm.Api.Services
                 BaseHealth = 1,
                 IsLegendary = false,
                 Title = pawn,
-                Character = claus,
-                Effects = new List<CardEffect> // TODO: EFFECT ONLY FOR TESTING!
-                {
-                    new CardEffect
-                    {
-                        Id = Guid.NewGuid(),
-                        EffectType = EffectType.Destroy,
-                        EffectParameters = JsonConvert.SerializeObject(new DestroyEffectParameters
-                        {
-                            TargetingType = TargetingType.CharacterName,
-                            TargetParameter = claus.Name
-                        })
-                    }
-                }
+                Character = claus
             },
             new Card
             {
@@ -259,21 +246,7 @@ namespace GatheringStorm.Api.Services
                 BaseHealth = 2,
                 IsLegendary = false,
                 Title = pawn,
-                Character = sepp,
-                Effects = new List<CardEffect> // TODO: EFFECT ONLY FOR TESTING!
-                {
-                    new CardEffect
-                    {
-                        Id = Guid.NewGuid(),
-                        EffectType = EffectType.ChangeStats,
-                        EffectParameters = JsonConvert.SerializeObject(new ChangeStatsEffectParameters
-                        {
-                            TargetingType = TargetingType.Title,
-                            TargetParameter = pawn.Name,
-                            EffectStrength = -1
-                        })
-                    }
-                }
+                Character = sepp
             },
             new Card
             {
@@ -292,7 +265,7 @@ namespace GatheringStorm.Api.Services
                         EffectType = EffectType.DrawCards,
                         EffectParameters = JsonConvert.SerializeObject(new DrawCardsEffectParameters
                         {
-                            //TODO UPDATE
+                            CardsCount = 1
                         })
                     }
                 }
@@ -330,12 +303,44 @@ namespace GatheringStorm.Api.Services
             new Card
             {
                 Id = Guid.NewGuid(),
-                Cost = 5,
+                Cost = 2,
                 Attack = 4,
-                BaseHealth = 4,
-                IsLegendary = true, // TODO: CHANGE THIS! ONLY FOR TESTING!
-                Title = bard,
-                Character = sepp,
+                BaseHealth = 1,
+                IsLegendary = false,
+                Title = berserker,
+                Character = uni
+            },
+            new Card
+            {
+                Id = Guid.NewGuid(),
+                Cost = 2,
+                Attack = 1,
+                BaseHealth = 2,
+                IsLegendary = false,
+                Title = librarian,
+                Character = okika,
+                Effects = new List<CardEffect>
+                {
+                    new CardEffect
+                    {
+                        Id = Guid.NewGuid(),
+                        EffectType = EffectType.DrawCards,
+                        EffectParameters = JsonConvert.SerializeObject(new DrawCardsEffectParameters
+                        {
+                            CardsCount = 1
+                        })
+                    }
+                }
+            },
+            new Card
+            {
+                Id = Guid.NewGuid(),
+                Cost = 2,
+                Attack = 1,
+                BaseHealth = 3,
+                IsLegendary = false,
+                Title = defender,
+                Character = zorya,
                 Effects = new List<CardEffect>
                 {
                     new CardEffect
@@ -346,9 +351,538 @@ namespace GatheringStorm.Api.Services
                         {
                             TargetingType = TargetingType.NumberOfTargets,
                             TargetParameter = "1",
-                            EffectStrength = 3
+                            EffectStrength = -1
                         })
                     }
+                }
+            },
+            new Card
+            {
+                Id = Guid.NewGuid(),
+                Cost = 3,
+                Attack = 3,
+                BaseHealth = 4,
+                IsLegendary = false,
+                Title = soldier,
+                Character = sepp
+            },
+            new Card
+            {
+                Id = Guid.NewGuid(),
+                Cost = 3,
+                Attack = 5,
+                BaseHealth = 2,
+                IsLegendary = false,
+                Title = berserker,
+                Character = yorza
+            },
+            new Card
+            {
+                Id = Guid.NewGuid(),
+                Cost = 3,
+                Attack = 1,
+                BaseHealth = 2,
+                IsLegendary = false,
+                Title = executioner,
+                Character = aiba,
+                Effects = new List<CardEffect>
+                {
+                    new CardEffect
+                    {
+                        Id = Guid.NewGuid(),
+                        EffectType = EffectType.Destroy,
+                        EffectParameters = JsonConvert.SerializeObject(new DestroyEffectParameters
+                        {
+                            TargetingType = TargetingType.NumberOfTargets,
+                            TargetParameter = "1"
+                        })
+                    }
+                }
+            },
+            new Card
+            {
+                Id = Guid.NewGuid(),
+                Cost = 3,
+                Attack = 2,
+                BaseHealth = 1,
+                IsLegendary = false,
+                Title = executioner,
+                Character = uni,
+                Effects = new List<CardEffect>
+                {
+                    new CardEffect
+                    {
+                        Id = Guid.NewGuid(),
+                        EffectType = EffectType.Destroy,
+                        EffectParameters = JsonConvert.SerializeObject(new DestroyEffectParameters
+                        {
+                            TargetingType = TargetingType.NumberOfTargets,
+                            TargetParameter = "1"
+                        })
+                    }
+                }
+            },
+            new Card
+            {
+                Id = Guid.NewGuid(),
+                Cost = 3,
+                Attack = 3,
+                BaseHealth = 3,
+                IsLegendary = false,
+                Title = bard,
+                Character = okika,
+                Effects = new List<CardEffect>
+                {
+                    new CardEffect
+                    {
+                        Id = Guid.NewGuid(),
+                        EffectType = EffectType.ChangeStats,
+                        EffectParameters = JsonConvert.SerializeObject(new ChangeStatsEffectParameters
+                        {
+                            TargetingType = TargetingType.NumberOfTargets,
+                            TargetParameter = "1",
+                            EffectStrength = 1
+                        })
+                    }
+                }
+            },
+            new Card
+            {
+                Id = Guid.NewGuid(),
+                Cost = 4,
+                Attack = 3,
+                BaseHealth = 4,
+                IsLegendary = false,
+                Title = sergeant,
+                Character = nono,
+                Effects = new List<CardEffect>
+                {
+                    new CardEffect
+                    {
+                        Id = Guid.NewGuid(),
+                        EffectType = EffectType.ChangeStats,
+                        EffectParameters = JsonConvert.SerializeObject(new ChangeStatsEffectParameters
+                        {
+                            TargetingType = TargetingType.Title,
+                            TargetParameter = soldier.Name,
+                            EffectStrength = 1
+                        })
+                    },
+                    new CardEffect
+                    {
+                        Id = Guid.NewGuid(),
+                        EffectType = EffectType.ChangeStats,
+                        EffectParameters = JsonConvert.SerializeObject(new ChangeStatsEffectParameters
+                        {
+                            TargetingType = TargetingType.Title,
+                            TargetParameter = pawn.Name,
+                            EffectStrength = 1
+                        })
+                    },
+                    new CardEffect
+                    {
+                        Id = Guid.NewGuid(),
+                        EffectType = EffectType.ChangeStats,
+                        EffectParameters = JsonConvert.SerializeObject(new ChangeStatsEffectParameters
+                        {
+                            TargetingType = TargetingType.Title,
+                            TargetParameter = recruit.Name,
+                            EffectStrength = 1
+                        })
+                    }
+                }
+            },
+            new Card
+            {
+                Id = Guid.NewGuid(),
+                Cost = 4,
+                Attack = 3,
+                BaseHealth = 4,
+                IsLegendary = false,
+                Title = bard,
+                Character = yuu,
+                Effects = new List<CardEffect>
+                {
+                    new CardEffect
+                    {
+                        Id = Guid.NewGuid(),
+                        EffectType = EffectType.ChangeStats,
+                        EffectParameters = JsonConvert.SerializeObject(new ChangeStatsEffectParameters
+                        {
+                            TargetingType = TargetingType.NumberOfTargets,
+                            TargetParameter = "1",
+                            EffectStrength = 2
+                        })
+                    }
+                }
+            },
+            new Card
+            {
+                Id = Guid.NewGuid(),
+                Cost = 4,
+                Attack = 3,
+                BaseHealth = 2,
+                IsLegendary = false,
+                Title = executioner,
+                Character = velza,
+                Effects = new List<CardEffect>
+                {
+                    new CardEffect
+                    {
+                        Id = Guid.NewGuid(),
+                        EffectType = EffectType.Destroy,
+                        EffectParameters = JsonConvert.SerializeObject(new DestroyEffectParameters
+                        {
+                            TargetingType = TargetingType.NumberOfTargets,
+                            TargetParameter = "1"
+                        })
+                    }
+                }
+            },
+            new Card
+            {
+                Id = Guid.NewGuid(),
+                Cost = 5,
+                Attack = 4,
+                BaseHealth = 7,
+                IsLegendary = false,
+                Title = guardian,
+                Character = sepp
+            },
+            new Card
+            {
+                Id = Guid.NewGuid(),
+                Cost = 5,
+                Attack = 5,
+                BaseHealth = 4,
+                IsLegendary = false,
+                Title = librarian,
+                Character = palutena,
+                Effects = new List<CardEffect>
+                {
+                    new CardEffect
+                    {
+                        Id = Guid.NewGuid(),
+                        EffectType = EffectType.DrawCards,
+                        EffectParameters = JsonConvert.SerializeObject(new DrawCardsEffectParameters
+                        {
+                             CardsCount = 2
+                        })
+                    }
+                }
+            },
+            new Card
+            {
+                Id = Guid.NewGuid(),
+                Cost = 5,
+                Attack = 3,
+                BaseHealth = 4,
+                IsLegendary = true,
+                Title = flameEmpress,
+                Character = akuga,
+                Effects = new List<CardEffect>
+                {
+                    new CardEffect
+                    {
+                        Id = Guid.NewGuid(),
+                        EffectType = EffectType.Destroy,
+                        EffectParameters = JsonConvert.SerializeObject(new DestroyEffectParameters
+                        {
+                             TargetingType = TargetingType.NumberOfTargets,
+                             TargetParameter = "4"
+                        })
+                    }
+                }
+            },
+            new Card
+            {
+                Id = Guid.NewGuid(),
+                Cost = 4,
+                Attack = 2,
+                BaseHealth = 3,
+                IsLegendary = true,
+                Title = executer,
+                Character = akuga,
+                Effects = new List<CardEffect>
+                {
+                    new CardEffect
+                    {
+                        Id = Guid.NewGuid(),
+                        EffectType = EffectType.ChangeStats,
+                        EffectParameters = JsonConvert.SerializeObject(new ChangeStatsEffectParameters
+                        {
+                             TargetingType = TargetingType.CharacterName,
+                             TargetParameter = executioner.Name,
+                             EffectStrength = 3
+                        })
+                    }
+                }
+            },
+            new Card
+            {
+                Id = Guid.NewGuid(),
+                Cost = 4,
+                Attack = 2,
+                BaseHealth = 3,
+                IsLegendary = true,
+                Title = demonQueen,
+                Character = akuga,
+                Effects = new List<CardEffect>
+                {
+                    new CardEffect
+                    {
+                        Id = Guid.NewGuid(),
+                        EffectType = EffectType.ChangeStats,
+                        EffectParameters = JsonConvert.SerializeObject(new ChangeStatsEffectParameters
+                        {
+                             TargetingType = TargetingType.NumberOfTargets,
+                             TargetParameter = "1",
+                             EffectStrength = 1
+                        })
+                    },
+                    new CardEffect
+                    {
+                        Id = Guid.NewGuid(),
+                        EffectType = EffectType.Destroy,
+                        EffectParameters = JsonConvert.SerializeObject(new DestroyEffectParameters
+                        {
+                             TargetingType = TargetingType.NumberOfTargets,
+                             TargetParameter = "1"
+                        })
+                    },
+                    new CardEffect
+                    {
+                        Id = Guid.NewGuid(),
+                        EffectType = EffectType.DrawCards,
+                        EffectParameters = JsonConvert.SerializeObject(new DrawCardsEffectParameters
+                        {
+                             CardsCount = 1
+                        })
+                    }
+                }
+            },
+            new Card
+            {
+                Id = Guid.NewGuid(),
+                Cost = 3,
+                Attack = 1,
+                BaseHealth = 4,
+                IsLegendary = true,
+                Title = holy,
+                Character = yerag,
+                Effects = new List<CardEffect>
+                {
+                    new CardEffect
+                    {
+                        Id = Guid.NewGuid(),
+                        EffectType = EffectType.ChangeStats,
+                        EffectParameters = JsonConvert.SerializeObject(new ChangeStatsEffectParameters
+                        {
+                             TargetingType = TargetingType.NumberOfTargets,
+                             TargetParameter = "1",
+                             EffectStrength = 1
+                        })
+                    },
+                    new CardEffect
+                    {
+                        Id = Guid.NewGuid(),
+                        EffectType = EffectType.DrawCards,
+                        EffectParameters = JsonConvert.SerializeObject(new DrawCardsEffectParameters
+                        {
+                             CardsCount = 2
+                        })
+                    }
+                }
+            },
+            new Card
+            {
+                Id = Guid.NewGuid(),
+                Cost = 4,
+                Attack = 2,
+                BaseHealth = 1,
+                IsLegendary = true,
+                Title = sinner,
+                Character = yerag,
+                Effects = new List<CardEffect>
+                {
+                    new CardEffect
+                    {
+                        Id = Guid.NewGuid(),
+                        EffectType = EffectType.Destroy,
+                        EffectParameters = JsonConvert.SerializeObject(new DestroyEffectParameters
+                        {
+                             TargetingType = TargetingType.NumberOfTargets,
+                             TargetParameter = "3"
+                        })
+                    }
+                }
+            },
+            new Card
+            {
+                Id = Guid.NewGuid(),
+                Cost = 3,
+                Attack = 1,
+                BaseHealth = 3,
+                IsLegendary = true,
+                Title = undead,
+                Character = yerag,
+                Effects = new List<CardEffect>
+                {
+                    new CardEffect
+                    {
+                        Id = Guid.NewGuid(),
+                        EffectType = EffectType.ChangeStats,
+                        EffectParameters = JsonConvert.SerializeObject(new ChangeStatsEffectParameters
+                        {
+                             TargetingType = TargetingType.NumberOfTargets,
+                             TargetParameter = "5",
+                             EffectStrength = -1
+                        })
+                    }
+                }
+            },
+            new Card
+            {
+                Id = Guid.NewGuid(),
+                Cost = 3,
+                Attack = 3,
+                BaseHealth = 2,
+                IsLegendary = true,
+                Title = monk,
+                Character = drahlget,
+                Effects = new List<CardEffect>
+                {
+                    new CardEffect
+                    {
+                        Id = Guid.NewGuid(),
+                        EffectType = EffectType.ChangeStats,
+                        EffectParameters = JsonConvert.SerializeObject(new ChangeStatsEffectParameters
+                        {
+                             TargetingType = TargetingType.CharacterName,
+                             TargetParameter = uni.Name,
+                             EffectStrength = 1
+                        })
+                    },
+                    new CardEffect
+                    {
+                        Id = Guid.NewGuid(),
+                        EffectType = EffectType.ChangeStats,
+                        EffectParameters = JsonConvert.SerializeObject(new ChangeStatsEffectParameters
+                        {
+                             TargetingType = TargetingType.CharacterName,
+                             TargetParameter = aiba.Name,
+                             EffectStrength = 1
+                        })
+                    },
+                    new CardEffect
+                    {
+                        Id = Guid.NewGuid(),
+                        EffectType = EffectType.ChangeStats,
+                        EffectParameters = JsonConvert.SerializeObject(new ChangeStatsEffectParameters
+                        {
+                             TargetingType = TargetingType.CharacterName,
+                             TargetParameter = yuu.Name,
+                             EffectStrength = 1
+                        })
+                    },
+                    new CardEffect
+                    {
+                        Id = Guid.NewGuid(),
+                        EffectType = EffectType.DrawCards,
+                        EffectParameters = JsonConvert.SerializeObject(new DrawCardsEffectParameters
+                        {
+                            CardsCount = 1
+                        })
+                    }
+                }
+            },
+            new Card
+            {
+                Id = Guid.NewGuid(),
+                Cost = 4,
+                Attack = 2,
+                BaseHealth = 3,
+                IsLegendary = true,
+                Title = fist,
+                Character = drahlget,
+                Effects = new List<CardEffect>
+                {
+                    new CardEffect
+                    {
+                        Id = Guid.NewGuid(),
+                        EffectType = EffectType.Destroy,
+                        EffectParameters = JsonConvert.SerializeObject(new DestroyEffectParameters
+                        {
+                             TargetingType = TargetingType.Title,
+                             TargetParameter = recruit.Name
+                        })
+                    },
+                    new CardEffect
+                    {
+                        Id = Guid.NewGuid(),
+                        EffectType = EffectType.Destroy,
+                        EffectParameters = JsonConvert.SerializeObject(new DestroyEffectParameters
+                        {
+                             TargetingType = TargetingType.Title,
+                             TargetParameter = soldier.Name
+                        })
+                    },
+                    new CardEffect
+                    {
+                        Id = Guid.NewGuid(),
+                        EffectType = EffectType.Destroy,
+                        EffectParameters = JsonConvert.SerializeObject(new DestroyEffectParameters
+                        {
+                             TargetingType = TargetingType.Title,
+                             TargetParameter = pawn.Name
+                        })
+                    }
+                },
+            },
+            new Card
+            {
+                Id = Guid.NewGuid(),
+                Cost = 3,
+                Attack = 1,
+                BaseHealth = 4,
+                IsLegendary = true,
+                Title = leader,
+                Character = drahlget,
+                Effects = new List<CardEffect>
+                {
+                    new CardEffect
+                    {
+                        Id = Guid.NewGuid(),
+                        EffectType = EffectType.ChangeStats,
+                        EffectParameters = JsonConvert.SerializeObject(new ChangeStatsEffectParameters
+                        {
+                             TargetingType = TargetingType.NumberOfTargets,
+                             TargetParameter = "1",
+                             EffectStrength = 2
+                        })
+                    },
+                    new CardEffect
+                    {
+                        Id = Guid.NewGuid(),
+                        EffectType = EffectType.ChangeStats,
+                        EffectParameters = JsonConvert.SerializeObject(new ChangeStatsEffectParameters
+                        {
+                             TargetingType = TargetingType.Title,
+                             TargetParameter = pawn.Name,
+                             EffectStrength = -1
+                        })
+                    },
+                    new CardEffect
+                    {
+                        Id = Guid.NewGuid(),
+                        EffectType = EffectType.ChangeStats,
+                        EffectParameters = JsonConvert.SerializeObject(new ChangeStatsEffectParameters
+                        {
+                             TargetingType = TargetingType.Title,
+                             TargetParameter = recruit.Name,
+                             EffectStrength = -1
+                        })
+                    },
                 }
             },
             new Card
