@@ -1,6 +1,8 @@
 import React from "react";
 
 import Card from "./Card/Card.jsx"
+import defaultWebAccess from "../../../controller/webAccess.js"
+import { getCurrentGame } from "../../../controller/currentBoard.js"
 
 class Board extends React.Component {
     constructor(props) {
@@ -13,8 +15,8 @@ class Board extends React.Component {
         let oBoard = [];
         let pBoard = [];
         let pHand = [];
-        oBoard.push(...this.props.board.opponentBoardCards);
-        pBoard.push(...this.props.board.playerBoardCards);
+        oBoard.push(...this.props.board.opponent.boardCards);
+        pBoard.push(...this.props.board.player.boardCards);
         pHand.push(...this.props.board.playerHandCards);
 
         this.setState({
@@ -23,6 +25,10 @@ class Board extends React.Component {
             PlayerBoard: this.createCard(pBoard),
             PlayerHand: this.createCard(pHand)
         })
+    }
+
+    endTurn() {
+        defaultWebAccess.endTurn(getCurrentGame());
     }
 
     createCard(cardMap) {
@@ -46,6 +52,7 @@ class Board extends React.Component {
                     </div>
                     <div className="boardseperator flex-container-horizontal">
                         <div className="spacer"></div>
+                        <button onClick={this.endTurn}>End Turn</button>
                     </div>
                     <div className="PlayerBoard flex-container-horizontal">
                         {this.state.PlayerBoard}
