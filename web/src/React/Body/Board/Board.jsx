@@ -51,7 +51,7 @@ class Board extends React.Component {
         return (
             <div className="Layout flex-container">
                 <div>
-                    <button>{this.state.playerHP}</button>
+                    <button value={this.state.playerHP} />
                 </div>
                 <div className="OpponentHand flex-container-horizontal">
                     {this.state.OpponentHand}
@@ -74,7 +74,7 @@ class Board extends React.Component {
                     {this.state.PlayerHand}
                 </div>
                 <div>
-                    <button>{this.state.opponentHP}</button>
+                    <button value={this.state.opponentHP} />
                 </div>
             </div>
         )
