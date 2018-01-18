@@ -70,9 +70,9 @@ class GameSelectionCard extends React.Component {
     if (this.props.mode == "new")
       style += "newGame ";
     else if (this.props.currentTurnPlayer == JSON.parse(localStorage.getItem("userToken")).profileObj.email)
-      style += "yourTurn ";
-    else
       style += "enemyTurn";
+    else
+      style += "yourTurn ";
 
     return style;
   }

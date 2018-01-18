@@ -3,12 +3,20 @@ import React from "react";
 import Card from "./Card/Card.jsx"
 import defaultWebAccess from "../../../controller/webAccess.js"
 import { getCurrentGame } from "../../../controller/currentBoard.js"
+import { cardMove } from "../../../controller/cardMove.js"
 
 class Board extends React.Component {
     constructor(props) {
         super(props);
 
-        this.state = { OpponentHand: null, OpponentBoard: null, PlayerBoard: null, PlayerHand: null }
+        this.state = { OpponentHand: null, OpponentBoard: null, PlayerBoard: null, PlayerHand: null, playFieldEmpty: null }
+
+        this.createCard = this.createCard.bind(this);
+    }
+
+    componentWillMount() {
+        if (this.props.board.player.boardCards == [] && this.props.board.opponent.boardCards)
+            playFieldEmpty = true;
     }
 
     componentDidMount() {
@@ -21,9 +29,9 @@ class Board extends React.Component {
 
         this.setState({
             OpponentHand: <div>{this.props.board.opponentHandCardsCount}</div>,
-            OpponentBoard: this.createCard(oBoard),
-            PlayerBoard: this.createCard(pBoard),
-            PlayerHand: this.createCard(pHand)
+            OpponentBoard: this.createCard(oBoard, "board", "opp"),
+            PlayerBoard: this.createCard(pBoard, "board", "you"),
+            PlayerHand: this.createCard(pHand, "hand", "you")
         })
     }
 
@@ -31,10 +39,10 @@ class Board extends React.Component {
         defaultWebAccess.endTurn(getCurrentGame());
     }
 
-    createCard(cardMap) {
+    createCard(cardMap, pos, owner) {
         return (<div className="flex-container-horizontal">{
             cardMap.map((item, index) => {
-                return <Card key={index} card={item} />
+                return <Card key={index} card={item} owner={owner} position={pos} boardEmpty={this.state.playFieldEmpty} />
             })
         }</div>)
     }
@@ -42,6 +50,9 @@ class Board extends React.Component {
     render() {
         return (
             <div className="Layout flex-container">
+                <div>
+                    <button>{this.state.playerHP}</button>
+                </div>
                 <div className="OpponentHand flex-container-horizontal">
                     {this.state.OpponentHand}
                 </div>
@@ -61,6 +72,9 @@ class Board extends React.Component {
                 <div className="spacer"></div>
                 <div className="PlayerHand flex-container-horizontal">
                     {this.state.PlayerHand}
+                </div>
+                <div>
+                    <button>{this.state.opponentHP}</button>
                 </div>
             </div>
         )

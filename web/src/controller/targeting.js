@@ -4,7 +4,8 @@ var targets = [];
 
 export function target(card, max) {
     targets[selectedTargets] = card;
-    if (max == selectedTargets)
+    selectedTargets += 1;
+    if (max <= selectedTargets)
         return true;
     return false;
 }
