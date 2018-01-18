@@ -1,5 +1,5 @@
 var selector = null;
-var pay = null;
+var pay = [];
 var savedPay = 0;
 var effect = [];
 var savedEffect = 0;
@@ -18,7 +18,7 @@ export function savePay(value) {
 }
 
 export function getSavedPay() {
-    return pay;
+    return pay[0];
 }
 
 export function saveEffect(id, value) {

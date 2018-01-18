@@ -1,3 +1,7 @@
+import {
+    saveSelector
+} from "./playSaves.js"
+
 var Selector = null;
 var selectedTargets = 0;
 var targets = [];
@@ -20,9 +24,10 @@ function removeTarget(card) {
 
 export function setSelector(card) {
     Selector = card;
+    saveSelector(card);
 }
 
-export function getSelector(card) {
+export function getSelector() {
     return Selector;
 }
 

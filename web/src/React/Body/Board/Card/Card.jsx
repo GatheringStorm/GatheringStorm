@@ -11,6 +11,7 @@ import { saveEffect } from "../../../../controller/playSaves.js"
 import { getSavedEffect } from "../../../../controller/playSaves.js"
 import { flush } from "../../../../controller/playSaves.js"
 import defaultWebAccess from "../../../../controller/webAccess.js"
+import { getSelector } from "../../../../controller/targeting";
 
 class Card extends React.Component {
   constructor(props) {
@@ -53,7 +54,7 @@ class Card extends React.Component {
 
     switch (response.move) {
       case "attack":
-        defaultWebAccess.attack(getCurrentGame(), this.props.card.id, response.targets[0]);
+        defaultWebAccess.attack(getCurrentGame(), getSavedSelector(), response.targets[0]);
         break;
       case "pay":
         this.setState({
@@ -61,14 +62,14 @@ class Card extends React.Component {
         });
         savePay(response.targets);
         if (this.props.card.effects[this.state.effect].targetsCount == 0 || this.props.boardEmpty) {
-          defaultWebAccess.playCard(getCurrentGame(), this.props.card.id, getSavedPay(), getSavedEffect());
+          defaultWebAccess.playCard(getCurrentGame(), getSavedSelector(), getSavedPay(), getSavedEffect());
           flush();
         }
         break;
       case "effect":
         saveEffect(this.state.effect, response.targets);
         if (this.state.effect == this.state.countEffects) {
-          defaultWebAccess.playCard(getCurrentGame(), this.props.card.id, getSavedPay(), getSavedEffect());
+          defaultWebAccess.playCard(getCurrentGame(), getSavedSelector(), getSavedPay(), getSavedEffect());
           flush();
         } else {
           this.setState({
