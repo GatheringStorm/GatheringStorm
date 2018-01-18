@@ -22,6 +22,7 @@ namespace GatheringStorm.Api.Services
         Task<VoidAppResult> EndTurn(Guid gameId, CancellationToken cancellationToken = default(CancellationToken));
         Task<VoidAppResult> PlayCard(Guid gameId, DtoPlayCardMove move, CancellationToken cancellationToken = default(CancellationToken));
         Task<VoidAppResult> Attack(Guid gameId, DtoAttackMove move, CancellationToken cancellationToken = default(CancellationToken));
+        Task<VoidAppResult> AttackPlayer(Guid gameId, DtoAttackPlayerMove attackPlayerMove, CancellationToken cancellationToken = default(CancellationToken));
     }
 
     public class GamesService : IGamesService
@@ -411,6 +412,16 @@ namespace GatheringStorm.Api.Services
                 return VoidAppResult.Error(ErrorPreset.OnLoadingData);
             }
 
+            var attackerDtoCardResult = await this.GetDtoCardsFromGameCards(new List<GameCard> { attacker }, gameId);
+            if (attackerDtoCardResult.IsErrorResult)
+            {
+                return attackerDtoCardResult.GetVoidAppResult();
+            }
+            if (!attackerDtoCardResult.SuccessReturnValue.First().CanAttack)
+            {
+                return VoidAppResult.Error(AppActionResultType.RuleError, "This card has already attacked in this turn.");
+            }
+
             var dbMove = new Move
             {
                 Date = DateTime.Now,
@@ -441,6 +452,53 @@ namespace GatheringStorm.Api.Services
 
             await this.dbContext.Moves.AddAsync(dbMove, cancellationToken);
             await this.dbContext.SaveChangesAsync(cancellationToken);
+
+            return VoidAppResult.Success();
+        }
+
+        public async Task<VoidAppResult> AttackPlayer(Guid gameId, DtoAttackPlayerMove attackPlayerMove, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var game = await this.dbContext.Games.IncludeUserParticipations().IncludeEntities().SingleOrDefaultAsync(_ => _.Id == gameId, cancellationToken);
+            if (game == null)
+            {
+                return VoidAppResult.Error(ErrorPreset.OnLoadingData);
+            }
+            var currentTurnPlayerResult = await this.GetCurrentTurnPlayer(game, cancellationToken);
+            if (currentTurnPlayerResult.IsErrorResult)
+            {
+                return currentTurnPlayerResult.GetVoidAppResult();
+            }
+            var currentTurnPlayer = currentTurnPlayerResult.SuccessReturnValue;
+            
+            if (currentTurnPlayer.Mail != this.loginManager.LoggedInUser.Mail)
+            {
+                return VoidAppResult.Error(ErrorPreset.NotYourTurn);
+            }
+
+            var attacker = await dbContext.GameCards.IncludeAll().SingleOrDefaultAsync(_ => _.Id == attackPlayerMove.AttackerId);
+            var target = await dbContext.Players.Include(_ => _.User).SingleOrDefaultAsync(_ => _.User.Mail == this.loginManager.LoggedInUser.Mail);
+            if (target == null || attacker == null)
+            {
+                return VoidAppResult.Error(ErrorPreset.OnLoadingData);
+            }
+
+            var attackerDtoCardResult = await this.GetDtoCardsFromGameCards(new List<GameCard> { attacker }, gameId);
+            if (attackerDtoCardResult.IsErrorResult)
+            {
+                return attackerDtoCardResult.GetVoidAppResult();
+            }
+            if (!attackerDtoCardResult.SuccessReturnValue.First().CanAttack)
+            {
+                return VoidAppResult.Error(AppActionResultType.RuleError, "This card has already attacked in this turn.");
+            }
+
+            target.Health =- (attacker.Card.Attack + attacker.StatModifiersCount);
+            if (target.Health <= 0)
+            {
+                game.Status = GameStatus.Finished;
+            }
+
+            await dbContext.SaveChangesAsync();
 
             return VoidAppResult.Success();
         }
