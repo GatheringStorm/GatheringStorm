@@ -36,8 +36,6 @@ class GameSelectionCard extends React.Component {
     prioSorted[prio.slow - 1] = "slow";
 
     defaultWebAccess.joinGame(this.props.ID, prioSorted);
-
-    window.location.reload();
   }
 
   createNewGame() {
@@ -61,8 +59,6 @@ class GameSelectionCard extends React.Component {
     prioSorted[prio.slow - 1] = "slow";
 
     defaultWebAccess.startNewGame(enemy, prioSorted);
-
-    window.location.reload();
   }
 
   createStyle() {
