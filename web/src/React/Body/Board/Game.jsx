@@ -3,8 +3,8 @@ import React from "react";
 
 import Board from "./Board.jsx"
 import defaultWebAccess from "../../../controller/webAccess.js"
-import { Action } from "../../../controller/statemachine.js"
 import { getCurrentGame } from "../../../controller/currentBoard.js"
+import { Action } from "../../../controller/statemachine.js"
 
 class Game extends React.Component {
     constructor(props) {

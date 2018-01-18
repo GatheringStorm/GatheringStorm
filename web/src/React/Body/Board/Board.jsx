@@ -9,9 +9,14 @@ class Board extends React.Component {
     constructor(props) {
         super(props);
 
-        this.state = { OpponentHand: null, OpponentBoard: null, PlayerBoard: null, PlayerHand: null }
+        this.state = { OpponentHand: null, OpponentBoard: null, PlayerBoard: null, PlayerHand: null, playFieldEmpty: null }
 
         this.createCard = this.createCard.bind(this);
+    }
+
+    componentWillMount() {
+        if (this.props.board.player.boardCards == [] && this.props.board.opponent.boardCards)
+            playFieldEmpty = true;
     }
 
     componentDidMount() {
@@ -37,31 +42,9 @@ class Board extends React.Component {
     createCard(cardMap, pos, owner) {
         return (<div className="flex-container-horizontal">{
             cardMap.map((item, index) => {
-                return <Card key={index} card={item} onClick={() => use(item.id, pos, owner, item.cost)} />
+                return <Card key={index} card={item} owner={owner} position={pos} boardEmpty={this.state.playFieldEmpty} />
             })
         }</div>)
-    }
-
-    use(id, pofs, owner, cost) {
-        let response = cardMove(id, pos, owner, cost)
-
-        if (response == "pending")
-            return;
-
-        switch (response.move) {
-            case "attack":
-                defaultWebAccess.attack(getCurrentGame(), id, response.targets[0]);
-                break;
-            case "pay":
-                defaultWebAccess.attack(getCurrentGame(), id, response.targets);
-                break;
-            case "effect":
-                defaultWebAccess.attack(getCurrentGame(), id, response.targets[0]);
-                break;
-
-            default:
-                break;
-        }
     }
 
     render() {

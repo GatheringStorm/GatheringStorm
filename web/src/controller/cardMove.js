@@ -14,34 +14,52 @@ import {
     getTargets
 } from "./targeting.js"
 
-export function cardMove(card, pos, owner, payCost) {
-    if (getSelector == card) {
+export function cardMove(card, pos, owner, payCost, paid, effectCount) {
+    if (getSelector() == card) {
         resetTargets();
-        return true
+        setSelector(null);
+        return true;
     }
     switch (pos) {
         case "board":
-            // attack
-            if (owner == "you") {
+            if (paid) {
                 resetTargets();
-                Selector(card);
-            } else {
-                // maximum 1 target
-                if (target(card, 1))
+                if (target(card, effectCount))
                     return {
-                        move: "attack",
+                        move: "effect",
                         targets: getTargets()
-                    };
+                    }
                 return "pending";
+            } else {
+                // attack
+                if (owner == "you") {
+                    resetTargets();
+                    setSelector(card);
+                } else {
+                    // maximum 1 target
+                    if (target(card, 1))
+                        return {
+                            move: "attack",
+                            targets: getTargets()
+                        };
+                    return "pending";
+                }
+
             }
             break;
         case "hand":
+            if (getSelector() == null) {
+                resetTargets();
+                setSelector(card);
+                return;
+            }
             // pay costs
             if (target(card, payCost))
                 return {
                     move: "pay",
                     targets: getTargets()
                 };
+            console.log(getTargets());
             return "pending";
             break;
         default:
