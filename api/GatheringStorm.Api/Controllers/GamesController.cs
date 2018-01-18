@@ -89,5 +89,13 @@ namespace GatheringStorm.Api.Controllers
             var result = await this.gamesService.Attack(gameId, move).ConfigureAwait(false);
             return this.utility.GetActionResult(result);
         }
+        [HttpPost("{gameId}/AttackPlayer")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(typeof(ErrorActionResultContent), 400)]
+        public async Task<IActionResult> AttackPlayer(Guid gameId, [FromBody] DtoAttackPlayerMove attackPlayerMove)
+        {
+            var result = await this.gamesService.AttackPlayer(gameId, attackPlayerMove).ConfigureAwait(false);
+             return this.utility.GetActionResult(result);
+         }
     }
 }
